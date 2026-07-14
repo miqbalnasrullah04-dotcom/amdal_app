@@ -1,0 +1,111 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import api from '../../api/client.js';
+
+const emptyForm = { name: '', icon: '', order: 0 };
+
+export default function AdminCategoryForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEdit = !!id;
+
+  const [form, setForm] = useState(emptyForm);
+  const [loading, setLoading] = useState(isEdit);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!isEdit) return;
+    api.get('/admin/categories')
+      .then((res) => {
+        const c = res.data.find((x) => String(x.id) === String(id));
+        if (!c) {
+          setError('Kategori tidak ditemukan.');
+          return;
+        }
+        setForm({ name: c.name || '', icon: c.icon || '', order: c.order || 0 });
+      })
+      .catch(() => setError('Gagal memuat data.'))
+      .finally(() => setLoading(false));
+  }, [id, isEdit]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    try {
+      if (isEdit) await api.put(`/categories/${id}`, form);
+      else await api.post('/categories', form);
+      navigate('/admin/kategori');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal menyimpan data.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <p className="text-[#414844]/70">Memuat...</p>;
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center gap-3">
+        <button onClick={() => navigate('/admin/kategori')} className="text-[#414844]/60 hover:text-[#2E5E3B]">
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-[#2E5E3B]">{isEdit ? 'Edit Kategori' : 'Tambah Kategori'}</h2>
+          <p className="text-[#414844]/80 text-sm mt-1">Kelola kategori tenaga ahli/konten.</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-[#2E5E3B]/15 shadow-sm p-6 max-w-lg">
+        {error && <p className="bg-[#FFDAD6] text-[#93000A] text-sm rounded-lg p-3 mb-4">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="text-xs font-bold uppercase text-[#414844]/70">Nama *</label>
+            <input
+              required
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-[#414844]/70">Icon (nama Material Symbol)</label>
+            <input
+              value={form.icon}
+              onChange={(e) => setForm({ ...form, icon: e.target.value })}
+              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase text-[#414844]/70">Urutan</label>
+            <input
+              type="number"
+              value={form.order}
+              onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
+              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+            />
+          </div>
+          <div className="flex gap-3 mt-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 bg-[#2E5E3B] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#244B2F] disabled:opacity-60"
+            >
+              {saving ? 'Menyimpan...' : 'Simpan'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/kategori')}
+              className="px-6 py-3 rounded-lg text-sm font-bold text-[#414844] border border-[#414844]/20 hover:bg-[#414844]/5"
+            >
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

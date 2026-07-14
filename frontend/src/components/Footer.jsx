@@ -27,9 +27,11 @@ export default function Footer() {
         
         {/* Ikon Sosial Media Medsos Tengah (SVG Kustom Gaya Heroicons) */}
         <div className="flex items-center justify-center gap-4">
-          {/* Facebook */}
+          {/* Facebook - mengarah ke halaman utama Facebook */}
           <a
-            href="#"
+            href="https://www.facebook.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all"
             aria-label="Facebook"
           >
@@ -38,9 +40,11 @@ export default function Footer() {
             </svg>
           </a>
 
-          {/* YouTube */}
+          {/* YouTube - mengarah ke halaman utama YouTube */}
           <a
-            href="#"
+            href="https://www.youtube.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all"
             aria-label="YouTube"
           >
@@ -49,9 +53,11 @@ export default function Footer() {
             </svg>
           </a>
 
-          {/* Twitter / X */}
+          {/* Twitter / X - mengarah ke halaman utama X */}
           <a
-            href="#"
+            href="https://x.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all"
             aria-label="Twitter"
           >
@@ -63,7 +69,7 @@ export default function Footer() {
 
         {/* Hak Cipta / Copyright */}
         <p className="text-gray-700 text-sm md:text-base font-normal tracking-wide">
-          Copyright© 2023 - {new Date().getFullYear()} KLHS.ID. All rights reserved by System Dynamics Center
+          Copyright© 2023 - {new Date().getFullYear()} AMDAL.ID. All rights reserved by System Dynamics Center
         </p>
       </div>
 

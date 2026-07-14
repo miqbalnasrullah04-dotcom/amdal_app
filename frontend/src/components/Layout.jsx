@@ -3,12 +3,23 @@ import Navbar from './Navbar.jsx';
 import Footer from './Footer.jsx';
 
 // Halaman yang tidak memakai Layout (Navbar & Footer) sama sekali —
-// biasanya karena halaman itu render Navbar-nya sendiri.
+// biasanya karena halaman itu render Navbar-nya sendiri, atau punya
+// shell sendiri (mis. DashboardLayout untuk halaman member).
 const FULL_PAGE_ROUTES = [
   '/narasumber',
   '/tenaga-ahli',
   '/instruktur-pengajar',
   '/peneliti-artikel-jurnal',
+  '/sign-in',
+  '/daftar',
+  '/profil-saya',
+  // Halaman member/dashboard — pakai DashboardLayout (sidebar) sendiri,
+  // jadi tidak boleh dobel dengan Navbar & Footer publik.
+  '/dashboard',
+  '/lengkapi-profil',
+  '/pilih-paket',
+  '/pembayaran',
+  '/riwayat-pembayaran',
 ];
 
 // Halaman yang tetap pakai Navbar dari Layout, tapi tidak butuh Footer

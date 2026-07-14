@@ -16,9 +16,8 @@ export default function TentangKami() {
       {/* Kotak coklat di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) */}
       <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
 
-      {/* Hero — foto + deskripsi. Aksen teal (samakan dengan warna primary
-          di Home: hover search jadi #0B7285) dipakai di garis judul supaya
-          nyambung dengan warna aksi/navigasi di halaman lain. */}
+      {/* Hero — foto + deskripsi. Aksen hijau gelap (#2E5E3B) digunakan di garis judul 
+          supaya nyambung dengan warna aksi/navigasi di halaman lain. */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter items-center mb-20">
         <img
           src={tentangKamiImg}
@@ -27,7 +26,7 @@ export default function TentangKami() {
         />
 
         <div>
-          <span className="inline-block w-14 h-1.5 rounded-full bg-[#006673] mb-4" />
+          <span className="inline-block w-14 h-1.5 rounded-full bg-[#2E5E3B] mb-4" />
           <h1 className="font-headline-lg text-headline-lg text-[#1F3D2B] mb-6">Tentang Kami</h1>
           <p className="text-[#3D5A48] leading-relaxed mb-4">
             AMDAL.ID merupakan platform pencarian ahli atau pakar untuk menyusun AMDAL maupun narasumber
@@ -63,10 +62,9 @@ export default function TentangKami() {
         </table>
       </div>
 
-      {/* CTA — hijau-teal supaya konsisten dengan tombol utama di Home
-          (bg-primary / hover bg-primary-container) tanpa lepas dari nuansa
-          hijau alam yang jadi benang merah brand AMDAL.ID. */}
-      <div className="rounded-xl p-8 text-center mt-16 bg-gradient-to-br from-[#006673] to-[#1F3D2B]">
+      {/* CTA — Menggunakan warna dasar hijau gelap #2E5E3B yang bergradasi 
+          menuju #1F3D2B agar tetap konsisten dengan nuansa alam brand AMDAL.ID */}
+      <div className="rounded-xl p-8 text-center mt-16 bg-gradient-to-br from-[#2E5E3B] to-[#1F3D2B]">
         <h2 className="font-headline-md text-xl text-white mb-3">Ingin bergabung sebagai tenaga ahli?</h2>
         <p className="text-white/85 mb-6">Daftarkan diri Anda dan perluas jangkauan proyek Anda.</p>
         <Link

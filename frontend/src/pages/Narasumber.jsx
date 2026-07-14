@@ -17,6 +17,7 @@ import {
   MinusIcon,
   ArrowsPointingOutIcon,
   MapPinIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
@@ -42,7 +43,7 @@ function shuffle(arr) {
   return a;
 }
 
-// Demo data used only if /api/experts is unreachable.
+// Demo data used only if /api/experts is unreachable OR returns empty data.
 const FALLBACK_EXPERTS = [
   {
     id: 1,
@@ -133,7 +134,10 @@ export default function Narasumber() {
           order: searchParams.get('order') || 'latest',
         },
       })
-      .then((res) => setExperts(res.data))
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        setExperts(data.length > 0 ? data : FALLBACK_EXPERTS);
+      })
       .catch(() => setExperts(FALLBACK_EXPERTS))
       .finally(() => setLoading(false));
   }, [searchParams]);
@@ -317,7 +321,7 @@ export default function Narasumber() {
                     className="text-gray-500 hover:text-black"
                     aria-label="Hapus kriteria"
                   >
-                    ✕
+                    <XMarkIcon className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
@@ -390,7 +394,7 @@ export default function Narasumber() {
 
             <button
               type="submit"
-              className="bg-[#006673] hover:bg-[#00505a] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2"
+              className="bg-[#2E5E3B] hover:bg-[#21442a] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
               Search

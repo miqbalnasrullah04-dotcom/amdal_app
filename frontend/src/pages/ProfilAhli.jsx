@@ -123,10 +123,12 @@ export default function ProfilAhli() {
       maxZoom: 19,
       attribution: '© OpenStreetMap contributors © CARTO',
     }).addTo(instance);
+
+    // Mengubah penanda lingkaran pada peta menjadi Hijau Gelap (#2E5E3B)
     L.circleMarker([profile.lokasi.lat, profile.lokasi.lng], {
       radius: 9,
-      color: '#0B7285',
-      fillColor: '#0B7285',
+      color: '#2E5E3B',
+      fillColor: '#2E5E3B',
       fillOpacity: 0.9,
       weight: 3,
     }).addTo(instance);
@@ -172,10 +174,9 @@ export default function ProfilAhli() {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* ---------- HERO BACKGROUND: DIUBAH MENJADI FULL-COVER MUTLAK ---------- */}
+      {/* Hero Background */}
       <div className="relative h-80 md:h-[28rem] w-full overflow-hidden bg-on-background">
         <img src={profile.cover} alt="" className="w-full h-full object-cover" />
-        {/* Lapisan gradien halus agar teks putih tetap terbaca kontras */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
 
         {/* Informasi Profil di Dalam Hero */}
@@ -212,15 +213,17 @@ export default function ProfilAhli() {
       <div className="border-b border-outline-variant/40 sticky top-0 bg-white/95 backdrop-blur-sm z-10 shadow-sm">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex items-center justify-between">
           <nav className="flex">
-            <span className="font-semibold text-sm text-[#006673] border-b-2 border-[#006673] px-4 py-4">
+            {/* Mengubah warna teks & border tab-aktif menjadi hijau gelap #2E5E3B */}
+            <span className="font-semibold text-sm text-[#2E5E3B] border-b-2 border-[#2E5E3B] px-4 py-4">
               Profil
             </span>
           </nav>
 
           <div className="flex items-center gap-2 py-2.5">
+            {/* Mengubah bg button email ke hijau gelap #2E5E3B dan hover:bg-[#244B2F] */}
             <a
               href={`mailto:${profile.email}`}
-              className="bg-[#006673] text-white h-9 px-4 rounded-full flex items-center gap-1.5 font-medium text-xs md:text-sm hover:bg-[#005561] transition-colors whitespace-nowrap shadow-sm"
+              className="bg-[#2E5E3B] text-white h-9 px-4 rounded-full flex items-center gap-1.5 font-medium text-xs md:text-sm hover:bg-[#244B2F] transition-colors whitespace-nowrap shadow-sm"
             >
               <span className="material-symbols-outlined text-[16px]">mail</span>
               <span>Send an email</span>
@@ -277,9 +280,10 @@ export default function ProfilAhli() {
             </h2>
             <div className="flex flex-wrap gap-2">
               {profile.keahlian?.map((k) => (
+                // Mengubah warna chip keahlian ke warna tema hijau gelap
                 <span
                   key={k}
-                  className="bg-[#006673]/10 text-[#006673] text-sm font-medium px-4 py-1.5 rounded-full"
+                  className="bg-[#2E5E3B]/10 text-[#2E5E3B] text-sm font-medium px-4 py-1.5 rounded-full"
                 >
                   {k}
                 </span>
@@ -331,9 +335,10 @@ export default function ProfilAhli() {
             <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">
               Alamat Email
             </h3>
+            {/* Mengubah warna teks link email ke hijau gelap */}
             <a
               href={`mailto:${profile.email}`}
-              className="text-[#006673] text-sm font-medium hover:underline break-all"
+              className="text-[#2E5E3B] text-sm font-medium hover:underline break-all"
             >
               {profile.email}
             </a>
@@ -348,11 +353,12 @@ export default function ProfilAhli() {
                   Lokasi
                 </h3>
                 <p className="text-sm text-gray-800 mb-3 leading-snug">{profile.lokasi.label}</p>
+                {/* Mengubah warna teks link 'Get Directions' ke hijau gelap */}
                 <a
                   href={`https://maps.google.com/?q=${encodeURIComponent(profile.lokasi.label)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[#006673] text-sm font-medium hover:underline flex items-center gap-1"
+                  className="text-[#2E5E3B] text-sm font-medium hover:underline flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[16px]">directions</span>
                   Get Directions
@@ -361,7 +367,7 @@ export default function ProfilAhli() {
             </div>
           )}
 
-          {/* Sosial Media (DIUBAH KE IKON ASLI) */}
+          {/* Sosial Media */}
           {profile.sosial?.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
               <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">
@@ -369,13 +375,14 @@ export default function ProfilAhli() {
               </h3>
               <div className="flex gap-2.5">
                 {profile.sosial.map((s) => (
+                  // Mengubah warna hover background icon sosial media ke hijau gelap
                   <a
                     key={s.label}
                     href={s.url}
                     target="_blank"
                     rel="noreferrer"
                     title={s.label}
-                    className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#006673] hover:text-white text-gray-600 transition-colors"
+                    className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#2E5E3B] hover:text-white text-gray-600 transition-colors"
                   >
                     <SocialIcon type={s.type} />
                   </a>
@@ -391,10 +398,11 @@ export default function ProfilAhli() {
             </h3>
             <div className="flex flex-wrap gap-2">
               {profile.kriteria?.map((k) => (
+                // Mengubah warna hover badge kriteria keanggotaan ke hijau gelap
                 <Link
                   key={k.label}
                   to={k.to}
-                  className="text-xs bg-gray-100 hover:bg-[#006673]/10 hover:text-[#006673] text-gray-600 px-3 py-1.5 rounded-full transition-colors"
+                  className="text-xs bg-gray-100 hover:bg-[#2E5E3B]/10 hover:text-[#2E5E3B] text-gray-600 px-3 py-1.5 rounded-full transition-colors"
                 >
                   {k.label}
                 </Link>

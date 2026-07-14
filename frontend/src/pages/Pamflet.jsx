@@ -14,7 +14,7 @@ export default function Pamflet() {
         setItems([
           {
             id: 1,
-            title: 'Sosialisasi KLHS 2026',
+            title: 'Sosialisasi AMDAL 2026',
             img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=900',
           },
           {
@@ -39,13 +39,14 @@ export default function Pamflet() {
       {/* Hero */}
       <section className="pt-36 pb-20 bg-gradient-to-b from-[#3E2B1F] via-[#4A3528] to-[#5A4030]">
         <div className="max-w-7xl mx-auto px-6">
-          <span className="inline-block px-4 py-1 rounded-full bg-[#006673]/20 text-[#006673] border border-[#006673]/30 text-sm font-semibold mb-5">
+          {/* Mengubah bg ke hijau gelap opasitas rendah, border, dan teks menjadi putih */}
+          <span className="inline-block px-4 py-1 rounded-full bg-[#2E5E3B]/40 text-white border border-[#2E5E3B]/60 text-sm font-semibold mb-5">
             Informasi Terbaru
           </span>
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Pamflet</h1>
           <p className="text-gray-200 text-lg leading-8 max-w-3xl">
-            Berbagai informasi mengenai sosialisasi, pelatihan, seminar, workshop, pengumuman, dan kegiatan terbaru
-            seputar AMDAL maupun KLHS.
+            Berbagai informasi mengenai sosialisasi, pelatihan, seminar, workshop, pengumuman, and kegiatan terbaru
+            seputar AMDAL.
           </p>
         </div>
       </section>
@@ -88,7 +89,8 @@ export default function Pamflet() {
                 
                 {/* Teks Judul tetap ada */}
                 <div className="w-full">
-                  <span className="inline-block bg-[#006673] text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                  {/* Mengubah warna label PAMFLET dari teal ke hijau gelap (#2E5E3B) */}
+                  <span className="inline-block bg-[#2E5E3B] text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
                     PAMFLET
                   </span>
                   <h2 className="text-2xl font-bold text-white leading-snug drop-shadow-lg">

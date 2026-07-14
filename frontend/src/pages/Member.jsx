@@ -92,14 +92,14 @@ export default function Member() {
       <span className="inline-flex flex-col ml-1 -space-y-1 align-middle">
         <span
           className={`material-symbols-outlined text-[14px] leading-none ${
-            isActive && sortConfig.direction === 'asc' ? 'text-[#006673]' : 'text-on-surface-variant/40'
+            isActive && sortConfig.direction === 'asc' ? 'text-[#2E5E3B]' : 'text-on-surface-variant/40'
           }`}
         >
           arrow_drop_up
         </span>
         <span
           className={`material-symbols-outlined text-[14px] leading-none ${
-            isActive && sortConfig.direction === 'desc' ? 'text-[#006673]' : 'text-on-surface-variant/40'
+            isActive && sortConfig.direction === 'desc' ? 'text-[#2E5E3B]' : 'text-on-surface-variant/40'
           }`}
         >
           arrow_drop_down
@@ -118,9 +118,9 @@ export default function Member() {
         Daftar tenaga ahli AMDAL yang telah tersertifikasi dan terdaftar di AMDAL.ID.
       </p>
 
-      <div className="bg-white rounded-xl border border-[#006673]/25 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#2E5E3B]/25 shadow-sm overflow-hidden">
         {/* Toolbar: entries + search */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-[#006673]/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-[#2E5E3B]/20">
           <div className="flex items-center gap-2 text-sm text-on-surface-variant">
             <span>Show</span>
             <select
@@ -129,7 +129,7 @@ export default function Member() {
                 setEntriesPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border border-[#006673]/30 rounded-lg px-2 py-1.5 text-sm focus:ring-[#006673] focus:border-[#006673] bg-white"
+              className="border border-[#2E5E3B]/30 rounded-lg px-2 py-1.5 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B] bg-white"
             >
               {[10, 18, 25, 50].map((n) => (
                 <option key={n} value={n}>
@@ -151,7 +151,7 @@ export default function Member() {
                 setCurrentPage(1);
               }}
               placeholder="Cari nama, instansi, atau nomor member"
-              className="w-full pl-9 pr-4 py-2 text-sm border border-[#006673]/30 rounded-lg focus:ring-[#006673] focus:border-[#006673]"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-[#2E5E3B]/30 rounded-lg focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function Member() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-[#006673]/5">
+              <tr className="bg-[#2E5E3B]/5">
                 {columns.map((col) => (
                   <th
                     key={col.key}
@@ -192,8 +192,8 @@ export default function Member() {
                 paginatedMembers.map((m, idx) => (
                   <tr
                     key={m.id}
-                    className={`border-t border-[#006673]/10 hover:bg-[#006673]/5 transition-colors ${
-                      idx % 2 === 0 ? 'bg-white' : 'bg-[#006673]/[0.03]'
+                    className={`border-t border-[#2E5E3B]/10 hover:bg-[#2E5E3B]/5 transition-colors ${
+                      idx % 2 === 0 ? 'bg-white' : 'bg-[#2E5E3B]/[0.03]'
                     }`}
                   >
                     <td className="px-6 py-4 text-on-background">{m.nama}</td>
@@ -207,7 +207,7 @@ export default function Member() {
         </div>
 
         {/* Footer: info + pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#006673]/20 text-sm text-on-surface-variant">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#2E5E3B]/20 text-sm text-on-surface-variant">
           <span>
             Showing {showingFrom} to {showingTo} of {totalEntries} entries
           </span>
@@ -216,7 +216,7 @@ export default function Member() {
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-[#006673]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#006673]/10 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-[#2E5E3B]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#2E5E3B]/10 transition-colors"
             >
               Previous
             </button>
@@ -239,8 +239,8 @@ export default function Member() {
                     onClick={() => setCurrentPage(page)}
                     className={`w-9 h-9 rounded-lg transition-colors ${
                       currentPage === page
-                        ? 'bg-[#006673] text-white'
-                        : 'border border-[#006673]/30 hover:bg-[#006673]/10'
+                        ? 'bg-[#2E5E3B] text-white'
+                        : 'border border-[#2E5E3B]/30 hover:bg-[#2E5E3B]/10'
                     }`}
                   >
                     {page}
@@ -251,7 +251,7 @@ export default function Member() {
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg border border-[#006673]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#006673]/10 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-[#2E5E3B]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#2E5E3B]/10 transition-colors"
             >
               Next
             </button>

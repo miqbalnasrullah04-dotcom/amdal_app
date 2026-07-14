@@ -50,7 +50,8 @@ export default function PeraturanAMDAL() {
 
       {/* Header */}
       <div className="mb-10 max-w-2xl">
-        <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-[#006673] bg-[#006673]/10 px-3 py-1 rounded-full mb-4">
+        {/* Mengubah warna dasar hukum badge ke hijau gelap #2E5E3B */}
+        <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-[#2E5E3B] bg-[#2E5E3B]/10 px-3 py-1 rounded-full mb-4">
           <span className="material-symbols-outlined text-[16px]">balance</span>
           Dasar Hukum
         </span>
@@ -66,11 +67,11 @@ export default function PeraturanAMDAL() {
           Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-24 rounded-2xl bg-[#006673]/5 animate-pulse border border-[#006673]/10"
+              className="h-24 rounded-2xl bg-[#2E5E3B]/5 animate-pulse border border-[#2E5E3B]/10"
             />
           ))
         ) : regulations.length === 0 ? (
-          <div className="text-center py-16 text-on-surface-variant border border-dashed border-[#006673]/30 rounded-2xl">
+          <div className="text-center py-16 text-on-surface-variant border border-dashed border-[#2E5E3B]/30 rounded-2xl">
             Belum ada data peraturan.
           </div>
         ) : (
@@ -82,23 +83,23 @@ export default function PeraturanAMDAL() {
                 onClick={() => toggleExpand(reg.id)} // Seluruh kartu bisa diklik untuk membuka detail
                 className={`group relative flex flex-col bg-white p-6 rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${
                   isExpanded 
-                    ? 'border-[#006673] shadow-md ring-1 ring-[#006673]/20' 
-                    : 'border-[#006673]/15 shadow-sm hover:shadow-md hover:border-[#006673]/40'
+                    ? 'border-[#2E5E3B] shadow-md ring-1 ring-[#2E5E3B]/20' 
+                    : 'border-[#2E5E3B]/15 shadow-sm hover:shadow-md hover:border-[#2E5E3B]/40'
                 }`}
               >
                 {/* Aksen kiri */}
                 <span className={`absolute left-0 top-0 h-full w-1 transition-colors duration-200 ${
-                  isExpanded ? 'bg-[#006673]' : 'bg-[#3E2B1F] group-hover:bg-[#006673]'
+                  isExpanded ? 'bg-[#2E5E3B]' : 'bg-[#3E2B1F] group-hover:bg-[#2E5E3B]'
                 }`} />
 
                 {/* Baris Utama Card */}
                 <div className="flex items-start gap-5 w-full">
                   {/* Ikon */}
                   <div className={`shrink-0 w-14 h-14 rounded-xl flex items-center justify-center transition-colors duration-200 ${
-                    isExpanded ? 'bg-[#006673]' : 'bg-[#006673]/10 group-hover:bg-[#006673]'
+                    isExpanded ? 'bg-[#2E5E3B]' : 'bg-[#2E5E3B]/10 group-hover:bg-[#2E5E3B]'
                   }`}>
                     <span className={`material-symbols-outlined text-[28px] transition-colors duration-200 ${
-                      isExpanded ? 'text-white' : 'text-[#006673] group-hover:text-white'
+                      isExpanded ? 'text-white' : 'text-[#2E5E3B] group-hover:text-white'
                     }`}>
                       gavel
                     </span>
@@ -119,16 +120,16 @@ export default function PeraturanAMDAL() {
                   {/* Tombol Chevron dengan Animasi Rotasi */}
                   <span className={`material-symbols-outlined text-[24px] self-center transition-all duration-300 ${
                     isExpanded 
-                      ? 'text-[#006673] rotate-90 translate-x-0' 
-                      : 'text-[#006673]/30 group-hover:text-[#006673] group-hover:translate-x-1'
-                  } hidden sm:block`}>
+                      ? 'text-[#2E5E3B] rotate-90 translate-x-0' 
+                      : 'text-[#2E5E3B]/30 group-hover:text-[#2E5E3B] group-hover:translate-x-1'
+                  }`} hidden sm:block>
                     chevron_right
                   </span>
                 </div>
 
                 {/* Area Detail yang Tersembunyi (Akan meluncur turun saat isExpanded === true) */}
                 <div className={`grid transition-all duration-300 ease-in-out ${
-                  isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-[#006673]/10' : 'grid-rows-[0fr] opacity-0'
+                  isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-[#2E5E3B]/10' : 'grid-rows-[0fr] opacity-0'
                 }`}>
                   <div className="overflow-hidden">
                     <div className="bg-[#F8F5F0] p-4 rounded-xl border border-[#3E2B1F]/10">

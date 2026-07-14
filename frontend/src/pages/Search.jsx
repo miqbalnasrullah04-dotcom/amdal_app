@@ -120,6 +120,32 @@ const FALLBACK_EXPERTS = [
   },
 ];
 
+// -----------------------------------------------------------------------
+// useClickOutside — closes a dropdown when the user taps/clicks anywhere
+// outside its container. This replaces the old onBlur+setTimeout pattern,
+// which was unreliable (especially on touch devices): blur fires the
+// instant a finger touches the suggestion button, and the timeout could
+// unmount the button before the click/tap event finished, so nothing
+// happened when people tapped a suggestion. Listening on the document for
+// mousedown/touchstart and checking ref containment is the standard,
+// reliable fix.
+// -----------------------------------------------------------------------
+function useClickOutside(ref, onOutside) {
+  useEffect(() => {
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) {
+        onOutside();
+      }
+    }
+    document.addEventListener('mousedown', handle);
+    document.addEventListener('touchstart', handle);
+    return () => {
+      document.removeEventListener('mousedown', handle);
+      document.removeEventListener('touchstart', handle);
+    };
+  }, [ref, onOutside]);
+}
+
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -143,6 +169,16 @@ export default function Search() {
 
   const mapWrapperRef = useRef(null);
   const cardRefs = useRef({});
+
+  // Containers for the three dropdown fields — used by useClickOutside so
+  // each dropdown closes only when the user interacts outside of it.
+  const kriteriaBoxRef = useRef(null);
+  const locationBoxRef = useRef(null);
+  const orderBoxRef = useRef(null);
+
+  useClickOutside(kriteriaBoxRef, () => setKriteriaOpen(false));
+  useClickOutside(locationBoxRef, () => setLocationOpen(false));
+  useClickOutside(orderBoxRef, () => setOrderOpen(false));
 
   // Keep the form fields in sync with the URL even when React Router doesn't
   // remount this component — e.g. navigating here again from the Home hero
@@ -285,6 +321,9 @@ export default function Search() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setKriteriaOpen(false);
+    setLocationOpen(false);
+    setOrderOpen(false);
     setSearchParams({ keyword, location, kriteria, order });
   };
 
@@ -295,6 +334,21 @@ export default function Search() {
     setOrder('latest');
     setSearchAsMove(false);
     setSearchParams({});
+  };
+
+  const selectKriteria = (s) => {
+    setKriteria(s);
+    setKriteriaOpen(false);
+  };
+
+  const selectLocation = (s) => {
+    setLocation(s);
+    setLocationOpen(false);
+  };
+
+  const selectOrder = (value) => {
+    setOrder(value);
+    setOrderOpen(false);
   };
 
   const focusExpert = (expert, index) => {
@@ -367,7 +421,7 @@ export default function Search() {
           </div>
 
           {/* --- INPUT LOKASI --- */}
-          <div className="flex flex-col gap-1 relative">
+          <div className="flex flex-col gap-1 relative" ref={locationBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Kota/Kabupaten/Provinsi
             </label>
@@ -379,21 +433,17 @@ export default function Search() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 onFocus={() => setLocationOpen(true)}
-                onBlur={() => setTimeout(() => setLocationOpen(false), 150)}
               />
             </div>
 
             {locationOpen && locationMatches.length > 0 && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-primary rounded-t-lg shadow-lg z-10 overflow-hidden">
+              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-primary rounded-t-lg shadow-lg z-20 overflow-hidden">
                 {locationMatches.map((s, i) => (
                   <button
                     key={s}
                     type="button"
-                    onClick={() => {
-                      setLocation(s);
-                      setLocationOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low transition-colors ${
+                    onClick={() => selectLocation(s)}
+                    className={`w-full text-left px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low active:bg-surface-container-low transition-colors ${
                       i !== locationMatches.length - 1 ? 'border-b border-outline-variant/20' : ''
                     }`}
                   >
@@ -405,7 +455,7 @@ export default function Search() {
           </div>
 
           {/* --- INPUT KRITERIA KEANGGOTAAN --- */}
-          <div className="flex flex-col gap-1 relative">
+          <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Kriteria Keanggotaan
             </label>
@@ -416,32 +466,26 @@ export default function Search() {
               value={kriteria}
               onChange={(e) => setKriteria(e.target.value)}
               onFocus={() => setKriteriaOpen(true)}
-              onBlur={() => setTimeout(() => setKriteriaOpen(false), 150)}
             />
 
             {kriteriaOpen && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-primary rounded-t-lg shadow-lg z-10 overflow-hidden">
-                <div className="px-4 py-3 text-xs text-on-surface-variant/60 text-center">
-                  {kriteria.trim() ? 'Searching...' : 'Ketik kata kunci kriteria'}
-                </div>
-                {kriteriaMatches.map((s, i) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => {
-                      setKriteria(s);
-                      setKriteriaOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low transition-colors ${
-                      i !== kriteriaMatches.length - 1 ? 'border-b border-outline-variant/20' : ''
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-                {kriteria.trim() && kriteriaMatches.length === 0 && (
-                  <div className="px-4 py-3 text-xs text-on-surface-variant/60 text-center border-t border-outline-variant/20">
-                    Tidak ada saran, tekan Search untuk mencari “{kriteria}”
+              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-primary rounded-t-lg shadow-lg z-20 overflow-hidden">
+                {kriteriaMatches.length > 0 ? (
+                  kriteriaMatches.map((s, i) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => selectKriteria(s)}
+                      className={`w-full text-left px-4 py-3 text-sm text-on-surface hover:bg-surface-container-low active:bg-surface-container-low transition-colors ${
+                        i !== kriteriaMatches.length - 1 ? 'border-b border-outline-variant/20' : ''
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-xs text-on-surface-variant/60 text-center">
+                    Tidak ada saran, tekan Search untuk mencari "{kriteria}"
                   </div>
                 )}
               </div>
@@ -449,14 +493,13 @@ export default function Search() {
           </div>
 
           {/* --- ORDER BY --- */}
-          <div className="flex flex-col gap-1 relative">
+          <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Order by
             </label>
             <button
               type="button"
               onClick={() => setOrderOpen((v) => !v)}
-              onBlur={() => setTimeout(() => setOrderOpen(false), 120)}
               className="flex items-center justify-between border border-outline-variant/40 rounded-lg px-3 py-2 text-sm text-on-surface bg-transparent"
             >
               <span className="font-semibold">
@@ -468,16 +511,13 @@ export default function Search() {
             </button>
 
             {orderOpen && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-outline-variant/30 rounded-lg shadow-lg z-10 overflow-hidden">
+              <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-outline-variant/30 rounded-lg shadow-lg z-20 overflow-hidden">
                 {ORDER_OPTIONS.map((o, i) => (
                   <button
                     key={o.value}
                     type="button"
-                    onClick={() => {
-                      setOrder(o.value);
-                      setOrderOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left hover:bg-surface-container-low transition-colors ${
+                    onClick={() => selectOrder(o.value)}
+                    className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left hover:bg-surface-container-low active:bg-surface-container-low transition-colors ${
                       i !== ORDER_OPTIONS.length - 1 ? 'border-b border-outline-variant/20' : ''
                     } ${order === o.value ? 'font-semibold text-on-surface' : 'text-on-surface-variant'}`}
                   >

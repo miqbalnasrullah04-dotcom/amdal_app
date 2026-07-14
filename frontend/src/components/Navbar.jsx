@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo amdal.png';
+import api from '../api/client.js';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -13,12 +14,35 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Cek status login setiap kali pindah halaman (misal setelah login/logout redirect)
+  useEffect(() => {
+    const token = localStorage.getItem('amdal_token');
+    setIsLoggedIn(!!token);
+  }, [location]);
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/logout');
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      localStorage.removeItem('amdal_token');
+      localStorage.removeItem('amdal_user');
+      setIsLoggedIn(false);
+      setMenuOpen(false);
+      navigate('/sign-in');
+    }
+  };
 
   const textColor = scrolled ? 'text-on-background' : 'text-white';
   const mutedColor = scrolled ? 'text-on-surface-variant' : 'text-white/80';
@@ -30,14 +54,6 @@ export default function Navbar() {
       }`}
     >
       <Link to="/" className="flex items-center">
-        {/* Logo dibesarkan (h-14, md:h-16) supaya lebih jelas terlihat —
-            sebelumnya h-10 terasa terlalu kecil. Padding vertikal navbar
-            (py-4 -> py-3) sedikit dikurangi supaya logo yang lebih besar
-            tetap proporsional dan navbar tidak jadi terlalu tinggi.
-            Saat navbar transparan di atas hero (belum discroll), logo dibuat
-            putih (brightness-0 invert) supaya teks "indonesia" yang hitam
-            tetap kontras dengan background gelap. Setelah discroll (navbar
-            putih), logo kembali ke warna asli biru-hijau. */}
         <img
           src={logo}
           alt="AMDAL Indonesia"
@@ -54,7 +70,7 @@ export default function Navbar() {
               className={({ isActive }) =>
                 `font-label-md text-label-md pb-1 transition-colors ${
                   isActive
-                    ? `${textColor} border-b-2 border-primary-fixed`
+                    ? `${textColor} border-b-2 border-[#2E5E3B]`
                     : `${mutedColor} hover:${scrolled ? 'text-on-background' : 'text-white'}`
                 }`
               }
@@ -64,19 +80,31 @@ export default function Navbar() {
           ))}
         </div>
         <div className="flex items-center gap-4 ml-gutter">
-          <Link
-            to="/sign-in"
-            className={`font-label-md text-label-md ${textColor} hover:text-primary-fixed transition-colors flex items-center gap-1`}
-          >
-            <span className="material-symbols-outlined text-sm">person</span>
-            Sign in
-          </Link>
-          <Link
-            to="/daftar"
-            className="bg-white text-primary px-6 py-2 rounded-lg font-label-md text-label-md scale-95 active:scale-90 transition-transform hover:bg-surface-container-low"
-          >
-            Daftar
-          </Link>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className={`font-label-md text-label-md ${textColor} hover:text-[#B3261E] transition-colors flex items-center gap-1`}
+            >
+              <span className="material-symbols-outlined text-sm">logout</span>
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link
+                to="/sign-in"
+                className={`font-label-md text-label-md ${textColor} hover:text-[#2E5E3B] transition-colors flex items-center gap-1`}
+              >
+                <span className="material-symbols-outlined text-sm">person</span>
+                Sign in
+              </Link>
+              <Link
+                to="/daftar"
+                className="bg-white text-[#2E5E3B] px-6 py-2 rounded-lg font-label-md text-label-md scale-95 active:scale-90 transition-transform hover:bg-surface-container-low"
+              >
+                Daftar
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -92,16 +120,24 @@ export default function Navbar() {
             </NavLink>
           ))}
           <hr className="border-outline-variant" />
-          <Link to="/sign-in" onClick={() => setMenuOpen(false)} className="font-label-md text-label-md">
-            Sign in
-          </Link>
-          <Link
-            to="/daftar"
-            onClick={() => setMenuOpen(false)}
-            className="bg-primary text-white px-6 py-2 rounded-lg font-label-md text-label-md text-center"
-          >
-            Daftar
-          </Link>
+          {isLoggedIn ? (
+            <button onClick={handleLogout} className="font-label-md text-label-md text-left text-[#B3261E]">
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/sign-in" onClick={() => setMenuOpen(false)} className="font-label-md text-label-md">
+                Sign in
+              </Link>
+              <Link
+                to="/daftar"
+                onClick={() => setMenuOpen(false)}
+                className="bg-[#2E5E3B] text-white px-6 py-2 rounded-lg font-label-md text-label-md text-center"
+              >
+                Daftar
+              </Link>
+            </>
+          )}
         </div>
       )}
     </nav>
