@@ -32,20 +32,20 @@ export default function Pamflet() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F8F5F0]">
-      {/* Background Navbar */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40"></div>
+    <div className="min-h-screen bg-slate-50">
+      {/* Background Navbar — Disamakan ke Biru Gradasi Search */}
+      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
-      {/* Hero */}
-      <section className="pt-36 pb-20 bg-gradient-to-b from-[#3E2B1F] via-[#4A3528] to-[#5A4030]">
+      {/* Hero — Menggunakan Gradasi Tema Biru */}
+      <section className="pt-36 pb-20 bg-gradient-to-b from-[#0369A1] via-[#0284C7] to-[#0EA5E9]">
         <div className="max-w-7xl mx-auto px-6">
-          {/* Mengubah bg ke hijau gelap opasitas rendah, border, dan teks menjadi putih */}
-          <span className="inline-block px-4 py-1 rounded-full bg-[#2E5E3B]/40 text-white border border-[#2E5E3B]/60 text-sm font-semibold mb-5">
+          {/* Label diubah menjadi aksen biru semi-transparan */}
+          <span className="inline-block px-4 py-1 rounded-full bg-white/20 text-white border border-white/40 text-sm font-semibold mb-5">
             Informasi Terbaru
           </span>
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Pamflet</h1>
-          <p className="text-gray-200 text-lg leading-8 max-w-3xl">
-            Berbagai informasi mengenai sosialisasi, pelatihan, seminar, workshop, pengumuman, and kegiatan terbaru
+          <p className="text-sky-100 text-lg leading-8 max-w-3xl">
+            Berbagai informasi mengenai sosialisasi, pelatihan, seminar, workshop, pengumuman, dan kegiatan terbaru
             seputar AMDAL.
           </p>
         </div>
@@ -57,7 +57,7 @@ export default function Pamflet() {
           {items.map((item) => (
             <div
               key={item.id}
-              onClick={() => setSelectedImg(item)} // Trigger modal saat kartu diklik
+              onClick={() => setSelectedImg(item)}
               className="
                 group
                 relative
@@ -86,11 +86,9 @@ export default function Pamflet() {
 
               {/* Overlay + Teks Judul */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition duration-500 flex flex-col justify-end p-6">
-                
-                {/* Teks Judul tetap ada */}
                 <div className="w-full">
-                  {/* Mengubah warna label PAMFLET dari teal ke hijau gelap (#2E5E3B) */}
-                  <span className="inline-block bg-[#2E5E3B] text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                  {/* Label PAMFLET diubah ke warna biru tema #0EA5E9 */}
+                  <span className="inline-block bg-[#0EA5E9] text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
                     PAMFLET
                   </span>
                   <h2 className="text-2xl font-bold text-white leading-snug drop-shadow-lg">
@@ -107,7 +105,7 @@ export default function Pamflet() {
       {selectedImg && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
-          onClick={() => setSelectedImg(null)} // Tutup modal jika area luar diklik
+          onClick={() => setSelectedImg(null)}
         >
           {/* Tombol Close */}
           <button
@@ -126,10 +124,10 @@ export default function Pamflet() {
             </svg>
           </button>
 
-          {/* Konten Gambar Modal */}
+          {/* Konten Gambar Modal — Background diubah dari cokelat ke slate gelap/biru tua */}
           <div
-            className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl bg-[#3E2B1F] p-2 shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()} // Mencegah modal tertutup saat gambar diklik
+            className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl bg-slate-900 p-2 shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
           >
             <img
               src={selectedImg.img}

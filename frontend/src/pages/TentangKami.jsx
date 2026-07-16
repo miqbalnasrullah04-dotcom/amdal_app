@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import tentangKamiImg from '../assets/tentangkami.jpg';
 
-// Data tim — dipisah dari markup supaya gampang ditambah/diubah tanpa
-// menyentuh styling tabel di bawah.
+// Data tim tetap aman di sini
 const TIM_AMDAL = [
   { role: 'Pengarah', name: 'Prof. Dr. Ir. Widiatmaka, DAA' },
   { role: 'Koordinator Pakar', name: 'Dr. Irman Firmansyah, S.Hut, M.Si' },
@@ -13,66 +12,67 @@ const TIM_AMDAL = [
 export default function TentangKami() {
   return (
     <div className="relative pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-      {/* Kotak coklat di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
+      {/* KOTAK ATAS: Diubah menjadi Gradasi Biru sesuai dengan header halaman Search */}
+      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
-      {/* Hero — foto + deskripsi. Aksen hijau gelap (#2E5E3B) digunakan di garis judul 
-          supaya nyambung dengan warna aksi/navigasi di halaman lain. */}
+      {/* Hero — Foto + Deskripsi */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter items-center mb-20">
         <img
           src={tentangKamiImg}
           alt="Tim AMDAL.ID"
-          className="w-full h-[380px] object-cover rounded-xl shadow-lg"
+          className="w-full h-[380px] object-cover rounded-xl shadow-md border border-outline-variant"
         />
 
         <div>
-          <span className="inline-block w-14 h-1.5 rounded-full bg-[#2E5E3B] mb-4" />
-          <h1 className="font-headline-lg text-headline-lg text-[#1F3D2B] mb-6">Tentang Kami</h1>
-          <p className="text-[#3D5A48] leading-relaxed mb-4">
+          {/* Aksen garis menggunakan Biru Cerah (#0EA5E9) */}
+          <span className="inline-block w-14 h-1.5 rounded-full bg-[#0EA5E9] mb-4" />
+          <h1 className="font-headline-lg text-headline-lg text-on-background mb-6">Tentang Kami</h1>
+          <p className="text-on-surface-variant leading-relaxed mb-4">
             AMDAL.ID merupakan platform pencarian ahli atau pakar untuk menyusun AMDAL maupun narasumber
             di Indonesia yang telah memiliki sertifikat. Platform ini bertujuan memudahkan dalam mencari
-            ahli penyusun AMDAL sesuai dengan keahlian dan kepakaran masing-masing.
+            ahli penyusun AMDAL sesuai dengan keahlian and kepakaran masing-masing.
           </p>
-          <p className="text-[#3D5A48] leading-relaxed">
+          <p className="text-on-surface-variant leading-relaxed">
             AMDAL juga sebagai media memperoleh informasi mengenai peraturan, artikel, lembaga pelatihan
             dan penyusun AMDAL.
           </p>
         </div>
       </div>
 
-      {/* TIM AMDAL.ID — tema coklat kayu, senada dengan section "Tenaga Ahli
-          Kajian Lingkungan Hidup Strategis" di Home (bg-[#3E2B1F], border
-          #6B4F3A, teks krem #F0E2CE, aksen emas #C9A876). */}
-      <h2 className="font-headline-md text-xl text-[#1F3D2B] mb-6">TIM AMDAL.ID</h2>
-      <div className="rounded-xl overflow-hidden border border-[#6B4F3A] bg-[#3E2B1F] shadow-lg">
+      {/* TIM AMDAL.ID — Tabel Bertema Modern */}
+      <h2 className="font-headline-md text-xl text-on-background mb-6">TIM AMDAL.ID</h2>
+      <div className="rounded-xl overflow-hidden border border-outline-variant bg-white shadow-sm">
         <table className="w-full text-left">
           <tbody>
             {TIM_AMDAL.map((member, i) => (
               <tr
                 key={member.role}
-                className={`${i !== TIM_AMDAL.length - 1 ? 'border-b border-[#6B4F3A]' : ''} ${
-                  i % 2 === 0 ? 'bg-[#3E2B1F]' : 'bg-[#2A1D14]'
+                className={`${i !== TIM_AMDAL.length - 1 ? 'border-b border-outline-variant' : ''} ${
+                  i % 2 === 0 ? 'bg-white' : 'bg-surface-container-low'
                 }`}
               >
-                <td className="px-6 py-4 text-[#C9A876] font-medium w-1/3">{member.role}</td>
-                <td className="px-6 py-4 text-[#F0E2CE]">{member.name}</td>
+                <td className="px-6 py-4 text-[#0EA5E9] font-semibold w-1/3">{member.role}</td>
+                <td className="px-6 py-4 text-on-background">{member.name}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* CTA — Menggunakan warna dasar hijau gelap #2E5E3B yang bergradasi 
-          menuju #1F3D2B agar tetap konsisten dengan nuansa alam brand AMDAL.ID */}
-      <div className="rounded-xl p-8 text-center mt-16 bg-gradient-to-br from-[#2E5E3B] to-[#1F3D2B]">
-        <h2 className="font-headline-md text-xl text-white mb-3">Ingin bergabung sebagai tenaga ahli?</h2>
-        <p className="text-white/85 mb-6">Daftarkan diri Anda dan perluas jangkauan proyek Anda.</p>
-        <Link
-          to="/daftar"
-          className="inline-block bg-[#F0E2CE] text-[#1F3D2B] px-8 py-3 rounded-full font-label-md hover:bg-white transition-colors"
-        >
-          Daftar Sekarang
-        </Link>
+      {/* CTA — Gradasi Biru Gelap Premium */}
+      <div className="rounded-xl p-8 text-center mt-16 bg-gradient-to-br from-[#031B2E] via-[#04263F] to-[#010B14] relative overflow-hidden shadow-lg">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-[#0EA5E9]/10 blur-[60px] pointer-events-none" />
+        
+        <div className="relative z-10">
+          <h2 className="font-headline-md text-xl text-white mb-3">Ingin bergabung sebagai tenaga ahli?</h2>
+          <p className="text-white/70 mb-6 text-sm">Daftarkan diri Anda dan perluas jangkauan proyek Anda.</p>
+          <Link
+            to="/daftar"
+            className="inline-block bg-[#0EA5E9] text-white px-8 py-3 rounded-full font-label-md hover:bg-[#0284C7] scale-95 active:scale-90 transition-all shadow-sm shadow-[#0EA5E9]/20"
+          >
+            Daftar Sekarang
+          </Link>
+        </div>
       </div>
     </div>
   );

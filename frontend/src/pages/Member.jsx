@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import api from '../api/client.js';
 
+import { usePageLoading } from '../context/LoadingContext.jsx';
+
 const dummyMembers = [
   { id: 1, nama: 'Ir. Boy Rangga, ST, M.Ling', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0030' },
   { id: 2, nama: 'Ir. M.Nasir, S.Hut, M.Si', instansi: 'PSLH UIN AR RANIRY', nomor: 'CERT. IDN. 001.5.0723.0029' },
@@ -13,7 +15,7 @@ const dummyMembers = [
   { id: 9, nama: 'Huda Eka Nurdiyatmi, S.PWK, M.PWK', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0022' },
   { id: 10, nama: 'Risa Triwiyanti, ST., M.PWK', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0021' },
   { id: 11, nama: 'Dr. Ali Aulia Ghozali, S.Si., M.Si.', instansi: 'Institut Teknologi Yogyakarta', nomor: 'CERT. IDN. 001.5.0723.0020' },
-  { id: 12, nama: 'Dr. Ir. Eldina Fatimah, M. Sc.', instansi: 'FT Sipil, Universitas Syiah Kuala', nomor: 'CERT. IDN. 001.5.0723.0019' },
+  { id: 12, merge: 'Dr. Ir. Eldina Fatimah, M. Sc.', instansi: 'FT Sipil, Universitas Syiah Kuala', nomor: 'CERT. IDN. 001.5.0723.0019' },
   { id: 13, nama: 'Ir. Syaiful Bakhri, M.Kes.', instansi: 'PT. Quart Trust', nomor: 'CERT. IDN. 001.5.0723.0018' },
   { id: 14, nama: 'Prof. Dr. Ir. Muhammad Nur Aidi MS', instansi: 'Penaprolis', nomor: 'CERT. IDN. 001.5.0523.0017' },
   { id: 15, nama: 'Citra Fadhilah Utami', instansi: 'BPIW-Kementerian PUPR', nomor: 'CERT. IDN. 001.5.0523.0016' },
@@ -22,6 +24,7 @@ const dummyMembers = [
 export default function Member() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { reportReady } = usePageLoading();
   const [keyword, setKeyword] = useState('');
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,12 +32,11 @@ export default function Member() {
 
   useEffect(() => {
     setLoading(true);
-    // GET /api/members
     api
       .get('/members')
       .then((res) => setMembers(res.data))
       .catch(() => setMembers(dummyMembers))
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); reportReady(); });
   }, []);
 
   const handleSort = (key) => {
@@ -54,7 +56,8 @@ export default function Member() {
     if (q) {
       result = result.filter(
         (m) =>
-          m.nama.toLowerCase().includes(q) ||
+          (m.nama && m.nama.toLowerCase().includes(q)) ||
+          (m.merge && m.merge.toLowerCase().includes(q)) ||
           m.instansi.toLowerCase().includes(q) ||
           m.nomor.toLowerCase().includes(q)
       );
@@ -62,8 +65,8 @@ export default function Member() {
 
     if (sortConfig.key) {
       result = [...result].sort((a, b) => {
-        const valA = a[sortConfig.key].toLowerCase();
-        const valB = b[sortConfig.key].toLowerCase();
+        const valA = (a[sortConfig.key] || a.merge || '').toLowerCase();
+        const valB = (b[sortConfig.key] || b.merge || '').toLowerCase();
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
@@ -92,14 +95,14 @@ export default function Member() {
       <span className="inline-flex flex-col ml-1 -space-y-1 align-middle">
         <span
           className={`material-symbols-outlined text-[14px] leading-none ${
-            isActive && sortConfig.direction === 'asc' ? 'text-[#2E5E3B]' : 'text-on-surface-variant/40'
+            isActive && sortConfig.direction === 'asc' ? 'text-[#0EA5E9]' : 'text-on-surface-variant/40'
           }`}
         >
           arrow_drop_up
         </span>
         <span
           className={`material-symbols-outlined text-[14px] leading-none ${
-            isActive && sortConfig.direction === 'desc' ? 'text-[#2E5E3B]' : 'text-on-surface-variant/40'
+            isActive && sortConfig.direction === 'desc' ? 'text-[#0EA5E9]' : 'text-on-surface-variant/40'
           }`}
         >
           arrow_drop_down
@@ -110,17 +113,18 @@ export default function Member() {
 
   return (
     <div className="relative pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-      {/* Kotak coklat di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) — TIDAK DIUBAH */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
+      {/* Warna Kotak Navbar disamakan ke Biru Gradasi Search */}
+      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40" />
 
       <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">Member</h1>
       <p className="text-on-surface-variant mb-8">
         Daftar tenaga ahli AMDAL yang telah tersertifikasi dan terdaftar di AMDAL.ID.
       </p>
 
-      <div className="bg-white rounded-xl border border-[#2E5E3B]/25 shadow-sm overflow-hidden">
+      {/* Warna border diubah dari border-[#2E5E3B]/25 ke border-[#0EA5E9]/25 */}
+      <div className="bg-white rounded-xl border border-[#0EA5E9]/25 shadow-sm overflow-hidden">
         {/* Toolbar: entries + search */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-[#2E5E3B]/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-[#0EA5E9]/20">
           <div className="flex items-center gap-2 text-sm text-on-surface-variant">
             <span>Show</span>
             <select
@@ -129,7 +133,7 @@ export default function Member() {
                 setEntriesPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border border-[#2E5E3B]/30 rounded-lg px-2 py-1.5 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B] bg-white"
+              className="border border-[#0EA5E9]/30 rounded-lg px-2 py-1.5 text-sm focus:ring-[#0EA5E9] focus:border-[#0EA5E9] bg-white text-on-surface-variant outline-none"
             >
               {[10, 18, 25, 50].map((n) => (
                 <option key={n} value={n}>
@@ -151,7 +155,7 @@ export default function Member() {
                 setCurrentPage(1);
               }}
               placeholder="Cari nama, instansi, atau nomor member"
-              className="w-full pl-9 pr-4 py-2 text-sm border border-[#2E5E3B]/30 rounded-lg focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-[#0EA5E9]/30 rounded-lg focus:ring-[#0EA5E9] focus:border-[#0EA5E9] outline-none"
             />
           </div>
         </div>
@@ -160,12 +164,12 @@ export default function Member() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-[#2E5E3B]/5">
+              <tr className="bg-[#0EA5E9]/5">
                 {columns.map((col) => (
                   <th
                     key={col.key}
                     onClick={() => handleSort(col.key)}
-                    className="px-6 py-4 font-label-md text-[#3E2B1F] cursor-pointer select-none whitespace-nowrap"
+                    className="px-6 py-4 font-label-md text-on-background cursor-pointer select-none whitespace-nowrap"
                   >
                     <span className="inline-flex items-center">
                       {col.label}
@@ -176,13 +180,7 @@ export default function Member() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={columns.length} className="px-6 py-8 text-center text-on-surface-variant">
-                    Memuat data member...
-                  </td>
-                </tr>
-              ) : paginatedMembers.length === 0 ? (
+              {loading ? null : paginatedMembers.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} className="px-6 py-8 text-center text-on-surface-variant">
                     Tidak ada data yang cocok.
@@ -192,11 +190,11 @@ export default function Member() {
                 paginatedMembers.map((m, idx) => (
                   <tr
                     key={m.id}
-                    className={`border-t border-[#2E5E3B]/10 hover:bg-[#2E5E3B]/5 transition-colors ${
-                      idx % 2 === 0 ? 'bg-white' : 'bg-[#2E5E3B]/[0.03]'
+                    className={`border-t border-[#0EA5E9]/10 hover:bg-[#0EA5E9]/5 transition-colors ${
+                      idx % 2 === 0 ? 'bg-white' : 'bg-[#0EA5E9]/[0.03]'
                     }`}
                   >
-                    <td className="px-6 py-4 text-on-background">{m.nama}</td>
+                    <td className="px-6 py-4 text-on-background">{m.nama || m.merge}</td>
                     <td className="px-6 py-4 text-on-surface-variant">{m.instansi}</td>
                     <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">{m.nomor}</td>
                   </tr>
@@ -207,7 +205,7 @@ export default function Member() {
         </div>
 
         {/* Footer: info + pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#2E5E3B]/20 text-sm text-on-surface-variant">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#0EA5E9]/20 text-sm text-on-surface-variant">
           <span>
             Showing {showingFrom} to {showingTo} of {totalEntries} entries
           </span>
@@ -216,7 +214,7 @@ export default function Member() {
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-[#2E5E3B]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#2E5E3B]/10 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-[#0EA5E9]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0EA5E9]/10 transition-colors"
             >
               Previous
             </button>
@@ -239,8 +237,8 @@ export default function Member() {
                     onClick={() => setCurrentPage(page)}
                     className={`w-9 h-9 rounded-lg transition-colors ${
                       currentPage === page
-                        ? 'bg-[#2E5E3B] text-white'
-                        : 'border border-[#2E5E3B]/30 hover:bg-[#2E5E3B]/10'
+                        ? 'bg-[#0EA5E9] text-white'
+                        : 'border border-[#0EA5E9]/30 hover:bg-[#0EA5E9]/10'
                     }`}
                   >
                     {page}
@@ -251,7 +249,7 @@ export default function Member() {
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg border border-[#2E5E3B]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#2E5E3B]/10 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-[#0EA5E9]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0EA5E9]/10 transition-colors"
             >
               Next
             </button>

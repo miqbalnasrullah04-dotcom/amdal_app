@@ -1,80 +1,161 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Expert;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ExpertController extends Controller
 {
+    /**
+     * Tampilan untuk Admin (Data Mentah JSON)
+     * Mengatasi error "Gagal memuat data dari server" pada tabel frontend
+     */
+    public function adminIndex()
+    {
+        try {
+            // Mengambil semua data tenaga ahli terbaru dalam bentuk JSON
+            $experts = Expert::latest()->get();
+            return response()->json($experts, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data dari database.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Tampilan untuk publik/user umum
+     */
     public function index(Request $request)
     {
         $experts = Expert::query()
             ->when($request->q, fn ($q) => $q->where('name', 'like', "%{$request->q}%"))
             ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->paginate(10);
 
-        return view('admin.experts.index', compact('experts'));
+        return response()->json($experts, 200);
     }
 
-    public function create()
+    /**
+     * Detail tenaga ahli berdasarkan slug
+     */
+    public function show($slug)
     {
-        return view('admin.experts.create');
+        $expert = Expert::where('slug', $slug)->first();
+
+        if (!$expert) {
+            return response()->json(['message' => 'Tenaga ahli tidak ditemukan.'], 404);
+        }
+
+        return response()->json($expert, 200);
     }
 
+    /**
+     * Menyimpan data Baru (Tambah Tenaga Ahli)
+     * Mengatasi masalah URL Foto agar bisa disimpan sebagai teks biasa
+     */
     public function store(Request $request)
     {
-        $data = $this->validated($request);
-        $data['slug'] = $this->uniqueSlug($data['name']);
+        // 1. Validasi Input dari Frontend (photo diubah menjadi string|url)
+        $validatedData = $request->validate([
+            'name'            => 'required|string|max:255',
+            'institution'     => 'nullable|string|max:255',
+            'email'           => 'nullable|email|max:255',
+            'field'           => 'nullable|string|max:255',
+            'kriteria'        => 'required|string|max:255',
+            'alamat_kota'     => 'nullable|string|max:255',
+            'alamat_provinsi' => 'nullable|string|max:255',
+            'photo'           => 'nullable|string|url', // Mengizinkan string URL teks biasa
+            'verified'        => 'nullable|boolean',
+            'featured'        => 'nullable|boolean',
+        ]);
 
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('experts/photo', 'public');
-        }
-        if ($request->hasFile('cover')) {
-            $data['cover'] = $request->file('cover')->store('experts/cover', 'public');
-        }
+        // 2. Generate slug otomatis berdasarkan nama
+        $validatedData['slug'] = $this->uniqueSlug($validatedData['name']);
 
-        Expert::create($data);
+        // 3. Pastikan format boolean terisi dengan benar
+        $validatedData['verified'] = $request->boolean('verified');
+        $validatedData['featured'] = $request->boolean('featured');
 
-        return redirect()->route('admin.experts.index')->with('success', 'Tenaga ahli berhasil ditambahkan.');
+        // 4. Simpan langsung string URL dan data lainnya ke database
+        $expert = Expert::create($validatedData);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tenaga ahli berhasil ditambahkan.',
+            'data' => $expert
+        ], 201);
     }
 
-    public function edit(Expert $expert)
+    /**
+     * Mengubah data yang sudah ada (Edit Tenaga Ahli)
+     */
+    public function update(Request $request, $id)
     {
-        return view('admin.experts.edit', compact('expert'));
-    }
+        $expert = Expert::find($id);
 
-    public function update(Request $request, Expert $expert)
-    {
-        $data = $this->validated($request);
-
-        if ($request->hasFile('photo')) {
-            if ($expert->photo) Storage::disk('public')->delete($expert->photo);
-            $data['photo'] = $request->file('photo')->store('experts/photo', 'public');
-        }
-        if ($request->hasFile('cover')) {
-            if ($expert->cover) Storage::disk('public')->delete($expert->cover);
-            $data['cover'] = $request->file('cover')->store('experts/cover', 'public');
+        if (!$expert) {
+            return response()->json(['message' => 'Tenaga ahli tidak ditemukan.'], 404);
         }
 
-        $expert->update($data);
+        // 1. Validasi Input (photo diubah menjadi string|url)
+        $validatedData = $request->validate([
+            'name'            => 'required|string|max:255',
+            'institution'     => 'nullable|string|max:255',
+            'email'           => 'nullable|email|max:255',
+            'field'           => 'nullable|string|max:255',
+            'kriteria'        => 'required|string|max:255',
+            'alamat_kota'     => 'nullable|string|max:255',
+            'alamat_provinsi' => 'nullable|string|max:255',
+            'photo'           => 'nullable|string|url', // Mengizinkan string URL teks biasa
+            'verified'        => 'nullable|boolean',
+            'featured'        => 'nullable|boolean',
+        ]);
 
-        return redirect()->route('admin.experts.index')->with('success', 'Tenaga ahli berhasil diperbarui.');
+        // 2. Update slug jika nama berubah
+        if ($expert->name !== $validatedData['name']) {
+            $validatedData['slug'] = $this->uniqueSlug($validatedData['name'], $expert->id);
+        }
+
+        $validatedData['verified'] = $request->boolean('verified');
+        $validatedData['featured'] = $request->boolean('featured');
+
+        // 3. Perbarui data ke database
+        $expert->update($validatedData);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tenaga ahli berhasil diperbarui.',
+            'data' => $expert
+        ], 200);
     }
 
-    public function destroy(Expert $expert)
+    /**
+     * Menghapus data Tenaga Ahli
+     */
+    public function destroy($id)
     {
-        if ($expert->photo) Storage::disk('public')->delete($expert->photo);
-        if ($expert->cover) Storage::disk('public')->delete($expert->cover);
+        $expert = Expert::find($id);
+
+        if (!$expert) {
+            return response()->json(['message' => 'Tenaga ahli tidak ditemukan.'], 404);
+        }
+
         $expert->delete();
 
-        return redirect()->route('admin.experts.index')->with('success', 'Tenaga ahli berhasil dihapus.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Tenaga ahli berhasil dihapus.'
+        ], 200);
     }
 
+    /**
+     * Helper untuk membuat slug unik
+     */
     private function uniqueSlug(string $name, ?int $ignoreId = null): string
     {
         $base = Str::slug($name);
@@ -91,114 +172,5 @@ class ExpertController extends Controller
         }
 
         return $slug;
-    }
-
-    private function validated(Request $request): array
-    {
-        $kriteriaOptions = array_keys(Expert::kriteriaRouteMap());
-
-        $data = $request->validate([
-            'name'            => 'required|string|max:255',
-            'field'           => 'nullable|string|max:255',
-            'kriteria'        => 'required|string|in:'.implode(',', $kriteriaOptions),
-            'kriteria_list'   => 'nullable|array',
-            'kriteria_list.*' => 'string|in:'.implode(',', $kriteriaOptions),
-            'location'        => 'nullable|string|max:255',
-            'lat'             => 'nullable|numeric',
-            'lng'             => 'nullable|numeric',
-            'rating'          => 'nullable|numeric|min:0|max:9.9',
-            'institution'     => 'nullable|string|max:255',
-            'active_since'    => 'nullable|integer|min:1900|max:'.date('Y'),
-            'email'           => 'nullable|email|max:255',
-            'alamat_lengkap'  => 'nullable|string|max:255',
-            'alamat_kota'     => 'nullable|string|max:255',
-            'alamat_provinsi' => 'nullable|string|max:255',
-            'lokasi_label'    => 'nullable|string|max:255',
-            'photo'           => 'nullable|image|max:2048',
-            'cover'           => 'nullable|image|max:4096',
-
-            'keahlian' => 'nullable|string',
-
-            'sosial_instagram' => 'nullable|string|max:255',
-            'sosial_linkedin'  => 'nullable|string|max:255',
-            'sosial_twitter'   => 'nullable|string|max:255',
-            'sosial_website'   => 'nullable|string|max:255',
-            'sosial_whatsapp'  => 'nullable|string|max:255',
-
-            'narasumber_judul'         => 'nullable|array',
-            'narasumber_penyelenggara' => 'nullable|array',
-            'narasumber_tahun'         => 'nullable|array',
-            'narasumber_deskripsi'     => 'nullable|array',
-
-            'kajian_judul'     => 'nullable|array',
-            'kajian_lokasi'    => 'nullable|array',
-            'kajian_tahun'     => 'nullable|array',
-            'kajian_deskripsi' => 'nullable|array',
-        ]);
-
-        $data['verified'] = $request->boolean('verified');
-        $data['featured'] = $request->boolean('featured');
-        $data['kriteria_list'] = $request->input('kriteria_list', [$data['kriteria']]);
-
-        $data['keahlian'] = collect(explode("\n", $request->input('keahlian', '')))
-            ->map(fn ($v) => trim($v))
-            ->filter()
-            ->values()
-            ->all();
-
-        $data['sosial'] = array_filter([
-            'instagram' => $request->input('sosial_instagram'),
-            'linkedin'  => $request->input('sosial_linkedin'),
-            'twitter'   => $request->input('sosial_twitter'),
-            'website'   => $request->input('sosial_website'),
-            'whatsapp'  => $request->input('sosial_whatsapp'),
-        ]);
-
-        $data['narasumber_riwayat'] = $this->zipRows(
-            $request->input('narasumber_judul', []),
-            $request->input('narasumber_penyelenggara', []),
-            $request->input('narasumber_tahun', []),
-            $request->input('narasumber_deskripsi', []),
-            ['judul', 'penyelenggara', 'tahun', 'deskripsi']
-        );
-
-        $data['kajian_riwayat'] = $this->zipRows(
-            $request->input('kajian_judul', []),
-            $request->input('kajian_lokasi', []),
-            $request->input('kajian_tahun', []),
-            $request->input('kajian_deskripsi', []),
-            ['judul', 'lokasi', 'tahun', 'deskripsi']
-        );
-
-        foreach ([
-            'sosial_instagram', 'sosial_linkedin', 'sosial_twitter', 'sosial_website', 'sosial_whatsapp',
-            'narasumber_judul', 'narasumber_penyelenggara', 'narasumber_tahun', 'narasumber_deskripsi',
-            'kajian_judul', 'kajian_lokasi', 'kajian_tahun', 'kajian_deskripsi',
-        ] as $key) {
-            unset($data[$key]);
-        }
-
-        return $data;
-    }
-
-    private function zipRows(array $a, array $b, array $c, array $d, array $keys): array
-    {
-        $rows = [];
-        $count = max(count($a), count($b), count($c), count($d));
-
-        for ($i = 0; $i < $count; $i++) {
-            $row = [
-                $keys[0] => $a[$i] ?? null,
-                $keys[1] => $b[$i] ?? null,
-                $keys[2] => $c[$i] ?? null,
-                $keys[3] => $d[$i] ?? null,
-            ];
-
-            if (array_filter($row, fn ($v) => filled($v))) {
-                $rows[] = $row;
-            }
-        }
-
-        return $rows;
     }
 }

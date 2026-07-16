@@ -1,36 +1,55 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PageLoader from './PageLoader';
+import { usePageLoading } from '../context/LoadingContext.jsx';
 
-const INITIAL_DURATION = 1400; // ms saat pertama kali web dibuka
-const ROUTE_DURATION = 1000;    // ms saat pindah halaman
+// Loader tetap tampil minimal segini, biar animasinya nggak "kedip"
+// walaupun datanya selesai fetch dalam sekejap.
+const MIN_DURATION = 600; // ms
+
+// Jaring pengaman: kalau suatu halaman lupa "lapor selesai" atau API
+// lambat/gantung, loader tetap akan hilang otomatis setelah durasi ini.
+const MAX_DURATION = 6000; // ms
 
 export default function RouteLoader({ children }) {
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
+  const { dataReady, resetReady } = usePageLoading();
+  const [visible, setVisible] = useState(true);
+  const startedAtRef = useRef(Date.now());
 
+  // Setiap kali rute berubah: nyalakan lagi loader, reset status "data siap",
+  // dan pasang jaring pengaman durasi maksimum.
   useEffect(() => {
-    // Setiap kali rute berubah, set loading ke true
-    setLoading(true);
+    setVisible(true);
+    resetReady();
+    startedAtRef.current = Date.now();
 
-    // Tentukan durasi berdasarkan apakah ini load pertama atau pindah halaman biasa
-    // Kita bisa cek apakah performa navigasi bertipe 'reload' atau bukan, 
-    // tapi cara paling aman dan simpel adalah mendeteksi via window performance jika diperlukan.
-    // Untuk simplifikasi anti-stuck, kita pakai durasi rute standar yang cepat (900ms) agar user tidak menunggu lama.
-    const isReload = window.performance && window.performance.getEntriesByType("navigation")[0]?.type === "reload";
-    const duration = isReload ? INITIAL_DURATION : ROUTE_DURATION;
+    const maxTimer = setTimeout(() => {
+      setVisible(false);
+    }, MAX_DURATION);
 
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, duration);
-
-    // Bersihkan timer jika komponen unmount atau rute berubah lagi sebelum timer selesai
-    return () => clearTimeout(timer);
+    return () => clearTimeout(maxTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
+
+  // Begitu halaman melapor datanya sudah siap (dataReady === true),
+  // hitung sisa waktu supaya tetap memenuhi MIN_DURATION, baru sembunyikan.
+  useEffect(() => {
+    if (!dataReady) return;
+
+    const elapsed = Date.now() - startedAtRef.current;
+    const remaining = Math.max(MIN_DURATION - elapsed, 0);
+
+    const hideTimer = setTimeout(() => {
+      setVisible(false);
+    }, remaining);
+
+    return () => clearTimeout(hideTimer);
+  }, [dataReady]);
 
   return (
     <>
-      <PageLoader visible={loading} />
+      <PageLoader visible={visible} />
       {children}
     </>
   );

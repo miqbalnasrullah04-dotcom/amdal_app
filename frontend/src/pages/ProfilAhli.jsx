@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/client.js';
 
+
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 

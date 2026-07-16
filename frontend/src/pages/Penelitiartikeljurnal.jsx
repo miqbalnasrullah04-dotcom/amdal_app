@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
+import { usePageLoading } from '../context/LoadingContext.jsx';
 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -41,6 +42,30 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// -----------------------------------------------------------------------
+// useClickOutside — closes a dropdown when the user taps/clicks anywhere
+// outside its container. Using document-level mousedown/touchstart + ref
+// containment instead of onBlur+setTimeout, because blur fires the instant
+// a finger touches a suggestion button on mobile, and the timeout could
+// unmount the button before the tap finished — so nothing happened when
+// people tapped a suggestion on a phone.
+// -----------------------------------------------------------------------
+function useClickOutside(ref, onOutside) {
+  useEffect(() => {
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) {
+        onOutside();
+      }
+    }
+    document.addEventListener('mousedown', handle);
+    document.addEventListener('touchstart', handle);
+    return () => {
+      document.removeEventListener('mousedown', handle);
+      document.removeEventListener('touchstart', handle);
+    };
+  }, [ref, onOutside]);
 }
 
 // Demo data used only if /api/experts is unreachable OR returns empty data.
@@ -102,6 +127,7 @@ export default function PenelitiArtikelJurnal() {
 
   const [experts, setExperts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { reportReady } = usePageLoading();
   const [activeId, setActiveId] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -114,6 +140,11 @@ export default function PenelitiArtikelJurnal() {
 
   const mapWrapperRef = useRef(null);
   const cardRefs = useRef({});
+  const kriteriaBoxRef = useRef(null);
+  const orderBoxRef = useRef(null);
+
+  useClickOutside(kriteriaBoxRef, () => setKriteriaOpen(false));
+  useClickOutside(orderBoxRef, () => setOrderOpen(false));
 
   const kriteriaMatches = useMemo(
     () =>
@@ -123,23 +154,12 @@ export default function PenelitiArtikelJurnal() {
     [kriteriaInput]
   );
 
+  // --- BYPASS API BACKEND KE FALLBACK DATA ---
   useEffect(() => {
     setLoading(true);
-    api
-      .get('/experts', {
-        params: {
-          keyword: searchParams.get('keyword') || '',
-          location: searchParams.get('location') || '',
-          kriteria: searchParams.get('kategori') || searchParams.get('kriteria') || 'Peneliti Artikel/Jurnal',
-          order: searchParams.get('order') || 'latest',
-        },
-      })
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
-        setExperts(data.length > 0 ? data : FALLBACK_EXPERTS);
-      })
-      .catch(() => setExperts(FALLBACK_EXPERTS))
-      .finally(() => setLoading(false));
+    setExperts(FALLBACK_EXPERTS);
+    setLoading(false);
+    reportReady();
   }, [searchParams]);
 
   useEffect(() => {
@@ -224,6 +244,8 @@ export default function PenelitiArtikelJurnal() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setKriteriaOpen(false);
+    setOrderOpen(false);
     setSearchParams({ keyword, location, kriteria, order });
   };
 
@@ -280,7 +302,6 @@ export default function PenelitiArtikelJurnal() {
 
   return (
     <div className="min-h-screen bg-white pt-20">
-      {/* Kotak coklat di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) */}
       <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
 
       <Navbar />
@@ -292,7 +313,7 @@ export default function PenelitiArtikelJurnal() {
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Masukan Kata Kunci</label>
               <input
-                className="border-b border-gray-300 focus:border-emerald-500 outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-emerald-600 outline-none py-2 text-sm bg-transparent"
                 placeholder="Peneliti Kehutanan, Jurnal Lingkungan"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
@@ -302,14 +323,14 @@ export default function PenelitiArtikelJurnal() {
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Kota/Kabupaten/Provinsi</label>
               <input
-                className="border-b border-gray-300 focus:border-emerald-500 outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-emerald-600 outline-none py-2 text-sm bg-transparent"
                 placeholder="Pilih Lokasi"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
 
-            <div className="flex flex-col gap-1 relative">
+            <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
               <label className="text-sm text-gray-500">Kriteria Keanggotaan</label>
 
               {kriteria ? (
@@ -326,12 +347,11 @@ export default function PenelitiArtikelJurnal() {
                 </div>
               ) : (
                 <input
-                  className="border-b border-gray-300 focus:border-emerald-500 outline-none py-2 text-sm bg-transparent"
+                  className="border-b border-gray-300 focus:border-emerald-600 outline-none py-2 text-sm bg-transparent"
                   placeholder="Ketik untuk mencari kriteria..."
                   value={kriteriaInput}
                   onChange={(e) => setKriteriaInput(e.target.value)}
                   onFocus={() => setKriteriaOpen(true)}
-                  onBlur={() => setTimeout(() => setKriteriaOpen(false), 120)}
                 />
               )}
 
@@ -341,7 +361,7 @@ export default function PenelitiArtikelJurnal() {
                     <button
                       key={s}
                       type="button"
-                      onMouseDown={() => {
+                      onClick={() => {
                         setKriteria(s);
                         setKriteriaInput('');
                         setKriteriaOpen(false);
@@ -358,12 +378,11 @@ export default function PenelitiArtikelJurnal() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1 relative">
+            <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
               <label className="text-sm text-gray-500">Order by</label>
               <button
                 type="button"
                 onClick={() => setOrderOpen((v) => !v)}
-                onBlur={() => setTimeout(() => setOrderOpen(false), 120)}
                 className="flex items-center justify-between border-b border-gray-300 py-2 text-sm font-semibold"
               >
                 {ORDER_OPTIONS.find((o) => o.value === order)?.label}
@@ -420,8 +439,6 @@ export default function PenelitiArtikelJurnal() {
             </button>
           </div>
 
-          {loading && <p className="text-gray-500 text-sm p-6">Memuat hasil...</p>}
-
           {!loading && sortedExperts.length === 0 && (
             <div className="text-center text-gray-500 text-sm py-16 px-6">
               Tidak ada peneliti artikel/jurnal yang cocok.
@@ -431,46 +448,48 @@ export default function PenelitiArtikelJurnal() {
           )}
 
           <div className="flex flex-col gap-4 p-6">
-            {sortedExperts.map((expert, index) => (
-              <div
-                key={expert.id}
-                ref={(el) => (cardRefs.current[expert.id] = el)}
-                onClick={() => focusExpert(expert, index)}
-                className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-colors ${
-                  activeId === expert.id ? 'border-emerald-500' : 'border-transparent'
-                }`}
-              >
-                <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
-                <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
-                  <BoltIcon className="w-4 h-4 text-emerald-500" />
+            {loading ? null : (
+              sortedExperts.map((expert, index) => (
+                <div
+                  key={expert.id}
+                  ref={(el) => (cardRefs.current[expert.id] = el)}
+                  onClick={() => focusExpert(expert, index)}
+                  className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-colors ${
+                    activeId === expert.id ? 'border-emerald-600' : 'border-transparent'
+                  }`}
+                >
+                  <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
+                  <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
+                    <BoltIcon className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  {expert.slug && (
+                    <Link
+                      to={`/profil/${expert.slug}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-emerald-700 rounded-full px-3 py-1.5 shadow"
+                    >
+                      Lihat Profil
+                    </Link>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
+                    <img
+                      src={expert.photo}
+                      alt={expert.name}
+                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                    />
+                    <span className="text-white font-bold text-sm">{expert.name}</span>
+                    {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-emerald-400" />}
+                  </div>
                 </div>
-                {expert.slug && (
-                  <Link
-                    to={`/profil/${expert.slug}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-emerald-600 rounded-full px-3 py-1.5 shadow"
-                  >
-                    Lihat Profil
-                  </Link>
-                )}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
-                  <img
-                    src={expert.photo}
-                    alt={expert.name}
-                    className="w-9 h-9 rounded-full border-2 border-white object-cover"
-                  />
-                  <span className="text-white font-bold text-sm">{expert.name}</span>
-                  {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-emerald-400" />}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
 
         {/* ---------- MAP ---------- */}
         <div
           ref={mapWrapperRef}
-          className="hidden lg:block relative isolate sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
+          className="hidden lg:block relative isolate z-0 sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
         >
           <div id="peneliti-artikel-jurnal-map" className="absolute inset-0" />
 

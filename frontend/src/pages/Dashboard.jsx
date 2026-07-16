@@ -119,13 +119,15 @@ export default function Dashboard() {
       title={`Halo, ${name.split(' ')[0]} `}
       subtitle="Berikut ringkasan status akun dan profil Anda."
       headerRight={
-        <span
-          className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-          style={{ color: status.color, backgroundColor: status.bg }}
-        >
-          <span className="material-symbols-outlined text-[16px]">{status.icon}</span>
-          {status.text}
-        </span>
+        <div className="flex items-center gap-3">
+          <span
+            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
+            style={{ color: status.color, backgroundColor: status.bg }}
+          >
+            <span className="material-symbols-outlined text-[16px]">{status.icon}</span>
+            {status.text}
+          </span>
+        </div>
       }
     >
       {error && (

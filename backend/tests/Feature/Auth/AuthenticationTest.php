@@ -10,38 +10,47 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_users_can_authenticate_using_api_login(): void
     {
-        $user = User::factory()->create();
-
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
+        $user = User::factory()->create([
+            'password' => bcrypt('password123'),
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertNoContent();
+        $response = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'user' => ['id', 'name', 'email', 'role'],
+            'token'
+        ]);
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'password' => bcrypt('password123'),
+        ]);
 
-        $this->post('/login', [
+        $response = $this->postJson('/api/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
 
-        $this->assertGuest();
+        $response->assertStatus(422);
     }
 
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-        $response = $this->actingAs($user)->post('/logout');
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/logout');
 
-        $this->assertGuest();
-        $response->assertNoContent();
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Logged out']);
     }
 }

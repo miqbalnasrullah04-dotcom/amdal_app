@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
+import { usePageLoading } from '../context/LoadingContext.jsx';
+
 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -41,6 +43,30 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// -----------------------------------------------------------------------
+// useClickOutside — closes a dropdown when the user taps/clicks anywhere
+// outside its container. Using document-level mousedown/touchstart + ref
+// containment instead of onBlur+setTimeout, because blur fires the instant
+// a finger touches a suggestion button on mobile, and the timeout could
+// unmount the button before the tap finished — so nothing happened when
+// people tapped a suggestion on a phone.
+// -----------------------------------------------------------------------
+function useClickOutside(ref, onOutside) {
+  useEffect(() => {
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) {
+        onOutside();
+      }
+    }
+    document.addEventListener('mousedown', handle);
+    document.addEventListener('touchstart', handle);
+    return () => {
+      document.removeEventListener('mousedown', handle);
+      document.removeEventListener('touchstart', handle);
+    };
+  }, [ref, onOutside]);
 }
 
 // Demo data used only if /api/experts is unreachable OR returns empty data.
@@ -91,6 +117,7 @@ const FALLBACK_EXPERTS = [
 
 export default function Narasumber() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { reportReady } = usePageLoading();
 
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
   const [location, setLocation] = useState(searchParams.get('location') || '');
@@ -114,6 +141,11 @@ export default function Narasumber() {
 
   const mapWrapperRef = useRef(null);
   const cardRefs = useRef({});
+  const kriteriaBoxRef = useRef(null);
+  const orderBoxRef = useRef(null);
+
+  useClickOutside(kriteriaBoxRef, () => setKriteriaOpen(false));
+  useClickOutside(orderBoxRef, () => setOrderOpen(false));
 
   const kriteriaMatches = useMemo(
     () =>
@@ -125,22 +157,10 @@ export default function Narasumber() {
 
   useEffect(() => {
     setLoading(true);
-    api
-      .get('/experts', {
-        params: {
-          keyword: searchParams.get('keyword') || '',
-          location: searchParams.get('location') || '',
-          kriteria: searchParams.get('kategori') || searchParams.get('kriteria') || 'Narasumber/Pembicara',
-          order: searchParams.get('order') || 'latest',
-        },
-      })
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
-        setExperts(data.length > 0 ? data : FALLBACK_EXPERTS);
-      })
-      .catch(() => setExperts(FALLBACK_EXPERTS))
-      .finally(() => setLoading(false));
-  }, [searchParams]);
+    setExperts(FALLBACK_EXPERTS);
+    setLoading(false);
+    reportReady();
+  }, [searchParams, reportReady]);
 
   useEffect(() => {
     const instance = L.map('narasumber-map', { zoomControl: false }).setView([-6.9, 107.2], 7);
@@ -184,9 +204,10 @@ export default function Narasumber() {
 
     const withCoords = sortedExperts.filter((e) => e.lat && e.lng);
     const next = withCoords.map((e) => {
+      // Penyesuaian: border avatar pin diubah menjadi #3E2B1F agar selaras dengan navbar
       const icon = L.divIcon({
         className: '',
-        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #1FA774;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3);background:#fff">
+        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #3E2B1F;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3);background:#fff">
                  <img src="${e.photo}" style="width:100%;height:100%;object-fit:cover" />
                </div>`,
         iconSize: [40, 40],
@@ -224,6 +245,8 @@ export default function Narasumber() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setKriteriaOpen(false);
+    setOrderOpen(false);
     setSearchParams({ keyword, location, kriteria, order });
   };
 
@@ -280,7 +303,6 @@ export default function Narasumber() {
 
   return (
     <div className="min-h-screen bg-white pt-20">
-      {/* Kotak coklat di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) */}
       <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
 
       <Navbar />
@@ -289,27 +311,30 @@ export default function Narasumber() {
         {/* ---------- FILTERS ---------- */}
         <aside className="p-6 border-r border-gray-200">
           <form onSubmit={handleSearch} className="flex flex-col gap-6">
+            {/* Penyesuaian: focus:border diubah ke #2E5E3B */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Masukan Kata Kunci</label>
               <input
-                className="border-b border-gray-300 focus:border-emerald-500 outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-[#2E5E3B] outline-none py-2 text-sm bg-transparent"
                 placeholder="Ahli Kehutanan, Tata Ruang"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
             </div>
 
+            {/* Penyesuaian: focus:border diubah ke #2E5E3B */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Kota/Kabupaten/Provinsi</label>
               <input
-                className="border-b border-gray-300 focus:border-emerald-500 outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-[#2E5E3B] outline-none py-2 text-sm bg-transparent"
                 placeholder="Pilih Lokasi"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
 
-            <div className="flex flex-col gap-1 relative">
+            {/* Penyesuaian: focus:border diubah ke #2E5E3B */}
+            <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
               <label className="text-sm text-gray-500">Kriteria Keanggotaan</label>
 
               {kriteria ? (
@@ -326,12 +351,11 @@ export default function Narasumber() {
                 </div>
               ) : (
                 <input
-                  className="border-b border-gray-300 focus:border-emerald-500 outline-none py-2 text-sm bg-transparent"
+                  className="border-b border-gray-300 focus:border-[#2E5E3B] outline-none py-2 text-sm bg-transparent"
                   placeholder="Ketik untuk mencari kriteria..."
                   value={kriteriaInput}
                   onChange={(e) => setKriteriaInput(e.target.value)}
                   onFocus={() => setKriteriaOpen(true)}
-                  onBlur={() => setTimeout(() => setKriteriaOpen(false), 120)}
                 />
               )}
 
@@ -341,7 +365,7 @@ export default function Narasumber() {
                     <button
                       key={s}
                       type="button"
-                      onMouseDown={() => {
+                      onClick={() => {
                         setKriteria(s);
                         setKriteriaInput('');
                         setKriteriaOpen(false);
@@ -358,12 +382,11 @@ export default function Narasumber() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1 relative">
+            <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
               <label className="text-sm text-gray-500">Order by</label>
               <button
                 type="button"
                 onClick={() => setOrderOpen((v) => !v)}
-                onBlur={() => setTimeout(() => setOrderOpen(false), 120)}
                 className="flex items-center justify-between border-b border-gray-300 py-2 text-sm font-semibold"
               >
                 {ORDER_OPTIONS.find((o) => o.value === order)?.label}
@@ -392,14 +415,15 @@ export default function Narasumber() {
               )}
             </div>
 
+            {/* Penyesuaian: Menggunakan warna tombol hijau tua #2E5E3B */}
             <button
               type="submit"
-              className="bg-[#2E5E3B] hover:bg-[#21442a] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2"
+              className="bg-[#2E5E3B] hover:bg-[#21442a] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
               Search
             </button>
-            <button type="button" onClick={handleReset} className="text-gray-500 text-sm underline flex items-center gap-1 justify-center">
+            <button type="button" onClick={handleReset} className="text-gray-500 text-sm underline flex items-center gap-1 justify-center hover:text-gray-800">
               <ArrowPathIcon className="w-4 h-4" />
               Reset Filters
             </button>
@@ -420,8 +444,6 @@ export default function Narasumber() {
             </button>
           </div>
 
-          {loading && <p className="text-gray-500 text-sm p-6">Memuat hasil...</p>}
-
           {!loading && sortedExperts.length === 0 && (
             <div className="text-center text-gray-500 text-sm py-16 px-6">
               Tidak ada tenaga ahli yang cocok.
@@ -431,52 +453,61 @@ export default function Narasumber() {
           )}
 
           <div className="flex flex-col gap-4 p-6">
-            {sortedExperts.map((expert, index) => (
-              <div
-                key={expert.id}
-                ref={(el) => (cardRefs.current[expert.id] = el)}
-                onClick={() => focusExpert(expert, index)}
-                className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-colors ${
-                  activeId === expert.id ? 'border-emerald-500' : 'border-transparent'
-                }`}
-              >
-                <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
-                <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
-                  <BoltIcon className="w-4 h-4 text-emerald-500" />
+            {loading ? null : (
+              sortedExperts.map((expert, index) => (
+                <div
+                  key={expert.id}
+                  ref={(el) => (cardRefs.current[expert.id] = el)}
+                  onClick={() => focusExpert(expert, index)}
+                  className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
+                    activeId === expert.id ? 'border-[#3E2B1F]' : 'border-transparent'
+                  }`}
+                >
+                  <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
+                  
+                  {/* Penyesuaian: Warna BoltIcon diubah ke #2E5E3B */}
+                  <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
+                    <BoltIcon className="w-4 h-4 text-[#2E5E3B]" />
+                  </div>
+                  
+                  {/* Penyesuaian: Link text diubah ke text-[#2E5E3B] */}
+                  {expert.slug && (
+                    <Link
+                      to={`/profil/${expert.slug}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-[#2E5E3B] rounded-full px-3 py-1.5 shadow transition-colors"
+                    >
+                      Lihat Profil
+                    </Link>
+                  )}
+                  
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
+                    <img
+                      src={expert.photo}
+                      alt={expert.name}
+                      className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                    />
+                    <span className="text-white font-bold text-sm">{expert.name}</span>
+                    {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-emerald-400" />}
+                  </div>
                 </div>
-                {expert.slug && (
-                  <Link
-                    to={`/profil/${expert.slug}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-emerald-600 rounded-full px-3 py-1.5 shadow"
-                  >
-                    Lihat Profil
-                  </Link>
-                )}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
-                  <img
-                    src={expert.photo}
-                    alt={expert.name}
-                    className="w-9 h-9 rounded-full border-2 border-white object-cover"
-                  />
-                  <span className="text-white font-bold text-sm">{expert.name}</span>
-                  {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-emerald-400" />}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
 
         {/* ---------- MAP ---------- */}
         <div
           ref={mapWrapperRef}
-          className="hidden lg:block relative isolate sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
+          className="hidden lg:block relative isolate z-0 sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
         >
           <div id="narasumber-map" className="absolute inset-0" />
 
-          <label className="absolute top-4 left-4 z-[1000] bg-white shadow rounded-md px-3 py-2 flex items-center gap-2 text-sm cursor-pointer">
+          {/* Penyesuaian: warna checkbox menggunakan accent-[#2E5E3B] */}
+          <label className="absolute top-4 left-4 z-[1000] bg-white shadow rounded-md px-3 py-2 flex items-center gap-2 text-sm cursor-pointer select-none">
             <input
               type="checkbox"
+              className="accent-[#2E5E3B]"
               checked={searchAsMove}
               onChange={(e) => setSearchAsMove(e.target.checked)}
             />
@@ -484,16 +515,16 @@ export default function Narasumber() {
           </label>
 
           <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-            <button onClick={() => map?.zoomIn()} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={() => map?.zoomIn()} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
               <PlusIcon className="w-4 h-4" />
             </button>
-            <button onClick={() => map?.zoomOut()} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={() => map?.zoomOut()} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
               <MinusIcon className="w-4 h-4" />
             </button>
-            <button onClick={handleFullscreen} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={handleFullscreen} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
               <ArrowsPointingOutIcon className="w-4 h-4" />
             </button>
-            <button onClick={handleLocate} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={handleLocate} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
               <MapPinIcon className="w-4 h-4" />
             </button>
           </div>

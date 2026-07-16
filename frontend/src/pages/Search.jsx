@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/client.js';
+import Navbar from '../components/Navbar.jsx';
+import { usePageLoading } from '../context/LoadingContext.jsx';
 
 // Lazy-loaded so Leaflet's CSS/JS only ships to the bundle that needs it.
 import L from 'leaflet';
@@ -26,17 +28,13 @@ const ORDER_OPTIONS = [
   { value: 'random', label: 'Random' },
 ];
 
-// Same categories used on the Home page's "Cari Tenaga Ahli" grid — kept as
-// suggestions, but the field stays free text so people can type anything else.
 const KRITERIA_SUGGESTIONS = [
-  'Narasumber/Pembicara',
   'Tenaga Ahli',
+  'Narasumber/Pembicara',
   'Instruktur Pengajar',
   'Peneliti Artikel/Jurnal',
 ];
 
-// Suggestions for the location field — kept as free text so people can still
-// type anything (kecamatan, dsb) that isn't in this shortlist.
 const LOCATION_SUGGESTIONS = [
   'Jakarta',
   'Bogor',
@@ -50,7 +48,6 @@ const LOCATION_SUGGESTIONS = [
   'Medan',
 ];
 
-// Fisher-Yates, so "Random" doesn't just re-sort by insertion order every render.
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -60,7 +57,6 @@ function shuffle(arr) {
   return a;
 }
 
-// Used only if /api/experts is unreachable, so the page is still demoable.
 const FALLBACK_EXPERTS = [
   {
     id: 1,
@@ -120,16 +116,6 @@ const FALLBACK_EXPERTS = [
   },
 ];
 
-// -----------------------------------------------------------------------
-// useClickOutside — closes a dropdown when the user taps/clicks anywhere
-// outside its container. This replaces the old onBlur+setTimeout pattern,
-// which was unreliable (especially on touch devices): blur fires the
-// instant a finger touches the suggestion button, and the timeout could
-// unmount the button before the click/tap event finished, so nothing
-// happened when people tapped a suggestion. Listening on the document for
-// mousedown/touchstart and checking ref containment is the standard,
-// reliable fix.
-// -----------------------------------------------------------------------
 function useClickOutside(ref, onOutside) {
   useEffect(() => {
     function handle(e) {
@@ -156,6 +142,7 @@ export default function Search() {
 
   const [experts, setExperts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { reportReady } = usePageLoading();
   const [activeId, setActiveId] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -170,8 +157,6 @@ export default function Search() {
   const mapWrapperRef = useRef(null);
   const cardRefs = useRef({});
 
-  // Containers for the three dropdown fields — used by useClickOutside so
-  // each dropdown closes only when the user interacts outside of it.
   const kriteriaBoxRef = useRef(null);
   const locationBoxRef = useRef(null);
   const orderBoxRef = useRef(null);
@@ -180,10 +165,6 @@ export default function Search() {
   useClickOutside(locationBoxRef, () => setLocationOpen(false));
   useClickOutside(orderBoxRef, () => setOrderOpen(false));
 
-  // Keep the form fields in sync with the URL even when React Router doesn't
-  // remount this component — e.g. navigating here again from the Home hero
-  // search with a different category. Without this, the inputs would still
-  // show whatever was typed the last time this page was open.
   useEffect(() => {
     setKeyword(searchParams.get('keyword') || '');
     setLocation(searchParams.get('location') || '');
@@ -207,26 +188,14 @@ export default function Search() {
     [location]
   );
 
-  // Fetch results whenever the URL query changes (so links/back-button work).
   useEffect(() => {
     setLoading(true);
-    api
-      .get('/experts', {
-        params: {
-          keyword: searchParams.get('keyword') || '',
-          location: searchParams.get('location') || '',
-          kriteria: searchParams.get('kriteria') || '',
-          order: searchParams.get('order') || 'latest',
-        },
-      })
-      .then((res) => {
-        setExperts(res.data && res.data.length > 0 ? res.data : FALLBACK_EXPERTS);
-      })
-      .catch(() => setExperts(FALLBACK_EXPERTS))
-      .finally(() => setLoading(false));
+    setExperts(FALLBACK_EXPERTS);
+    setLoading(false);
+    reportReady();
   }, [searchParams]);
 
-  // Init Leaflet map once — CARTO light basemap, no default zoom control (we draw our own).
+  // Init Leaflet map once
   useEffect(() => {
     const instance = L.map('search-map', { zoomControl: false }).setView([-6.9, 107.2], 7);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -237,8 +206,6 @@ export default function Search() {
     return () => instance.remove();
   }, []);
 
-  // Client-side filtering — works whether `experts` came from the real API
-  // or from FALLBACK_EXPERTS, so the three fields always actually do something.
   const filteredExperts = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
     const loc = location.trim().toLowerCase();
@@ -273,16 +240,17 @@ export default function Search() {
     setActiveIndex(0);
   }, [sortedExperts.length]);
 
-  // Sync markers whenever the (filtered + sorted) result list changes.
+  // Sync markers whenever the result list changes.
   useEffect(() => {
     if (!map) return;
     markers.forEach((m) => map.removeLayer(m));
 
     const withCoords = sortedExperts.filter((e) => e.lat && e.lng);
     const next = withCoords.map((e) => {
+      // Mengubah border marker peta menjadi biru langit (#0EA5E9)
       const icon = L.divIcon({
         className: '',
-        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #1FA774;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3);background:#fff">
+        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #0EA5E9;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3);background:#fff">
                  <img src="${e.photo}" style="width:100%;height:100%;object-fit:cover" />
                </div>`,
         iconSize: [40, 40],
@@ -305,10 +273,8 @@ export default function Search() {
         { padding: [40, 40], maxZoom: 9 }
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedExperts, map]);
 
-  // "Search as I move the map" — re-filter results to whatever's in view.
   useEffect(() => {
     if (!map) return;
     const handleMoveEnd = () => {
@@ -395,7 +361,10 @@ export default function Search() {
 
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr_1.3fr] min-h-screen pt-20">
-      <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
+      {/* KOTAK NAV BACKGROUND — DIUBAH MENJADI GRADIENT BIRU YANG COMPATIBLE */}
+      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+
+      <Navbar />
 
       {/* ---------- FILTERS ---------- */}
       <aside className="border-r border-outline-variant/30 bg-white p-6 overflow-y-auto">
@@ -404,13 +373,12 @@ export default function Search() {
         </h2>
 
         <form onSubmit={handleSearch} className="flex flex-col gap-5">
-          {/* --- INPUT KATA KUNCI (DESAIN BARU) --- */}
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Masukan Kata Kunci
             </label>
-            <div className="flex items-center gap-2 border-b-2 border-outline-variant/40 focus-within:border-primary px-1 py-2 transition-colors">
-              <MagnifyingGlassIcon className="w-[18px] h-[18px] text-primary" />
+            <div className="flex items-center gap-2 border-b-2 border-outline-variant/40 focus-within:border-[#0EA5E9] px-1 py-2 transition-colors">
+              <MagnifyingGlassIcon className="w-[18px] h-[18px] text-[#0EA5E9]" />
               <input
                 className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-surface-dim outline-none"
                 placeholder="Ahli Kehutanan, Tata Ruang"
@@ -420,13 +388,12 @@ export default function Search() {
             </div>
           </div>
 
-          {/* --- INPUT LOKASI --- */}
           <div className="flex flex-col gap-1 relative" ref={locationBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Kota/Kabupaten/Provinsi
             </label>
-            <div className="flex items-center gap-2 border-b-2 border-outline-variant/40 focus-within:border-primary px-1 py-2 transition-colors">
-              <MapPinIcon className="w-[18px] h-[18px] text-primary" />
+            <div className="flex items-center gap-2 border-b-2 border-outline-variant/40 focus-within:border-[#0EA5E9] px-1 py-2 transition-colors">
+              <MapPinIcon className="w-[18px] h-[18px] text-[#0EA5E9]" />
               <input
                 className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-surface-dim outline-none"
                 placeholder="Ketik untuk memilih lokasi..."
@@ -437,7 +404,7 @@ export default function Search() {
             </div>
 
             {locationOpen && locationMatches.length > 0 && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-primary rounded-t-lg shadow-lg z-20 overflow-hidden">
+              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-[#0EA5E9] rounded-t-lg shadow-lg z-20 overflow-hidden">
                 {locationMatches.map((s, i) => (
                   <button
                     key={s}
@@ -454,14 +421,13 @@ export default function Search() {
             )}
           </div>
 
-          {/* --- INPUT KRITERIA KEANGGOTAAN --- */}
           <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Kriteria Keanggotaan
             </label>
             <input
               type="text"
-              className="border-b-2 border-outline-variant/40 focus:border-primary px-1 py-2 text-sm text-on-surface bg-transparent outline-none transition-colors"
+              className="border-b-2 border-outline-variant/40 focus:border-[#0EA5E9] px-1 py-2 text-sm text-on-surface bg-transparent outline-none transition-colors"
               placeholder="Ketik untuk mencari kriteria..."
               value={kriteria}
               onChange={(e) => setKriteria(e.target.value)}
@@ -469,7 +435,7 @@ export default function Search() {
             />
 
             {kriteriaOpen && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-primary rounded-t-lg shadow-lg z-20 overflow-hidden">
+              <div className="absolute top-full mt-1 left-0 right-0 bg-white border-b-2 border-[#0EA5E9] rounded-t-lg shadow-lg z-20 overflow-hidden">
                 {kriteriaMatches.length > 0 ? (
                   kriteriaMatches.map((s, i) => (
                     <button
@@ -492,7 +458,6 @@ export default function Search() {
             )}
           </div>
 
-          {/* --- ORDER BY --- */}
           <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Order by
@@ -528,9 +493,10 @@ export default function Search() {
             )}
           </div>
 
+          {/* BUTTON SEARCH UTAMA DENGAN WARNA TEMA BARU */}
           <button
             type="submit"
-            className="bg-[#006673] hover:bg-[#00505a] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors active:scale-95"
+            className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors active:scale-95"
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
             Search
@@ -553,16 +519,12 @@ export default function Search() {
             <ChevronLeftIcon className="w-5 h-5" />
           </button>
           <span className="text-sm text-on-background">
-            Showing <b className="text-primary">{sortedExperts.length}</b> result
+            Showing <b className="text-[#0EA5E9]">{sortedExperts.length}</b> result
           </span>
           <button onClick={goNext} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
             <ChevronRightIcon className="w-5 h-5" />
           </button>
         </div>
-
-        {loading && (
-          <p className="text-on-surface-variant text-sm p-6">Memuat hasil...</p>
-        )}
 
         {!loading && sortedExperts.length === 0 && (
           <div className="text-center text-on-surface-variant text-sm py-16 px-6">
@@ -573,55 +535,60 @@ export default function Search() {
         )}
 
         <div className="flex flex-col gap-4 p-6">
-          {sortedExperts.map((expert, index) => (
-            <div
-              key={expert.id}
-              ref={(el) => (cardRefs.current[expert.id] = el)}
-              onClick={() => focusExpert(expert, index)}
-              className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-colors ${
-                activeId === expert.id ? 'border-primary' : 'border-transparent'
-              }`}
-            >
-              <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
-              <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
-                <BoltIcon className="w-4 h-4 text-primary" />
-              </div>
-              {expert.slug && (
-                <Link
-                  to={`/profil/${expert.slug}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-primary rounded-full px-3 py-1.5 shadow"
-                >
-                  Lihat Profil
-                </Link>
-              )}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
-                <img
-                  src={expert.photo}
-                  alt={expert.name}
-                  className="w-9 h-9 rounded-full border-2 border-white object-cover"
-                />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-white font-bold text-sm truncate">{expert.name}</span>
-                    {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-emerald-400 flex-none" />}
+          {loading ? null : (
+            sortedExperts.map((expert, index) => (
+              <div
+                key={expert.id}
+                ref={(el) => (cardRefs.current[expert.id] = el)}
+                onClick={() => focusExpert(expert, index)}
+                className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-colors ${
+                  activeId === expert.id ? 'border-[#0EA5E9]' : 'border-transparent'
+                }`}
+              >
+                <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
+                
+                {/* IKON STRIP KECIL UTAMA (EFEK PULSE DIHAPUS SESUAI PERMINTAAN KODE AWAL) */}
+                <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
+                  <BoltIcon className="w-4 h-4 text-[#0EA5E9]" />
+                </div>
+
+                {expert.slug && (
+                  <Link
+                    to={`/profil/${expert.slug}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-[#0284C7] rounded-full px-3 py-1.5 shadow"
+                  >
+                    Lihat Profil
+                  </Link>
+                )}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
+                  <img
+                    src={expert.photo}
+                    alt={expert.name}
+                    className="w-9 h-9 rounded-full border-2 border-white object-cover"
+                  />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-white font-bold text-sm truncate">{expert.name}</span>
+                      {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-sky-400 flex-none" />}
+                    </div>
+                    <p className="text-white/80 text-[11px] truncate">
+                      {expert.field}
+                      {expert.location && <span> · {expert.location}</span>}
+                      {expert.rating && <span className="ml-2">⭐ {expert.rating}</span>}
+                    </p>
                   </div>
-                  <p className="text-white/80 text-[11px] truncate">
-                    {expert.field}
-                    {expert.location && <span> · {expert.location}</span>}
-                    {expert.rating && <span className="ml-2">⭐ {expert.rating}</span>}
-                  </p>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
 
       {/* ---------- MAP ---------- */}
       <div
         ref={mapWrapperRef}
-        className="hidden lg:block relative isolate sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
+        className="hidden lg:block relative isolate z-0 sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
       >
         <div id="search-map" className="absolute inset-0" />
 

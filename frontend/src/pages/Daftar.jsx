@@ -102,7 +102,7 @@ export default function Daftar() {
             </Link>
           </div>
 
-          <h2 className="font-headline-md text-2xl font-bold text-on-background mb-1">Buat akun baru</h2>
+          <h2 className="font-headline-md text-2xl font-bold text-on-background mb-1">Daftar</h2>
           <p className="text-sm text-on-surface-variant mb-8">
             Mulai proses pendaftaran sebagai tenaga ahli terverifikasi.
           </p>

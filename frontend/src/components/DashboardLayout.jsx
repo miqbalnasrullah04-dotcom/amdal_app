@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo amdal.png';
+import logo from "../assets/logo-tenaga-ahli.png";
 import api from '../api/client.js';
 
 const NAV_ITEMS = [
@@ -14,14 +14,16 @@ const NAV_ITEMS = [
 function SidebarContent({ user, onNavigate, onLogout }) {
   return (
     <>
+      {/* Header Sidebar */}
       <div className="p-6 flex items-center gap-3 border-b border-white/10">
-        <img src={logo} alt="AMDAL Indonesia" className="h-10 w-auto bg-white rounded-lg p-1 shrink-0" />
+        <img src={logo} alt="TenagaAhli.com" className="h-10 w-auto bg-white rounded-lg p-1 shrink-0" />
         <div className="min-w-0">
-          <p className="font-bold leading-tight tracking-tight truncate">AMDAL.ID</p>
+          <p className="font-bold leading-tight tracking-tight truncate">TenagaAhli.com</p>
           <p className="text-[11px] text-white/55 uppercase tracking-wider">Member Area</p>
         </div>
       </div>
 
+      {/* Navigasi Utama */}
       <nav className="flex-1 px-4 py-6 flex flex-col gap-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
           <NavLink
@@ -30,7 +32,7 @@ function SidebarContent({ user, onNavigate, onLogout }) {
             onClick={onNavigate}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                isActive ? 'bg-white text-[#20402A] shadow-sm' : 'text-white/75 hover:bg-white/10 hover:text-white'
+                isActive ? 'bg-white text-[#0369A1] shadow-sm' : 'text-white/75 hover:bg-white/10 hover:text-white'
               }`
             }
           >
@@ -40,7 +42,9 @@ function SidebarContent({ user, onNavigate, onLogout }) {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
+      {/* Bagian Bawah User & Aksi Keluar */}
+      <div className="p-4 border-t border-white/10 flex flex-col gap-1">
+        {/* Identitas Pendek User */}
         <div className="flex items-center gap-3 px-3 py-2 mb-2">
           <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-sm font-bold shrink-0">
             {(user?.name || 'U').charAt(0).toUpperCase()}
@@ -50,21 +54,25 @@ function SidebarContent({ user, onNavigate, onLogout }) {
             <p className="text-xs text-white/55 truncate">{user?.email || ''}</p>
           </div>
         </div>
+
+        {/* Tombol Menuju Web Utama Publik */}
+        <Link
+          to="/"
+          onClick={onNavigate}
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-colors"
+        >
+          <span className="material-symbols-outlined text-[20px]">language</span>
+          Lihat Web Utama
+        </Link>
+
+        {/* Tombol Aksi Logout */}
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[#FFB4AB] hover:bg-[#FFB4AB]/10 transition-colors"
         >
           <span className="material-symbols-outlined text-[20px]">logout</span>
           Logout
         </button>
-        <Link
-          to="/"
-          onClick={onNavigate}
-          className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-colors"
-        >
-          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-          Kembali
-        </Link>
       </div>
     </>
   );
@@ -99,15 +107,15 @@ export default function DashboardLayout({ title, subtitle, headerRight, children
   return (
     <div className="min-h-screen bg-[#F5F4EF] flex">
       {/* Sidebar — desktop */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen bg-gradient-to-b from-[#2E5E3B] to-[#1C3822] text-white">
+      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen bg-gradient-to-b from-[#0EA5E9] to-[#0284C7] text-white">
         <SidebarContent user={user} onLogout={handleLogout} />
       </aside>
 
       {/* Topbar — mobile */}
-      <div className="lg:hidden fixed top-0 left-0 w-full z-40 bg-[#2E5E3B] text-white flex items-center justify-between px-4 py-3 shadow-md">
+      <div className="lg:hidden fixed top-0 left-0 w-full z-40 bg-[#0EA5E9] text-white flex items-center justify-between px-4 py-3 shadow-md">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="AMDAL Indonesia" className="h-8 w-auto bg-white rounded-md p-0.5" />
-          <span className="font-bold text-sm">AMDAL.ID</span>
+          <img src={logo} alt="TenagaAhli.com" className="h-8 w-auto bg-white rounded-md p-0.5" />
+          <span className="font-bold text-sm">TenagaAhli.com</span>
         </div>
         <button onClick={() => setDrawerOpen(true)} aria-label="Buka menu" className="p-1">
           <span className="material-symbols-outlined">menu</span>
@@ -118,7 +126,7 @@ export default function DashboardLayout({ title, subtitle, headerRight, children
       {drawerOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setDrawerOpen(false)}>
           <aside
-            className="w-72 h-full bg-gradient-to-b from-[#2E5E3B] to-[#1C3822] text-white flex flex-col"
+            className="w-72 h-full bg-gradient-to-b from-[#0EA5E9] to-[#0284C7] text-white flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-end p-3">
