@@ -28,6 +28,7 @@ Route::get('/packages', [PackageController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/user/change-password', [AuthController::class, 'changePassword']);
 
     // Dashboard user - profil sendiri
     Route::get('/my/profile', [ExpertController::class, 'myProfile']);
@@ -74,6 +75,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/packages', [PackageController::class, 'store']);
     Route::put('/admin/packages/{id}', [PackageController::class, 'update']);
     Route::delete('/admin/packages/{id}', [PackageController::class, 'destroy']);
+
+    // Admin - dashboard stats, deactivate, change password
+    Route::get('/admin/dashboard-stats', [ExpertController::class, 'dashboardStats']);
+    Route::post('/admin/experts/{id}/deactivate', [ExpertController::class, 'deactivateProfile']);
+    Route::put('/admin/change-password', [AuthController::class, 'changePassword']);
 
     // CRUD Admin - Experts (manual, oleh admin sendiri)
     Route::post('/experts', [ExpertController::class, 'store']);

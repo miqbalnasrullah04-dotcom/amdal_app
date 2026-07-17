@@ -5,10 +5,11 @@ import api from '../api/client.js';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: 'space_dashboard' },
-  { to: '/lengkapi-profil', label: 'Lengkapi Profil', icon: 'edit_document' },
-  { to: '/pilih-paket', label: 'Pilih Paket', icon: 'workspace_premium' },
-  { to: '/riwayat-pembayaran', label: 'Riwayat Pembayaran', icon: 'receipt_long' },
-  { to: '/profil-saya', label: 'Pengaturan Akun', icon: 'settings' },
+  { to: '/lengkapi-profil', label: 'Profil Saya', icon: 'person' },
+  { to: '/paket', label: 'Paket', icon: 'workspace_premium' },
+  { to: '/pembayaran', label: 'Pembayaran', icon: 'payments' },
+  { to: '/profil-publik', label: 'Profil Publik', icon: 'language' },
+  { to: '/pengaturan', label: 'Pengaturan', icon: 'settings' },
 ];
 
 function SidebarContent({ user, onNavigate, onLogout }) {

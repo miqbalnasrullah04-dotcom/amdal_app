@@ -63,16 +63,16 @@ export default function AdminExpertForm() {
   return (
     <div>
       <div className="mb-6 flex items-center gap-3">
-        <button onClick={() => navigate('/admin/tenaga-ahli')} className="text-[#414844]/60 hover:text-[#2E5E3B]">
+        <button onClick={() => navigate('/admin/tenaga-ahli')} className="text-[#414844]/60 hover:text-[#0284C7]">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <div>
-          <h2 className="text-2xl font-bold text-[#2E5E3B]">{isEdit ? 'Edit Tenaga Ahli' : 'Tambah Tenaga Ahli'}</h2>
-          <p className="text-[#414844]/80 text-sm mt-1">Kelola data tenaga ahli yang terdaftar di AMDAL.ID.</p>
+          <h2 className="text-2xl font-bold text-[#0284C7]">{isEdit ? 'Edit Tenaga Ahli' : 'Tambah Tenaga Ahli'}</h2>
+          <p className="text-[#414844]/80 text-sm mt-1">Kelola data tenaga ahli yang terdaftar di TenagaAhli.com.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#2E5E3B]/15 shadow-sm p-6 max-w-2xl">
+      <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm p-6 max-w-2xl">
         {error && <p className="bg-[#FFDAD6] text-[#93000A] text-sm rounded-lg p-3 mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -82,7 +82,7 @@ export default function AdminExpertForm() {
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div>
@@ -90,7 +90,7 @@ export default function AdminExpertForm() {
             <input
               value={form.institution}
               onChange={(e) => setForm({ ...form, institution: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div>
@@ -99,7 +99,7 @@ export default function AdminExpertForm() {
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div>
@@ -107,7 +107,7 @@ export default function AdminExpertForm() {
             <input
               value={form.field}
               onChange={(e) => setForm({ ...form, field: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div>
@@ -115,7 +115,7 @@ export default function AdminExpertForm() {
             <select
               value={form.kriteria}
               onChange={(e) => setForm({ ...form, kriteria: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B] bg-white"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7] bg-white"
             >
               <option value="">-- Pilih Kriteria --</option>
               <option value="Narasumber/Pembicara">Narasumber/Pembicara</option>
@@ -130,7 +130,7 @@ export default function AdminExpertForm() {
               <input
                 value={form.alamat_kota}
                 onChange={(e) => setForm({ ...form, alamat_kota: e.target.value })}
-                className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+                className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
               />
             </div>
             <div>
@@ -138,7 +138,7 @@ export default function AdminExpertForm() {
               <input
                 value={form.alamat_provinsi}
                 onChange={(e) => setForm({ ...form, alamat_provinsi: e.target.value })}
-                className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+                className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
               />
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function AdminExpertForm() {
             <input
               value={form.photo}
               onChange={(e) => setForm({ ...form, photo: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div className="flex gap-6">
@@ -164,7 +164,7 @@ export default function AdminExpertForm() {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-[#2E5E3B] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#244B2F] disabled:opacity-60"
+              className="flex-1 bg-[#0284C7] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0369A1] disabled:opacity-60"
             >
               {saving ? 'Menyimpan...' : 'Simpan'}
             </button>

@@ -46,7 +46,7 @@ export default function PeraturanAMDAL() {
   return (
     <div className="relative pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
       {/* Warna Kotak Navbar disamakan ke Biru Gradasi Search */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40" />
+      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
       {/* Header */}
       <div className="mb-10 max-w-2xl">

@@ -75,12 +75,10 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3 fixed top-0 left-0 z-50 transition-all duration-300 ${
-        // Sebelum di-scroll: Efek kaca diturunkan sedikit (bg-black/15 + backdrop-blur-md) agar lebih transparan lembut
-        // Pas di-scroll: Berubah ke warna putih solid bersih
+      className={`flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3 fixed top-0 left-0 z-50 transition-all duration-300 shadow-none ${
         scrolled 
-          ? 'bg-white shadow-md border-b border-transparent' 
-          : 'bg-black/15 backdrop-blur-md border-b border-white/5'
+          ? 'bg-[#14B8A6]/20 backdrop-blur-xl backdrop-saturate-150 border-b border-[#14B8A6]/20' 
+          : 'bg-[#14B8A6]/10 backdrop-blur-lg border-b border-white/10'
       }`}
     >
       <Link to="/" className="flex items-center">
@@ -128,8 +126,8 @@ export default function Navbar() {
 
               {/* Box Dropdown */}
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-outline-variant py-2 z-50 text-on-background transition-all">
-                  <div className="px-4 py-2 border-b border-outline-variant">
+                <div className="absolute right-0 mt-2 w-52 bg-[#14B8A6]/15 backdrop-blur-xl backdrop-saturate-150 rounded-xl border border-[#14B8A6]/20 py-2 z-50 text-on-background transition-all shadow-none">
+                  <div className="px-4 py-2 border-b border-outline-variant/40">
                     <p className="font-label-md text-sm font-semibold truncate">{userData?.name || userData?.nama || 'User TenagaAhli'}</p>
                     <p className="text-xs text-on-surface-variant truncate">{userData?.email || ''}</p>
                   </div>
@@ -137,7 +135,7 @@ export default function Navbar() {
                   <Link 
                     to="/dashboard" 
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/30 transition-colors"
                   >
                     <span className="material-symbols-outlined text-base">dashboard</span>
                     Dashboard
@@ -146,13 +144,13 @@ export default function Navbar() {
                   <Link 
                     to="/profil-saya" 
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-surface-container-low transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-white/30 transition-colors"
                   >
                     <span className="material-symbols-outlined text-base">person</span>
                     Profil Saya
                   </Link>
 
-                  <hr className="border-outline-variant my-1" />
+                  <hr className="border-outline-variant/40 my-1" />
 
                   <button 
                     onClick={handleLogout} 
@@ -176,8 +174,8 @@ export default function Navbar() {
               <Link
                 to="/daftar"
                 className={`${
-                  scrolled ? 'bg-on-background text-white' : 'bg-white text-[#0EA5E9]'
-                } px-6 py-2 rounded-lg font-label-md text-label-md scale-95 active:scale-90 transition-all hover:opacity-90`}
+                  scrolled ? 'bg-on-background text-white' : 'bg-[#14B8A6]/20 backdrop-blur-lg text-white border border-white/30'
+                } px-6 py-2 rounded-lg font-label-md text-label-md scale-95 active:scale-90 transition-all hover:opacity-90 shadow-none`}
               >
                 Daftar
               </Link>
@@ -193,13 +191,13 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="absolute top-full left-0 w-full bg-white shadow-lg md:hidden flex flex-col p-margin-mobile gap-4 text-on-background z-50">
+        <div className="absolute top-full left-0 w-full bg-[#14B8A6]/20 backdrop-blur-xl backdrop-saturate-150 md:hidden flex flex-col p-margin-mobile gap-4 text-on-background z-50 border-t border-[#14B8A6]/20 shadow-none">
           {navLinks.map((link) => (
             <NavLink key={link.to} to={link.to} onClick={() => setMenuOpen(false)} className="font-label-md text-label-md">
               {link.label}
             </NavLink>
           ))}
-          <hr className="border-outline-variant" />
+          <hr className="border-outline-variant/40" />
           {isLoggedIn ? (
             <>
               <div className="flex items-center gap-3 px-1 py-1">
@@ -219,7 +217,7 @@ export default function Navbar() {
               <Link to="/profil-saya" onClick={() => setMenuOpen(false)} className="font-label-md text-label-md flex items-center gap-2">
                 <span className="material-symbols-outlined text-base">person</span> Profil Saya
               </Link>
-              <button onClick={handleLogout} className="font-label-md text-label-md text-left text-[#B3261E] flex items-center gap-2 pt-2 border-t border-outline-variant">
+              <button onClick={handleLogout} className="font-label-md text-label-md text-left text-[#B3261E] flex items-center gap-2 pt-2 border-t border-outline-variant/40">
                 <span className="material-symbols-outlined text-base">logout</span> Logout
               </button>
             </>
@@ -231,7 +229,7 @@ export default function Navbar() {
               <Link
                 to="/daftar"
                 onClick={() => setMenuOpen(false)}
-                className="bg-[#0EA5E9] text-white px-6 py-2 rounded-lg font-label-md text-label-md text-center"
+                className="bg-[#14B8A6] text-white px-6 py-2 rounded-lg font-label-md text-label-md text-center shadow-none"
               >
                 Daftar
               </Link>

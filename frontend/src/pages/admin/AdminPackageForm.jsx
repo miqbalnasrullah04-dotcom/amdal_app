@@ -60,16 +60,16 @@ export default function AdminPackageForm() {
   return (
     <div>
       <div className="mb-6 flex items-center gap-3">
-        <button onClick={() => navigate('/admin/paket')} className="text-[#414844]/60 hover:text-[#2E5E3B]">
+        <button onClick={() => navigate('/admin/paket')} className="text-[#414844]/60 hover:text-[#0284C7]">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <div>
-          <h2 className="text-2xl font-bold text-[#2E5E3B]">{isEdit ? 'Edit Paket' : 'Tambah Paket'}</h2>
+          <h2 className="text-2xl font-bold text-[#0284C7]">{isEdit ? 'Edit Paket' : 'Tambah Paket'}</h2>
           <p className="text-[#414844]/80 text-sm mt-1">Atur detail paket pendaftaran tenaga ahli.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#2E5E3B]/15 shadow-sm p-6 max-w-2xl">
+      <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm p-6 max-w-2xl">
         {error && <p className="bg-[#FFDAD6] text-[#93000A] text-sm rounded-lg p-3 mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -79,7 +79,7 @@ export default function AdminPackageForm() {
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div>
@@ -90,7 +90,7 @@ export default function AdminPackageForm() {
               min={0}
               value={form.price}
               onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div>
@@ -99,7 +99,7 @@ export default function AdminPackageForm() {
               rows={2}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div>
@@ -109,7 +109,7 @@ export default function AdminPackageForm() {
               value={form.benefits}
               onChange={(e) => setForm({ ...form, benefits: e.target.value })}
               placeholder={'Tayang di direktori\nBadge Premium\nPrioritas pencarian'}
-              className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+              className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -119,7 +119,7 @@ export default function AdminPackageForm() {
                 type="number"
                 value={form.order}
                 onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-                className="w-full mt-1 border border-[#2E5E3B]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#2E5E3B] focus:border-[#2E5E3B]"
+                className="w-full mt-1 border border-[#0284C7]/30 rounded-lg px-3 py-2 text-sm focus:ring-[#0284C7] focus:border-[#0284C7]"
               />
             </div>
             <div className="flex items-end pb-2">
@@ -137,7 +137,7 @@ export default function AdminPackageForm() {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-[#2E5E3B] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#244B2F] disabled:opacity-60"
+              className="flex-1 bg-[#0284C7] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0369A1] disabled:opacity-60"
             >
               {saving ? 'Menyimpan...' : 'Simpan'}
             </button>

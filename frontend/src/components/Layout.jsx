@@ -13,6 +13,7 @@ const FULL_PAGE_ROUTES = [
   '/sign-in',
   '/daftar',
   '/profil-saya',
+  '/menunggu-verifikasi',
   // Halaman member/dashboard — pakai DashboardLayout (sidebar) sendiri,
   // jadi tidak boleh dobel dengan Navbar & Footer publik.
   '/dashboard',

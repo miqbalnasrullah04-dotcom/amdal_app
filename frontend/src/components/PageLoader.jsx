@@ -69,7 +69,7 @@ export default function PageLoader({ visible }) {
       <div className="mt-8 flex flex-col items-center gap-2">
         {/* DI SINI DIKUNCI PAKAI 'normal-case' BIAR TIDAK DIPAKSA KAPITAL OLEH FONT */}
         <span className="text-white text-sm font-semibold tracking-wider normal-case">
-          Tenaga Ahli<span className="text-[#0EA5E9]">.com</span>
+          TenagaAhli<span className="text-[#0EA5E9]">.com</span>
         </span>
         <span className="text-white/40 text-xs tracking-wide">
           Memuat halaman...

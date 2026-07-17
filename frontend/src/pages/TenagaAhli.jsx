@@ -217,7 +217,7 @@ export default function TenagaAhli() {
     const next = withCoords.map((e) => {
       const icon = L.divIcon({
         className: '',
-        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #1FA774;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3);background:#fff">
+        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #0EA5E9;overflow:hidden;background:#fff">
                  <img src="${e.photo}" style="width:100%;height:100%;object-fit:cover" />
                </div>`,
         iconSize: [40, 40],
@@ -312,9 +312,9 @@ export default function TenagaAhli() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-20">
-      {/* Kotak coklat di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
+    <div className="min-h-screen bg-white pt-20 md:pt-[88px]">
+      {/* Kotak biru di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) */}
+      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
       <Navbar />
 
@@ -325,7 +325,7 @@ export default function TenagaAhli() {
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Masukan Kata Kunci</label>
               <input
-                className="border-b border-gray-300 focus:border-emerald-600 outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
                 placeholder="Ahli Kehutanan, Tata Ruang"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
@@ -335,7 +335,7 @@ export default function TenagaAhli() {
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Kota/Kabupaten/Provinsi</label>
               <input
-                className="border-b border-gray-300 focus:border-emerald-600 outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
                 placeholder="Pilih Lokasi"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -359,7 +359,7 @@ export default function TenagaAhli() {
                 </div>
               ) : (
                 <input
-                  className="border-b border-gray-300 focus:border-emerald-600 outline-none py-2 text-sm bg-transparent"
+                  className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
                   placeholder="Ketik untuk mencari kriteria..."
                   value={kriteriaInput}
                   onChange={(e) => setKriteriaInput(e.target.value)}
@@ -368,7 +368,7 @@ export default function TenagaAhli() {
               )}
 
               {kriteriaOpen && !kriteria && (
-                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 overflow-hidden">
+                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md z-10 overflow-hidden">
                   {kriteriaMatches.map((s) => (
                     <button
                       key={s}
@@ -403,7 +403,7 @@ export default function TenagaAhli() {
                 />
               </button>
               {orderOpen && (
-                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 overflow-hidden">
+                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md z-10 overflow-hidden">
                   {ORDER_OPTIONS.map((o) => (
                     <button
                       key={o.value}
@@ -425,7 +425,7 @@ export default function TenagaAhli() {
 
             <button
               type="submit"
-              className="bg-[#2E5E3B] hover:bg-[#21442a] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2"
+              className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
               Search
@@ -467,18 +467,18 @@ export default function TenagaAhli() {
                   ref={(el) => (cardRefs.current[expert.id] = el)}
                   onClick={() => focusExpert(expert, index)}
                   className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-colors ${
-                    activeId === expert.id ? 'border-emerald-600' : 'border-transparent'
+                    activeId === expert.id ? 'border-[#0EA5E9]' : 'border-transparent'
                   }`}
                 >
                   <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
-                  <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
-                    <BoltIcon className="w-4 h-4 text-emerald-600" />
+                  <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5">
+                    <BoltIcon className="w-4 h-4 text-[#0EA5E9]" />
                   </div>
                   {expert.slug && (
                     <Link
                       to={`/profil/${expert.slug}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-emerald-700 rounded-full px-3 py-1.5 shadow"
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-[#0284C7] rounded-full px-3 py-1.5"
                     >
                       Lihat Profil
                     </Link>
@@ -490,7 +490,7 @@ export default function TenagaAhli() {
                       className="w-9 h-9 rounded-full border-2 border-white object-cover"
                     />
                     <span className="text-white font-bold text-sm">{expert.name}</span>
-                    {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-emerald-400" />}
+                    {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-sky-400" />}
                   </div>
                 </div>
               ))
@@ -501,13 +501,14 @@ export default function TenagaAhli() {
         {/* ---------- MAP ---------- */}
         <div
           ref={mapWrapperRef}
-          className="hidden lg:block relative isolate z-0 sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
+          className="hidden lg:block relative isolate z-0 sticky top-20 md:top-[88px] h-[calc(100vh-80px)] md:h-[calc(100vh-88px)] overflow-hidden"
         >
           <div id="tenaga-ahli-map" className="absolute inset-0" />
 
-          <label className="absolute top-4 left-4 z-[1000] bg-white shadow rounded-md px-3 py-2 flex items-center gap-2 text-sm cursor-pointer">
+          <label className="absolute top-4 left-4 z-[1000] bg-white rounded-md px-3 py-2 flex items-center gap-2 text-sm cursor-pointer">
             <input
               type="checkbox"
+              className="accent-[#0EA5E9]"
               checked={searchAsMove}
               onChange={(e) => setSearchAsMove(e.target.checked)}
             />
@@ -515,16 +516,16 @@ export default function TenagaAhli() {
           </label>
 
           <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-            <button onClick={() => map?.zoomIn()} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={() => map?.zoomIn()} className="bg-white rounded-md w-9 h-9 flex items-center justify-center">
               <PlusIcon className="w-4 h-4" />
             </button>
-            <button onClick={() => map?.zoomOut()} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={() => map?.zoomOut()} className="bg-white rounded-md w-9 h-9 flex items-center justify-center">
               <MinusIcon className="w-4 h-4" />
             </button>
-            <button onClick={handleFullscreen} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={handleFullscreen} className="bg-white rounded-md w-9 h-9 flex items-center justify-center">
               <ArrowsPointingOutIcon className="w-4 h-4" />
             </button>
-            <button onClick={handleLocate} className="bg-white shadow rounded-md w-9 h-9 flex items-center justify-center">
+            <button onClick={handleLocate} className="bg-white rounded-md w-9 h-9 flex items-center justify-center">
               <MapPinIcon className="w-4 h-4" />
             </button>
           </div>

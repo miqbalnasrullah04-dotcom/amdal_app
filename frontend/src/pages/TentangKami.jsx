@@ -13,7 +13,7 @@ export default function TentangKami() {
   return (
     <div className="relative pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
       {/* KOTAK ATAS: Diubah menjadi Gradasi Biru sesuai dengan header halaman Search */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
       {/* Hero — Foto + Deskripsi */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter items-center mb-20">

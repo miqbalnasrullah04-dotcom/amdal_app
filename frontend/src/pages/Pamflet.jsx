@@ -34,7 +34,7 @@ export default function Pamflet() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Background Navbar — Disamakan ke Biru Gradasi Search */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
       {/* Hero — Menggunakan Gradasi Tema Biru */}
       <section className="pt-36 pb-20 bg-gradient-to-b from-[#0369A1] via-[#0284C7] to-[#0EA5E9]">

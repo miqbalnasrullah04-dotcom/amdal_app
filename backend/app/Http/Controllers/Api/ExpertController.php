@@ -307,4 +307,49 @@ class ExpertController extends Controller
 
         return response()->json($expert);
     }
+
+    // ================== ADMIN NONAKTIFKAN / AKTIFKAN AKUN ==================
+
+    public function deactivateProfile(Request $request, $id)
+    {
+        $expert = Expert::findOrFail($id);
+
+        // Toggle: jika sudah nonaktif, aktifkan kembali; jika aktif, nonaktifkan
+        if ($expert->profile_status === 'nonaktif') {
+            $expert->update(['profile_status' => 'aktif']);
+        } else {
+            $expert->update(['profile_status' => 'nonaktif']);
+        }
+
+        return response()->json($expert);
+    }
+
+    // ================== ADMIN DASHBOARD STATS ==================
+
+    public function dashboardStats()
+    {
+        $totalPendaftar = Expert::count();
+        $totalTenagaAhli = Expert::where('profile_status', 'aktif')->count();
+        $pendingVerifikasi = Expert::where('profile_status', 'menunggu_verifikasi')->count();
+
+        // Pengguna free: expert yang punya paket gratis (price=0) atau tanpa paket
+        $freePackageIds = Package::where('price', 0)->pluck('id')->toArray();
+        $penggunaFree = Expert::where(function ($q) use ($freePackageIds) {
+            $q->whereNull('package_id')
+              ->orWhereIn('package_id', $freePackageIds);
+        })->count();
+
+        // Pengguna premium: expert yang punya order verified (paket berbayar)
+        $penggunaPremium = Order::where('status', 'verified')
+            ->distinct('user_id')
+            ->count('user_id');
+
+        return response()->json([
+            'total_pendaftar' => $totalPendaftar,
+            'total_tenaga_ahli' => $totalTenagaAhli,
+            'pending_verifikasi' => $pendingVerifikasi,
+            'pengguna_free' => $penggunaFree,
+            'pengguna_premium' => $penggunaPremium,
+        ]);
+    }
 }

@@ -4,13 +4,11 @@ import api from '../../api/client.js';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
-    totalExperts: 0,
-    menungguVerifikasi: 0,
-    aktif: 0,
-    ditolak: 0,
-    menungguPembayaran: 0,
-    articles: 0,
-    partners: 0,
+    total_pendaftar: 0,
+    total_tenaga_ahli: 0,
+    pending_verifikasi: 0,
+    pengguna_free: 0,
+    pengguna_premium: 0,
   });
   const [recentPending, setRecentPending] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,44 +18,22 @@ export default function AdminDashboard() {
     let cancelled = false;
 
     Promise.allSettled([
-      api.get('/admin/experts'),
-      api.get('/admin/articles'),
-      api.get('/admin/partners'),
-      api.get('/admin/orders', { params: { status: 'menunggu_verifikasi' } }),
+      api.get('/admin/dashboard-stats'),
+      api.get('/admin/experts', { params: { status: 'menunggu_verifikasi' } }),
     ])
-      .then(([expertsRes, articlesRes, partnersRes, ordersRes]) => {
+      .then(([statsRes, expertsRes]) => {
         if (cancelled) return;
 
+        if (statsRes.status === 'fulfilled') {
+          setStats(statsRes.value.data);
+        }
+
         const experts = expertsRes.status === 'fulfilled' ? expertsRes.value.data : [];
-        const articles = articlesRes.status === 'fulfilled' ? articlesRes.value.data : [];
-        const partners = partnersRes.status === 'fulfilled' ? partnersRes.value.data : [];
-        const pendingOrders = ordersRes.status === 'fulfilled' ? ordersRes.value.data : [];
-
         const expertsList = Array.isArray(experts) ? experts : [];
+        setRecentPending(expertsList.slice(0, 5));
 
-        setStats({
-          totalExperts: expertsList.length,
-          menungguVerifikasi: expertsList.filter((e) => e.profile_status === 'menunggu_verifikasi').length,
-          aktif: expertsList.filter((e) => e.profile_status === 'aktif').length,
-          ditolak: expertsList.filter((e) => e.profile_status === 'ditolak').length,
-          menungguPembayaran: Array.isArray(pendingOrders) ? pendingOrders.length : 0,
-          articles: Array.isArray(articles) ? articles.length : 0,
-          partners: Array.isArray(partners) ? partners.length : 0,
-        });
-
-        setRecentPending(
-          expertsList
-            .filter((e) => e.profile_status === 'menunggu_verifikasi')
-            .slice(0, 5)
-        );
-
-        if (
-          expertsRes.status === 'rejected' ||
-          articlesRes.status === 'rejected' ||
-          partnersRes.status === 'rejected' ||
-          ordersRes.status === 'rejected'
-        ) {
-          setError('Sebagian data gagal dimuat. Cek koneksi ke backend.');
+        if (statsRes.status === 'rejected' || expertsRes.status === 'rejected') {
+          setError('Gagal memuat sebagian data statistik admin.');
         }
       })
       .finally(() => {
@@ -70,54 +46,89 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { label: 'Menunggu Verifikasi Profil', value: stats.menungguVerifikasi, icon: 'how_to_reg', accent: '#7A5900' },
-    { label: 'Menunggu Verifikasi Pembayaran', value: stats.menungguPembayaran, icon: 'payments', accent: '#7A5900' },
-    { label: 'Tenaga Ahli Aktif', value: stats.aktif, icon: 'verified', accent: '#2E5E3B' },
-    { label: 'Total Tenaga Ahli', value: stats.totalExperts, icon: 'groups', accent: '#3E2B1F' },
-    { label: 'Total Artikel', value: stats.articles, icon: 'newspaper', accent: '#3E2B1F' },
-    { label: 'Total Lembaga', value: stats.partners, icon: 'handshake', accent: '#6B4F3B' },
+    { label: 'Total Pendaftar', value: stats.total_pendaftar, icon: 'person_add', accent: '#3E2B1F' },
+    { label: 'Total Tenaga Ahli', value: stats.total_tenaga_ahli, icon: 'groups', accent: '#0284C7' },
+    { label: 'Pending Verifikasi', value: stats.pending_verifikasi, icon: 'how_to_reg', accent: '#7A5900' },
+    { label: 'Pengguna Free', value: stats.pengguna_free, icon: 'person', accent: '#414844' },
+    { label: 'Pengguna Premium', value: stats.pengguna_premium, icon: 'workspace_premium', accent: '#6B4F3B' },
   ];
 
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-[#2E5E3B]">Ringkasan Dashboard</h2>
+        <h2 className="text-2xl font-bold text-[#0284C7]">Ringkasan Dashboard</h2>
         <p className="text-[#414844]/80 text-sm mt-1">
-          Pantau status verifikasi, pembayaran, dan konten AMDAL.ID secara real-time.
+          Pantau status pendaftaran, verifikasi, dan keanggotaan TenagaAhli.com secara real-time.
         </p>
       </div>
 
       {error && <div className="mb-6 bg-[#FFDAD6] text-[#93000A] text-sm rounded-lg p-3">{error}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-10">
         {statCards.map((card) => (
           <div
             key={card.label}
-            className="bg-white p-6 rounded-xl border border-[#2E5E3B]/15 shadow-sm border-l-4"
+            className="bg-white p-5 rounded-xl border border-[#0284C7]/15 shadow-sm border-l-4 hover:shadow-md transition-shadow"
             style={{ borderLeftColor: card.accent }}
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div className="p-2 rounded-lg" style={{ backgroundColor: `${card.accent}1A` }}>
-                <span className="material-symbols-outlined" style={{ color: card.accent }}>
+                <span className="material-symbols-outlined text-[20px]" style={{ color: card.accent }}>
                   {card.icon}
                 </span>
               </div>
             </div>
-            <h3 className="text-sm text-[#414844]/80 mb-1">{card.label}</h3>
-            <p className="text-3xl font-bold" style={{ color: card.accent }}>
+            <h3 className="text-xs text-[#414844]/80 mb-1">{card.label}</h3>
+            <p className="text-xl font-bold truncate" style={{ color: card.accent }}>
               {loading ? '...' : card.value}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-[#2E5E3B]/15 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-[#2E5E3B]/15 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-[#2E5E3B] flex items-center gap-2">
+      {/* ── Alur Pendaftaran Diagram ──────────────────────────────── */}
+      <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm p-6 mb-6">
+        <h3 className="text-sm font-bold text-[#0284C7] flex items-center gap-2 mb-4">
+          <span className="material-symbols-outlined text-[18px]">route</span>
+          Alur Pendaftaran Tenaga Ahli
+        </h3>
+        <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2">
+          {[
+            { icon: 'person_add', label: 'Pendaftaran', color: '#0EA5E9' },
+            { icon: 'fact_check', label: 'Verifikasi Admin', color: '#7A5900' },
+            { icon: 'workspace_premium', label: 'Pilih Paket', color: '#0284C7' },
+            { icon: 'payments', label: 'Pembayaran', color: '#6B4F3B' },
+            { icon: 'public', label: 'Profil Tayang', color: '#0284C7' },
+          ].map((item, i, arr) => (
+            <div key={item.label} className="flex items-center flex-1 last:flex-none">
+              <div className="flex flex-col items-center gap-1.5 min-w-[56px]">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${item.color}1A` }}
+                >
+                  <span className="material-symbols-outlined text-[18px]" style={{ color: item.color }}>
+                    {item.icon}
+                  </span>
+                </div>
+                <span className="text-[10px] font-semibold text-center text-[#414844]/70">{item.label}</span>
+              </div>
+              {i < arr.length - 1 && (
+                <div className="flex-1 h-0.5 mx-1 mb-6 rounded-full bg-[#0284C7]/20 min-w-[12px]">
+                  <div className="h-full rounded-full bg-[#0284C7] w-full" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-[#0284C7]/15 flex justify-between items-center">
+          <h3 className="text-lg font-bold text-[#0284C7] flex items-center gap-2">
             <span className="material-symbols-outlined">pending_actions</span>
             Profil Menunggu Verifikasi
           </h3>
-          <Link to="/admin/verifikasi-user" className="text-sm text-[#2E5E3B] font-bold hover:underline">
+          <Link to="/admin/verifikasi" className="text-sm text-[#0284C7] font-bold hover:underline">
             Lihat Semua
           </Link>
         </div>
@@ -125,31 +136,33 @@ export default function AdminDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-[#2E5E3B]/5 text-[#414844]">
+              <tr className="bg-[#0284C7]/5 text-[#414844]">
                 <th className="px-6 py-3">Nama</th>
                 <th className="px-6 py-3">Email</th>
                 <th className="px-6 py-3">Instansi</th>
+                <th className="px-6 py-3">Bidang</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2E5E3B]/10">
+            <tbody className="divide-y divide-[#0284C7]/10">
               {loading ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-[#414844]/70">
+                  <td colSpan={4} className="px-6 py-8 text-center text-[#414844]/70">
                     Memuat data...
                   </td>
                 </tr>
               ) : recentPending.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-[#414844]/70">
+                  <td colSpan={4} className="px-6 py-8 text-center text-[#414844]/70">
                     Tidak ada profil yang menunggu verifikasi.
                   </td>
                 </tr>
               ) : (
                 recentPending.map((exp) => (
-                  <tr key={exp.id} className="hover:bg-[#2E5E3B]/5">
-                    <td className="px-6 py-4 font-semibold text-[#2E5E3B]">{exp.name || '-'}</td>
+                  <tr key={exp.id} className="hover:bg-[#0284C7]/5">
+                    <td className="px-6 py-4 font-semibold text-[#0284C7]">{exp.name || '-'}</td>
                     <td className="px-6 py-4 text-[#414844]/80">{exp.user?.email || exp.email || '-'}</td>
                     <td className="px-6 py-4 text-[#414844]/80">{exp.institution || '-'}</td>
+                    <td className="px-6 py-4 text-[#414844]/80">{exp.field || '-'}</td>
                   </tr>
                 ))
               )}

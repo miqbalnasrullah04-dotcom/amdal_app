@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 
@@ -25,7 +25,20 @@ function emptyCertificate() {
 
 export default function LengkapiProfil() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const stepVal = params.get('step');
+    if (stepVal !== null) {
+      const stepNum = parseInt(stepVal, 10);
+      if (!isNaN(stepNum) && stepNum >= 0 && stepNum < STEPS.length) {
+        setStep(stepNum);
+      }
+    }
+  }, [location.search]);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');

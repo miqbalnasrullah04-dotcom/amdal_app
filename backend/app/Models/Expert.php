@@ -13,7 +13,8 @@ class Expert extends Model
         'user_id', 'profile_status', 'reject_reason', 'package_id',
         'slug', 'name', 'field', 'kriteria', 'kriteria_list',
         'location', 'lat', 'lng', 'rating', 'photo', 'cover', 'verified', 'featured',
-        'institution', 'active_since', 'email', 'keahlian', 'alamat_lengkap',
+        'institution', 'active_since', 'email', 'phone', 'tempat_lahir', 'tanggal_lahir',
+        'pendidikan', 'pengalaman', 'cv_path', 'bukti_kompetensi_path', 'keahlian', 'alamat_lengkap',
         'alamat_kota', 'alamat_provinsi', 'lokasi_label', 'sosial',
         'narasumber_riwayat', 'kajian_riwayat',
     ];
@@ -31,6 +32,7 @@ class Expert extends Model
             'sosial' => 'array',
             'narasumber_riwayat' => 'array',
             'kajian_riwayat' => 'array',
+            'tanggal_lahir' => 'date',
         ];
     }
 

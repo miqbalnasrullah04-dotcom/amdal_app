@@ -360,9 +360,9 @@ export default function Search() {
   };
 
   return (
-    <div className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr_1.3fr] min-h-screen pt-20">
+    <div className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr_1.3fr] min-h-screen pt-20 md:pt-[88px]">
       {/* KOTAK NAV BACKGROUND — DIUBAH MENJADI GRADIENT BIRU YANG COMPATIBLE */}
-      <div className="fixed top-0 left-0 w-full h-20 bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
       <Navbar />
 
@@ -513,7 +513,7 @@ export default function Search() {
       </aside>
 
       {/* ---------- RESULTS ---------- */}
-      <section className="border-r border-outline-variant/30 overflow-y-auto max-h-[calc(100vh-80px)]">
+      <section className="border-r border-outline-variant/30 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[calc(100vh-88px)]">
         <div className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b border-outline-variant/20">
           <button onClick={goPrev} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
             <ChevronLeftIcon className="w-5 h-5" />
@@ -588,7 +588,7 @@ export default function Search() {
       {/* ---------- MAP ---------- */}
       <div
         ref={mapWrapperRef}
-        className="hidden lg:block relative isolate z-0 sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
+        className="hidden lg:block relative isolate z-0 sticky top-20 md:top-[88px] h-[calc(100vh-80px)] md:h-[calc(100vh-88px)] overflow-hidden"
       >
         <div id="search-map" className="absolute inset-0" />
 

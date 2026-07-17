@@ -204,10 +204,10 @@ export default function Narasumber() {
 
     const withCoords = sortedExperts.filter((e) => e.lat && e.lng);
     const next = withCoords.map((e) => {
-      // Penyesuaian: border avatar pin diubah menjadi #3E2B1F agar selaras dengan navbar
+      // Penyesuaian: border avatar pin diubah menjadi #0EA5E9 agar selaras dengan navbar
       const icon = L.divIcon({
         className: '',
-        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #3E2B1F;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3);background:#fff">
+        html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #0EA5E9;overflow:hidden;background:#fff">
                  <img src="${e.photo}" style="width:100%;height:100%;object-fit:cover" />
                </div>`,
         iconSize: [40, 40],
@@ -302,8 +302,8 @@ export default function Narasumber() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-20">
-      <div className="fixed top-0 left-0 w-full h-20 bg-[#3E2B1F] z-40" />
+    <div className="min-h-screen bg-white pt-20 md:pt-[88px]">
+      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
 
       <Navbar />
 
@@ -311,29 +311,29 @@ export default function Narasumber() {
         {/* ---------- FILTERS ---------- */}
         <aside className="p-6 border-r border-gray-200">
           <form onSubmit={handleSearch} className="flex flex-col gap-6">
-            {/* Penyesuaian: focus:border diubah ke #2E5E3B */}
+            {/* Penyesuaian: focus:border diubah ke #0EA5E9 */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Masukan Kata Kunci</label>
               <input
-                className="border-b border-gray-300 focus:border-[#2E5E3B] outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
                 placeholder="Ahli Kehutanan, Tata Ruang"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
             </div>
 
-            {/* Penyesuaian: focus:border diubah ke #2E5E3B */}
+            {/* Penyesuaian: focus:border diubah ke #0EA5E9 */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Kota/Kabupaten/Provinsi</label>
               <input
-                className="border-b border-gray-300 focus:border-[#2E5E3B] outline-none py-2 text-sm bg-transparent"
+                className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
                 placeholder="Pilih Lokasi"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
 
-            {/* Penyesuaian: focus:border diubah ke #2E5E3B */}
+            {/* Penyesuaian: focus:border diubah ke #0EA5E9 */}
             <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
               <label className="text-sm text-gray-500">Kriteria Keanggotaan</label>
 
@@ -351,7 +351,7 @@ export default function Narasumber() {
                 </div>
               ) : (
                 <input
-                  className="border-b border-gray-300 focus:border-[#2E5E3B] outline-none py-2 text-sm bg-transparent"
+                  className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
                   placeholder="Ketik untuk mencari kriteria..."
                   value={kriteriaInput}
                   onChange={(e) => setKriteriaInput(e.target.value)}
@@ -360,7 +360,7 @@ export default function Narasumber() {
               )}
 
               {kriteriaOpen && !kriteria && (
-                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 overflow-hidden">
+                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md z-10 overflow-hidden">
                   {kriteriaMatches.map((s) => (
                     <button
                       key={s}
@@ -395,7 +395,7 @@ export default function Narasumber() {
                 />
               </button>
               {orderOpen && (
-                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 overflow-hidden">
+                <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md z-10 overflow-hidden">
                   {ORDER_OPTIONS.map((o) => (
                     <button
                       key={o.value}
@@ -415,10 +415,10 @@ export default function Narasumber() {
               )}
             </div>
 
-            {/* Penyesuaian: Menggunakan warna tombol hijau tua #2E5E3B */}
+            {/* Penyesuaian: Menggunakan warna tombol biru #0EA5E9 */}
             <button
               type="submit"
-              className="bg-[#2E5E3B] hover:bg-[#21442a] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors"
+              className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
               Search
@@ -431,7 +431,7 @@ export default function Narasumber() {
         </aside>
 
         {/* ---------- RESULTS ---------- */}
-        <section className="border-r border-gray-200 overflow-y-auto max-h-[calc(100vh-80px)]">
+        <section className="border-r border-gray-200 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[calc(100vh-88px)]">
           <div className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b border-gray-100">
             <button onClick={goPrev} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
               <ChevronLeftIcon className="w-5 h-5" />
@@ -460,22 +460,22 @@ export default function Narasumber() {
                   ref={(el) => (cardRefs.current[expert.id] = el)}
                   onClick={() => focusExpert(expert, index)}
                   className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
-                    activeId === expert.id ? 'border-[#3E2B1F]' : 'border-transparent'
+                    activeId === expert.id ? 'border-[#0EA5E9]' : 'border-transparent'
                   }`}
                 >
                   <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
                   
-                  {/* Penyesuaian: Warna BoltIcon diubah ke #2E5E3B */}
-                  <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
-                    <BoltIcon className="w-4 h-4 text-[#2E5E3B]" />
+                  {/* Penyesuaian: Warna BoltIcon diubah ke #0EA5E9 */}
+                  <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5">
+                    <BoltIcon className="w-4 h-4 text-[#0EA5E9]" />
                   </div>
                   
-                  {/* Penyesuaian: Link text diubah ke text-[#2E5E3B] */}
+                  {/* Penyesuaian: Link text diubah ke text-[#0284C7] */}
                   {expert.slug && (
                     <Link
                       to={`/profil/${expert.slug}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-[#2E5E3B] rounded-full px-3 py-1.5 shadow transition-colors"
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-[#0284C7] rounded-full px-3 py-1.5 transition-colors"
                     >
                       Lihat Profil
                     </Link>
@@ -488,7 +488,7 @@ export default function Narasumber() {
                       className="w-9 h-9 rounded-full border-2 border-white object-cover"
                     />
                     <span className="text-white font-bold text-sm">{expert.name}</span>
-                    {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-emerald-400" />}
+                    {expert.verified && <CheckBadgeIcon className="w-5 h-5 text-sky-400" />}
                   </div>
                 </div>
               ))
@@ -499,15 +499,15 @@ export default function Narasumber() {
         {/* ---------- MAP ---------- */}
         <div
           ref={mapWrapperRef}
-          className="hidden lg:block relative isolate z-0 sticky top-20 h-[calc(100vh-80px)] overflow-hidden"
+          className="hidden lg:block relative isolate z-0 sticky top-20 md:top-[88px] h-[calc(100vh-80px)] md:h-[calc(100vh-88px)] overflow-hidden"
         >
           <div id="narasumber-map" className="absolute inset-0" />
 
-          {/* Penyesuaian: warna checkbox menggunakan accent-[#2E5E3B] */}
-          <label className="absolute top-4 left-4 z-[1000] bg-white shadow rounded-md px-3 py-2 flex items-center gap-2 text-sm cursor-pointer select-none">
+          {/* Penyesuaian: warna checkbox menggunakan accent-[#0EA5E9] */}
+          <label className="absolute top-4 left-4 z-[1000] bg-white rounded-md px-3 py-2 flex items-center gap-2 text-sm cursor-pointer select-none">
             <input
               type="checkbox"
-              className="accent-[#2E5E3B]"
+              className="accent-[#0EA5E9]"
               checked={searchAsMove}
               onChange={(e) => setSearchAsMove(e.target.checked)}
             />
@@ -515,13 +515,13 @@ export default function Narasumber() {
           </label>
 
           <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-            <button onClick={() => map?.zoomIn()} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
+            <button onClick={() => map?.zoomIn()} className="bg-white hover:bg-gray-50 rounded-md w-9 h-9 flex items-center justify-center transition-colors">
               <PlusIcon className="w-4 h-4" />
             </button>
-            <button onClick={() => map?.zoomOut()} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
+            <button onClick={() => map?.zoomOut()} className="bg-white hover:bg-gray-50 rounded-md w-9 h-9 flex items-center justify-center transition-colors">
               <MinusIcon className="w-4 h-4" />
             </button>
-            <button onClick={handleFullscreen} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
+            <button onClick={handleFullscreen} className="bg-white hover:bg-gray-50 rounded-md w-9 h-9 flex items-center justify-center transition-colors">
               <ArrowsPointingOutIcon className="w-4 h-4" />
             </button>
             <button onClick={handleLocate} className="bg-white hover:bg-gray-50 shadow rounded-md w-9 h-9 flex items-center justify-center transition-colors">
