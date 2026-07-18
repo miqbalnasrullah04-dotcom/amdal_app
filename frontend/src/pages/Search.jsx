@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
+import NavbarBackground from '../components/NavbarBackground.jsx';
 import { usePageLoading } from '../context/LoadingContext.jsx';
 
-// Lazy-loaded so Leaflet's CSS/JS only ships to the bundle that needs it.
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -195,7 +195,6 @@ export default function Search() {
     reportReady();
   }, [searchParams]);
 
-  // Init Leaflet map once
   useEffect(() => {
     const instance = L.map('search-map', { zoomControl: false }).setView([-6.9, 107.2], 7);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -240,14 +239,12 @@ export default function Search() {
     setActiveIndex(0);
   }, [sortedExperts.length]);
 
-  // Sync markers whenever the result list changes.
   useEffect(() => {
     if (!map) return;
     markers.forEach((m) => map.removeLayer(m));
 
     const withCoords = sortedExperts.filter((e) => e.lat && e.lng);
     const next = withCoords.map((e) => {
-      // Mengubah border marker peta menjadi biru langit (#0EA5E9)
       const icon = L.divIcon({
         className: '',
         html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #0EA5E9;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.3);background:#fff">
@@ -360,9 +357,8 @@ export default function Search() {
   };
 
   return (
-    <div className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr_1.3fr] min-h-screen pt-20 md:pt-[88px]">
-      {/* KOTAK NAV BACKGROUND — DIUBAH MENJADI GRADIENT BIRU YANG COMPATIBLE */}
-      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+    <div className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr_1.3fr] min-h-screen pt-[72px] md:pt-20">
+      <NavbarBackground />
 
       <Navbar />
 
@@ -493,7 +489,6 @@ export default function Search() {
             )}
           </div>
 
-          {/* BUTTON SEARCH UTAMA DENGAN WARNA TEMA BARU */}
           <button
             type="submit"
             className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors active:scale-95"
@@ -513,7 +508,7 @@ export default function Search() {
       </aside>
 
       {/* ---------- RESULTS ---------- */}
-      <section className="border-r border-outline-variant/30 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[calc(100vh-88px)]">
+      <section className="border-r border-outline-variant/30 overflow-y-auto max-h-[calc(100vh-72px)] md:max-h-[calc(100vh-80px)]">
         <div className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b border-outline-variant/20">
           <button onClick={goPrev} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
             <ChevronLeftIcon className="w-5 h-5" />
@@ -547,7 +542,6 @@ export default function Search() {
               >
                 <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
                 
-                {/* IKON STRIP KECIL UTAMA (EFEK PULSE DIHAPUS SESUAI PERMINTAAN KODE AWAL) */}
                 <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5 shadow">
                   <BoltIcon className="w-4 h-4 text-[#0EA5E9]" />
                 </div>
@@ -588,7 +582,7 @@ export default function Search() {
       {/* ---------- MAP ---------- */}
       <div
         ref={mapWrapperRef}
-        className="hidden lg:block relative isolate z-0 sticky top-20 md:top-[88px] h-[calc(100vh-80px)] md:h-[calc(100vh-88px)] overflow-hidden"
+        className="hidden lg:block relative isolate z-0 sticky top-[72px] md:top-20 h-[calc(100vh-72px)] md:h-[calc(100vh-80px)] overflow-hidden"
       >
         <div id="search-map" className="absolute inset-0" />
 

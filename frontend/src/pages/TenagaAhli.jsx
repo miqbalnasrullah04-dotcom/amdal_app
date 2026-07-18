@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
+import NavbarBackground from '../components/NavbarBackground.jsx';
 import { usePageLoading } from '../context/LoadingContext.jsx';
 
 import L from 'leaflet';
@@ -44,14 +45,6 @@ function shuffle(arr) {
   return a;
 }
 
-// -----------------------------------------------------------------------
-// useClickOutside — closes a dropdown when the user taps/clicks anywhere
-// outside its container. Using document-level mousedown/touchstart + ref
-// containment instead of onBlur+setTimeout, because blur fires the instant
-// a finger touches a suggestion button on mobile, and the timeout could
-// unmount the button before the tap finished — so nothing happened when
-// people tapped a suggestion on a phone.
-// -----------------------------------------------------------------------
 function useClickOutside(ref, onOutside) {
   useEffect(() => {
     function handle(e) {
@@ -68,7 +61,6 @@ function useClickOutside(ref, onOutside) {
   }, [ref, onOutside]);
 }
 
-// Demo data used only if /api/experts is unreachable OR returns empty data.
 const FALLBACK_EXPERTS = [
   {
     id: 1,
@@ -312,9 +304,8 @@ export default function TenagaAhli() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-20 md:pt-[88px]">
-      {/* Kotak biru di belakang navbar — tinggi sama persis dengan navbar (h-20 / 80px) */}
-      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+    <div className="min-h-screen bg-white pt-[72px] md:pt-20">
+      <NavbarBackground />
 
       <Navbar />
 
@@ -438,7 +429,7 @@ export default function TenagaAhli() {
         </aside>
 
         {/* ---------- RESULTS ---------- */}
-        <section className="border-r border-gray-200 overflow-y-auto max-h-[calc(100vh-80px)]">
+        <section className="border-r border-gray-200 overflow-y-auto max-h-[calc(100vh-72px)] md:max-h-[calc(100vh-80px)]">
           <div className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b border-gray-100">
             <button onClick={goPrev} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
               <ChevronLeftIcon className="w-5 h-5" />
@@ -501,7 +492,7 @@ export default function TenagaAhli() {
         {/* ---------- MAP ---------- */}
         <div
           ref={mapWrapperRef}
-          className="hidden lg:block relative isolate z-0 sticky top-20 md:top-[88px] h-[calc(100vh-80px)] md:h-[calc(100vh-88px)] overflow-hidden"
+          className="hidden lg:block relative isolate z-0 sticky top-[72px] md:top-20 h-[calc(100vh-72px)] md:h-[calc(100vh-80px)] overflow-hidden"
         >
           <div id="tenaga-ahli-map" className="absolute inset-0" />
 

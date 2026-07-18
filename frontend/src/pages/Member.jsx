@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import api from '../api/client.js';
-
+import NavbarBackground from '../components/NavbarBackground.jsx';
 import { usePageLoading } from '../context/LoadingContext.jsx';
 
 const dummyMembers = [
@@ -34,7 +34,20 @@ export default function Member() {
     setLoading(true);
     api
       .get('/members')
-      .then((res) => setMembers(res.data))
+      .then((res) => {
+        // Backend bisa saja membungkus data dalam { data: [...] } atau
+        // mengembalikan object lain, bukan array langsung. Validasi dulu
+        // sebelum di-set supaya .map()/.filter() di bawah tidak crash.
+        const raw = res.data;
+        const data = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.data)
+          ? raw.data
+          : Array.isArray(raw?.members)
+          ? raw.members
+          : [];
+        setMembers(data.length > 0 ? data : dummyMembers);
+      })
       .catch(() => setMembers(dummyMembers))
       .finally(() => { setLoading(false); reportReady(); });
   }, []);
@@ -51,15 +64,15 @@ export default function Member() {
 
   const filteredMembers = useMemo(() => {
     const q = keyword.toLowerCase().trim();
-    let result = members;
+    let result = Array.isArray(members) ? members : [];
 
     if (q) {
       result = result.filter(
         (m) =>
           (m.nama && m.nama.toLowerCase().includes(q)) ||
           (m.merge && m.merge.toLowerCase().includes(q)) ||
-          m.instansi.toLowerCase().includes(q) ||
-          m.nomor.toLowerCase().includes(q)
+          (m.instansi && m.instansi.toLowerCase().includes(q)) ||
+          (m.nomor && m.nomor.toLowerCase().includes(q))
       );
     }
 
@@ -113,15 +126,14 @@ export default function Member() {
 
   return (
     <div className="relative pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-      {/* Warna Kotak Navbar disamakan ke Biru Gradasi Search */}
-      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+      <NavbarBackground />
+
 
       <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">Member</h1>
       <p className="text-on-surface-variant mb-8">
         Daftar tenaga ahli AMDAL yang telah tersertifikasi dan terdaftar di AMDAL.ID.
       </p>
 
-      {/* Warna border diubah dari border-[#2E5E3B]/25 ke border-[#0EA5E9]/25 */}
       <div className="bg-white rounded-xl border border-[#0EA5E9]/25 shadow-sm overflow-hidden">
         {/* Toolbar: entries + search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-[#0EA5E9]/20">

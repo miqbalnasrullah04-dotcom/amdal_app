@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import tentangKamiImg from '../assets/tentangkami.jpg';
+import NavbarBackground from '../components/NavbarBackground.jsx';
 
-// Data tim tetap aman di sini
 const TIM_AMDAL = [
   { role: 'Pengarah', name: 'Prof. Dr. Ir. Widiatmaka, DAA' },
   { role: 'Koordinator Pakar', name: 'Dr. Irman Firmansyah, S.Hut, M.Si' },
@@ -12,8 +12,7 @@ const TIM_AMDAL = [
 export default function TentangKami() {
   return (
     <div className="relative pt-32 pb-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-      {/* KOTAK ATAS: Diubah menjadi Gradasi Biru sesuai dengan header halaman Search */}
-      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+      <NavbarBackground />
 
       {/* Hero — Foto + Deskripsi */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter items-center mb-20">
@@ -24,7 +23,6 @@ export default function TentangKami() {
         />
 
         <div>
-          {/* Aksen garis menggunakan Biru Cerah (#0EA5E9) */}
           <span className="inline-block w-14 h-1.5 rounded-full bg-[#0EA5E9] mb-4" />
           <h1 className="font-headline-lg text-headline-lg text-on-background mb-6">Tentang Kami</h1>
           <p className="text-on-surface-variant leading-relaxed mb-4">

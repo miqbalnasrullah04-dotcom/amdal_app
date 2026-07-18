@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
+import NavbarBackground from '../components/NavbarBackground.jsx';
 import { usePageLoading } from '../context/LoadingContext.jsx';
 
 
@@ -195,7 +196,6 @@ export default function InstrukturPengajar() {
 
     const withCoords = sortedExperts.filter((e) => e.lat && e.lng);
     const next = withCoords.map((e) => {
-      // Penyesuaian: border avatar pin diubah menjadi #0EA5E9 agar matching dengan navbar
       const icon = L.divIcon({
         className: '',
         html: `<div style="width:40px;height:40px;border-radius:9999px;border:3px solid #0EA5E9;overflow:hidden;background:#fff">
@@ -292,8 +292,9 @@ export default function InstrukturPengajar() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-20 md:pt-[88px]">
-      <div className="fixed top-0 left-0 w-full h-20 md:h-[88px] bg-gradient-to-r from-[#0369A1] via-[#0EA5E9] to-[#0284C7] z-40 shadow-sm" />
+    <div className="min-h-screen bg-white pt-[72px] md:pt-20">
+      <NavbarBackground />
+
 
       <Navbar />
 
@@ -301,7 +302,6 @@ export default function InstrukturPengajar() {
         {/* ---------- FILTERS ---------- */}
         <aside className="p-6 border-r border-gray-200">
           <form onSubmit={handleSearch} className="flex flex-col gap-6">
-            {/* Penyesuaian: focus:border diubah ke #0EA5E9 (Biru) */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Masukan Kata Kunci</label>
               <input
@@ -312,7 +312,6 @@ export default function InstrukturPengajar() {
               />
             </div>
 
-            {/* Penyesuaian: focus:border diubah ke #0EA5E9 (Biru) */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">Kota/Kabupaten/Provinsi</label>
               <input
@@ -323,7 +322,6 @@ export default function InstrukturPengajar() {
               />
             </div>
 
-            {/* Penyesuaian: focus:border diubah ke #0EA5E9 (Biru) */}
             <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
               <label className="text-sm text-gray-500">Kriteria Keanggotaan</label>
 
@@ -419,7 +417,7 @@ export default function InstrukturPengajar() {
         </aside>
 
         {/* ---------- RESULTS ---------- */}
-        <section className="border-r border-gray-200 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[calc(100vh-88px)]">
+        <section className="border-r border-gray-200 overflow-y-auto max-h-[calc(100vh-72px)] md:max-h-[calc(100vh-80px)]">
           <div className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white z-10 border-b border-gray-100">
             <button onClick={goPrev} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
               <ChevronLeftIcon className="w-5 h-5" />
@@ -452,12 +450,10 @@ export default function InstrukturPengajar() {
                 >
                   <img src={expert.cover} alt={expert.name} className="w-full h-48 object-cover" />
 
-                  {/* Penyesuaian: Warna BoltIcon diubah ke #0EA5E9 */}
                   <div className="absolute top-3 left-3 bg-white/90 rounded-md p-1.5">
                     <BoltIcon className="w-4 h-4 text-[#0EA5E9]" />
                   </div>
 
-                  {/* Penyesuaian: Link text diubah ke text-[#0284C7] */}
                   {expert.slug && (
                     <Link
                       to={`/profil/${expert.slug}`}
@@ -486,7 +482,7 @@ export default function InstrukturPengajar() {
         {/* ---------- MAP ---------- */}
         <div
           ref={mapWrapperRef}
-          className="hidden lg:block relative isolate z-0 sticky top-20 md:top-[88px] h-[calc(100vh-80px)] md:h-[calc(100vh-88px)] overflow-hidden"
+          className="hidden lg:block relative isolate z-0 sticky top-[72px] md:top-20 h-[calc(100vh-72px)] md:h-[calc(100vh-80px)] overflow-hidden"
         >
           <div id="instruktur-pengajar-map" className="absolute inset-0" />
 
