@@ -11,7 +11,6 @@ export default function AdminDashboard() {
     pengguna_premium: 0,
   });
   const [recentPending, setRecentPending] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -35,9 +34,6 @@ export default function AdminDashboard() {
         if (statsRes.status === 'rejected' || expertsRes.status === 'rejected') {
           setError('Gagal memuat sebagian data statistik admin.');
         }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
       });
 
     return () => {
@@ -80,7 +76,7 @@ export default function AdminDashboard() {
             </div>
             <h3 className="text-xs text-[#414844]/80 mb-1">{card.label}</h3>
             <p className="text-xl font-bold truncate" style={{ color: card.accent }}>
-              {loading ? '...' : card.value}
+              {card.value}
             </p>
           </div>
         ))}
@@ -144,13 +140,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#0284C7]/10">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-[#414844]/70">
-                    Memuat data...
-                  </td>
-                </tr>
-              ) : recentPending.length === 0 ? (
+              {recentPending.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-[#414844]/70">
                     Tidak ada profil yang menunggu verifikasi.

@@ -66,19 +66,19 @@ export default function Navbar() {
   }, [location.pathname]);
 
   const handleLogout = async () => {
+    // Always clear local state first — ignore 401 from server (token already expired)
+    localStorage.removeItem('amdal_token');
+    localStorage.removeItem('amdal_user');
+    setIsLoggedIn(false);
+    setMenuOpen(false);
+    setProfileOpen(false);
+    setUserData(null);
     try {
       await api.post('/logout');
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      localStorage.removeItem('amdal_token');
-      localStorage.removeItem('amdal_user');
-      setIsLoggedIn(false);
-      setMenuOpen(false);
-      setProfileOpen(false);
-      setUserData(null);
-      navigate('/');
+    } catch {
+      // Ignore — already logged out locally
     }
+    navigate('/');
   };
 
   // Neutral frosted glass: backdrop-blur only, no tinted/colored glow and
@@ -90,8 +90,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 z-50 w-full backdrop-blur-md transition-colors duration-300 ${
-        scrolled ? 'bg-white/70 border-b border-gray-100' : 'bg-black/20 border-b border-white/10'
+      className={`fixed top-0 left-0 z-50 w-full transition-colors duration-300 ${
+        scrolled ? 'bg-white border-b border-gray-100' : 'bg-black/20 border-b border-white/10'
       }`}
     >
       <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3">
@@ -151,7 +151,7 @@ export default function Navbar() {
 
                 {/* Box Dropdown — solid card, hairline border, no blur/glow */}
                 {profileOpen && (
-                  <div className="absolute right-0 mt-3 w-56 bg-white/80 backdrop-blur-md rounded-xl border border-gray-100 py-2 z-50 text-gray-800">
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl border border-gray-100 py-2 z-50 text-gray-800">
                     <div className="px-4 py-2.5 border-b border-gray-100">
                       <p className="font-label-md text-sm font-semibold truncate">
                         {userData?.name || userData?.nama || 'User TenagaAhli'}
@@ -225,7 +225,7 @@ export default function Navbar() {
 
       {/* Mobile Menu — solid panel, no blur/glow */}
       {menuOpen && (
-        <div className="md:hidden w-full bg-white/85 backdrop-blur-md border-t border-gray-100 flex flex-col px-margin-mobile py-5 gap-1 text-gray-800">
+        <div className="md:hidden w-full bg-white border-t border-gray-100 flex flex-col px-margin-mobile py-5 gap-1 text-gray-800">
           {navLinks.map((link) => (
             <NavLink
               key={link.to}

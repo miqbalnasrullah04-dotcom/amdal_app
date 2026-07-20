@@ -1,17 +1,15 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
+import PhoneInput from '../components/PhoneInput.jsx';
 
 /* ── Syarat‑Syarat Pendaftaran ──────────────────────────────────── */
 const SYARAT_LIST = [
-  'Warga Negara Indonesia (WNI)',
-  'Minimal pendidikan S1 / sederajat di bidang terkait',
-  'Memiliki pengalaman di bidang lingkungan / AMDAL minimal 2 tahun',
-  'Bersedia mengunggah CV terbaru (format PDF)',
-  'Bersedia mengunggah pas foto formal terbaru',
-  'Bersedia mengunggah bukti kompetensi (sertifikat, ijazah, dsb.)',
-  'Data yang diisi harus sesuai dengan identitas resmi',
-  'Bersedia mengikuti proses verifikasi oleh tim TenagaAhli.com',
+  'Memiliki pengalaman penelitian, kajian, atau publikasi yang sesuai dengan bidang keahlian yang didaftarkan (S1/S2/S3), dengan melampirkan bukti pendukung (opsional).',
+  'Sedang melakukan penelitian, pengembangan, atau proyek profesional yang berkaitan dengan bidang keahlian yang didaftarkan, dengan melampirkan bukti pendukung.',
+  'Pernah menjadi Tenaga Ahli, Konsultan, atau Tim Ahli pada instansi pemerintah, swasta, organisasi, maupun proyek tertentu, dengan melampirkan Surat Tugas, Surat Keputusan (SK), kontrak kerja, atau dokumen sejenis.',
+  'Memiliki sertifikat kompetensi, pelatihan, workshop, atau sertifikasi profesi yang relevan dengan bidang keahlian yang didaftarkan.',
+  'Pernah menjadi narasumber, pembicara, instruktur, mentor, atau fasilitator pada seminar, pelatihan, workshop, webinar, maupun kegiatan profesional lainnya yang sesuai dengan bidang keahlian, dengan melampirkan bukti pendukung.',
 ];
 
 /* ── Password rules ─────────────────────────────────────────────── */
@@ -21,7 +19,6 @@ const PW_RULES = [
   { key: 'number', label: 'Mengandung angka', test: (v) => /[0-9]/.test(v) },
 ];
 
-const PENDIDIKAN_OPTIONS = ['S1', 'S2', 'S3', 'Profesor'];
 
 /* ── Step Labels ────────────────────────────────────────────────── */
 const STEP_LABELS = ['Syarat Pendaftaran', 'Data Akun', 'Data Pribadi', 'Upload Dokumen'];
@@ -45,16 +42,31 @@ export default function Daftar() {
     password_confirmation: '',
     // Step 2 — Pribadi
     name: '',
-    phone: '',
+    phone: '+62 ',
     institution: '',
     field: '',
     tempat_lahir: '',
     tanggal_lahir: '',
-    pendidikan: '',
+    alamat_kota: '',
+    alamat_provinsi: '',
     pengalaman: '',
   });
 
   const [showPassword, setShowPassword] = useState(false);
+
+  /* ── Riwayat Pendidikan (dinamis) ──────────────────────────────── */
+  const [educations, setEducations] = useState([
+    { jenjang: '', institusi: '', jurusan: '', tahun_lulus: '' },
+  ]);
+
+  const addEducation = () =>
+    setEducations([...educations, { jenjang: '', institusi: '', jurusan: '', tahun_lulus: '' }]);
+
+  const removeEducation = (i) =>
+    setEducations(educations.filter((_, idx) => idx !== i));
+
+  const updateEducation = (i, field, value) =>
+    setEducations(educations.map((e, idx) => idx === i ? { ...e, [field]: value } : e));
 
   /* ── File uploads (step 3) ─────────────────────────────────────── */
   const [cv, setCv] = useState(null);
@@ -102,8 +114,22 @@ export default function Daftar() {
       return true;
     }
     if (step === 2) {
-      if (!form.name || !form.phone || !form.institution || !form.field) {
-        setError('Nama, No. HP, Institusi, dan Bidang Keahlian wajib diisi.');
+      if (!form.name || !form.institution || !form.field) {
+        setError('Nama, Institusi, dan Bidang Keahlian wajib diisi.');
+        return false;
+      }
+      if (!form.alamat_kota) {
+        setError('Kota / Kabupaten wajib diisi.');
+        return false;
+      }
+      const hasEdu = educations.some(e => e.jenjang && e.institusi);
+      if (!hasEdu) {
+        setError('Minimal satu riwayat pendidikan wajib diisi (Jenjang & Institusi).');
+        return false;
+      }
+      const phoneDigits = form.phone.replace(/\D/g, '');
+      if (!form.phone || phoneDigits.length < 6) {
+        setError('Nomor WhatsApp tidak valid. Minimal 6 digit.');
         return false;
       }
       return true;
@@ -136,8 +162,14 @@ export default function Daftar() {
       payload.append('field', form.field);
       payload.append('tempat_lahir', form.tempat_lahir);
       payload.append('tanggal_lahir', form.tanggal_lahir);
-      payload.append('pendidikan', form.pendidikan);
+      payload.append('alamat_kota', form.alamat_kota);
+      payload.append('alamat_provinsi', form.alamat_provinsi);
       payload.append('pengalaman', form.pengalaman);
+      // Riwayat pendidikan — kirim sebagai JSON string
+      const eduValid = educations.filter(e => e.jenjang && e.institusi);
+      if (eduValid.length > 0) {
+        payload.append('educations', JSON.stringify(eduValid));
+      }
       // Files
       if (cv) payload.append('cv', cv);
       if (foto) payload.append('foto', foto);
@@ -319,7 +351,7 @@ export default function Daftar() {
                   <span className="material-symbols-outlined text-[#0284C7] text-[20px] shrink-0 mt-0.5">info</span>
                   <div className="text-sm text-[#075985] leading-relaxed">
                     <p className="font-semibold mb-1">Informasi Penting</p>
-                    <p>Setelah mendaftar, data Anda akan diverifikasi oleh tim TenagaAhli.com. Proses verifikasi memerlukan waktu 1–3 hari kerja. Pastikan semua dokumen yang diunggah valid dan terbaru.</p>
+                    <p>Setelah mendaftar, data Anda akan diverifikasi oleh tim TenagaAhli.com. Proses verifikasi memerlukan waktu 1–3 hari kerja. Anda akan mendapat notifikasi email setelah akun disetujui atau jika ada perbaikan yang diperlukan.</p>
                   </div>
                 </div>
 
@@ -479,14 +511,17 @@ export default function Daftar() {
                     <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       No. HP / WhatsApp <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="08xxxxxxxxxx"
+                    <PhoneInput
                       value={form.phone}
-                      onChange={handleChange('phone')}
-                      className={INPUT_CLS}
+                      onChange={(val) => setForm({ ...form, phone: val })}
+                      placeholder="81234567890"
+                      required
+                      className="mt-1.5"
                     />
+                    <p className="text-xs text-on-surface-variant/60 mt-1.5 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[13px]">info</span>
+                      Hanya angka, tanpa tanda hubung atau spasi
+                    </p>
                   </div>
 
                   {/* Institusi */}
@@ -525,44 +560,114 @@ export default function Daftar() {
                       <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                         Tempat Lahir
                       </label>
-                      <input
-                        type="text"
-                        placeholder="Jakarta"
-                        value={form.tempat_lahir}
-                        onChange={handleChange('tempat_lahir')}
-                        className={INPUT_CLS}
-                      />
+                      <input type="text" placeholder="Jakarta" value={form.tempat_lahir}
+                        onChange={handleChange('tempat_lahir')} className={INPUT_CLS} />
                     </div>
                     <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                         Tanggal Lahir
                       </label>
-                      <input
-                        type="date"
-                        value={form.tanggal_lahir}
-                        onChange={handleChange('tanggal_lahir')}
-                        className={INPUT_CLS}
-                      />
+                      <input type="date" value={form.tanggal_lahir}
+                        onChange={handleChange('tanggal_lahir')} className={INPUT_CLS} />
                     </div>
                   </div>
 
-                  {/* Pendidikan Terakhir */}
+                  {/* Kota & Provinsi */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                        Kota / Kabupaten <span className="text-red-500">*</span>
+                      </label>
+                      <input type="text" placeholder="Kota Bogor" value={form.alamat_kota}
+                        onChange={handleChange('alamat_kota')} className={INPUT_CLS} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                        Provinsi
+                      </label>
+                      <input type="text" placeholder="Jawa Barat" value={form.alamat_provinsi}
+                        onChange={handleChange('alamat_provinsi')} className={INPUT_CLS} />
+                    </div>
+                  </div>
+
+                  {/* Riwayat Pendidikan — dinamis */}
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                      Pendidikan Terakhir
-                    </label>
-                    <select
-                      value={form.pendidikan}
-                      onChange={handleChange('pendidikan')}
-                      className={INPUT_CLS + ' appearance-none'}
-                    >
-                      <option value="">Pilih Jenjang</option>
-                      {PENDIDIKAN_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
+                    <div className="flex items-center justify-between mt-1 mb-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                        Riwayat Pendidikan
+                      </label>
+                      <button
+                        type="button"
+                        onClick={addEducation}
+                        className="flex items-center gap-1 text-xs font-bold text-[#0EA5E9] hover:text-[#0284C7] transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                        Tambah
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {educations.map((edu, i) => (
+                        <div key={i} className="bg-white border border-outline-variant/40 rounded-xl p-4 relative">
+                          {educations.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeEducation(i)}
+                              className="absolute top-3 right-3 text-red-400 hover:text-red-600 transition-colors"
+                              aria-label="Hapus"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">remove_circle</span>
+                            </button>
+                          )}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant/60">Jenjang *</label>
+                              <select
+                                value={edu.jenjang}
+                                onChange={(e) => updateEducation(i, 'jenjang', e.target.value)}
+                                className={INPUT_CLS}
+                              >
+                                <option value="">Pilih Jenjang</option>
+                                {['S1','S2','S3','Profesor','D3','D4','SMA/SMK'].map(j => (
+                                  <option key={j} value={j}>{j}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant/60">Institusi / Universitas *</label>
+                              <input
+                                type="text"
+                                placeholder="IPB University"
+                                value={edu.institusi}
+                                onChange={(e) => updateEducation(i, 'institusi', e.target.value)}
+                                className={INPUT_CLS}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant/60">Jurusan / Program Studi</label>
+                              <input
+                                type="text"
+                                placeholder="Ilmu Lingkungan"
+                                value={edu.jurusan}
+                                onChange={(e) => updateEducation(i, 'jurusan', e.target.value)}
+                                className={INPUT_CLS}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant/60">Tahun Lulus</label>
+                              <input
+                                type="number"
+                                placeholder="2018"
+                                min="1970"
+                                max={new Date().getFullYear() + 1}
+                                value={edu.tahun_lulus}
+                                onChange={(e) => updateEducation(i, 'tahun_lulus', e.target.value)}
+                                className={INPUT_CLS}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       ))}
-                    </select>
+                    </div>
                   </div>
 
                   {/* Ringkasan Pengalaman */}
@@ -572,7 +677,7 @@ export default function Daftar() {
                     </label>
                     <textarea
                       rows={4}
-                      placeholder="Ceritakan secara singkat pengalaman profesional Anda di bidang lingkungan / AMDAL..."
+                      placeholder="Ceritakan secara singkat pengalaman profesional Anda sebagai tenaga ahli, konsultan, narasumber, atau peneliti..."
                       value={form.pengalaman}
                       onChange={handleChange('pengalaman')}
                       className={INPUT_CLS + ' min-h-[100px] resize-none'}

@@ -11,15 +11,37 @@ const MIN_DURATION = 600; // ms
 // lambat/gantung, loader tetap akan hilang otomatis setelah durasi ini.
 const MAX_DURATION = 6000; // ms
 
+// Halaman-halaman dashboard/member punya layout sendiri dan tidak memanggil
+// reportReady(), jadi RouteLoader tidak boleh aktif di sini.
+const SKIP_LOADER_ROUTES = [
+  '/dashboard',
+  '/profil-saya',
+  '/paket',
+  '/pembayaran',
+  '/profil-publik',
+  '/pengaturan',
+  '/lengkapi-profil',
+  '/pilih-paket',
+  '/riwayat-pembayaran',
+];
+
 export default function RouteLoader({ children }) {
   const location = useLocation();
   const { dataReady, resetReady } = usePageLoading();
   const [visible, setVisible] = useState(true);
   const startedAtRef = useRef(Date.now());
 
+  const shouldSkip = SKIP_LOADER_ROUTES.includes(location.pathname);
+
   // Setiap kali rute berubah: nyalakan lagi loader, reset status "data siap",
   // dan pasang jaring pengaman durasi maksimum.
   useEffect(() => {
+    if (shouldSkip) {
+      setVisible(false);
+      resetReady();
+      return;
+    }
+
     setVisible(true);
     resetReady();
     startedAtRef.current = Date.now();

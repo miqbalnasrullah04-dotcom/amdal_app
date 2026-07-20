@@ -59,12 +59,21 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
+    public function myOrders(Request $request)
+    {
+        $orders = Order::where('user_id', $request->user()->id)
+            ->with('package:id,name,price')
+            ->latest()
+            ->get();
+        return response()->json($orders);
+    }
+
     public function uploadProof(Request $request, $id)
     {
         $order = Order::where('user_id', $request->user()->id)->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'proof' => ['required', 'image', 'max:5120'],
+            'proof' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ]);
 
         if ($validator->fails()) {

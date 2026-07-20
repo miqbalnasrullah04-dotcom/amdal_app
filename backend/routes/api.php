@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register/status', [AuthController::class, 'registrationStatus']);
 
 Route::get('/experts', [ExpertController::class, 'index']);
 Route::get('/experts/{slug}', [ExpertController::class, 'show']);
@@ -33,6 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard user - profil sendiri
     Route::get('/my/profile', [ExpertController::class, 'myProfile']);
     Route::post('/my/profile', [ExpertController::class, 'saveProfile']);
+    Route::patch('/my/profile', [ExpertController::class, 'saveProfile']);
+
     Route::post('/my/profile/submit', [ExpertController::class, 'submitForVerification']);
 
     Route::get('/my/educations', [EducationController::class, 'index']);

@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+
+const storageUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  return `${BACKEND_URL}/storage/${path}`;
+};
+
 const statusLabel = {
   draft: { text: 'Draft', color: '#414844', bg: '#F5F4F0' },
   menunggu_verifikasi: { text: 'Menunggu Verifikasi', color: '#7A5900', bg: '#FFF4D6' },
@@ -188,8 +196,8 @@ export default function AdminUserVerification() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-xs text-[#414844]/60 block font-medium">Pendidikan Terakhir (Form)</span>
-                    <span className="font-semibold text-[#1F2A22]">{detailTarget.pendidikan || '-'}</span>
+                    <span className="text-xs text-[#414844]/60 block font-medium">Kota / Kabupaten</span>
+                    <span className="font-semibold text-[#1F2A22]">{detailTarget.alamat_kota || '-'}</span>
                   </div>
                 </div>
               </div>
@@ -228,12 +236,12 @@ export default function AdminUserVerification() {
                     {detailTarget.photo ? (
                       <div className="space-y-2">
                         <img
-                          src={detailTarget.photo.startsWith('http') ? detailTarget.photo : `/storage/${detailTarget.photo}`}
+                          src={storageUrl(detailTarget.photo)}
                           alt="Foto Profil"
                           className="w-20 h-20 rounded-lg object-cover border border-[#0284C7]/20 mx-auto"
                         />
                         <a
-                          href={detailTarget.photo.startsWith('http') ? detailTarget.photo : `/storage/${detailTarget.photo}`}
+                          href={storageUrl(detailTarget.photo)}
                           target="_blank"
                           rel="noreferrer"
                           className="text-[#0284C7] hover:underline text-xs font-bold block"
@@ -253,7 +261,7 @@ export default function AdminUserVerification() {
                       <div className="space-y-2 text-center">
                         <span className="material-symbols-outlined text-[36px] text-red-500">picture_as_pdf</span>
                         <a
-                          href={`/storage/${detailTarget.cv_path}`}
+                          href={storageUrl(detailTarget.cv_path)}
                           target="_blank"
                           rel="noreferrer"
                           className="text-[#0284C7] hover:underline text-xs font-bold block"
@@ -273,7 +281,7 @@ export default function AdminUserVerification() {
                       <div className="space-y-2 text-center">
                         <span className="material-symbols-outlined text-[36px] text-[#0284C7]">verified</span>
                         <a
-                          href={`/storage/${detailTarget.bukti_kompetensi_path}`}
+                          href={storageUrl(detailTarget.bukti_kompetensi_path)}
                           target="_blank"
                           rel="noreferrer"
                           className="text-[#0284C7] hover:underline text-xs font-bold block"

@@ -12,14 +12,17 @@ const FULL_PAGE_ROUTES = [
   '/peneliti-artikel-jurnal',
   '/sign-in',
   '/daftar',
-  '/profil-saya',
   '/menunggu-verifikasi',
   // Halaman member/dashboard — pakai DashboardLayout (sidebar) sendiri,
   // jadi tidak boleh dobel dengan Navbar & Footer publik.
   '/dashboard',
+  '/profil-saya',
+  '/paket',
+  '/pembayaran',
+  '/profil-publik',
+  '/pengaturan',
   '/lengkapi-profil',
   '/pilih-paket',
-  '/pembayaran',
   '/riwayat-pembayaran',
 ];
 

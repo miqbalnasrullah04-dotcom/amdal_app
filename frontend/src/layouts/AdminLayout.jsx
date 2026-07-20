@@ -35,7 +35,7 @@ export default function AdminLayout() {
     } finally {
       localStorage.removeItem('amdal_token');
       localStorage.removeItem('amdal_user');
-      navigate('/sign-in');
+      navigate('/');
     }
   };
 

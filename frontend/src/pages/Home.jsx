@@ -278,8 +278,8 @@ export default function Home() {
       <section className="py-24 px-margin-mobile md:px-margin-desktop bg-white">
         <div className="max-w-container-max mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Tenaga Ahli Kajian Lingkungan Hidup Strategis</h2>
-            <p className="text-on-surface-variant">Telusuri tenaga ahli kajian lingkungan hidup strategis di sekitar anda</p>
+            <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Temukan Tenaga Ahli Terverifikasi</h2>
+            <p className="text-on-surface-variant">Telusuri tenaga ahli profesional dari berbagai bidang keahlian yang telah melalui proses verifikasi di TenagaAhli.com.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
             {loading ? null : (

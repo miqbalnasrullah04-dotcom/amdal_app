@@ -304,6 +304,15 @@ export default function ProfilAhli() {
   const [activeSection, setActiveSection] = useState('profil');
   const sectionRefs = useRef({});
 
+  const scrollToSection = (id) => {
+    setActiveSection(id);
+    const el = document.getElementById(id);
+    if (!el) return;
+    const navHeight = 56; // height of sticky nav
+    const top = el.getBoundingClientRect().top + window.scrollY - navHeight;
+    window.scrollTo({ top, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     setLoading(true);
     api
@@ -475,9 +484,10 @@ export default function ProfilAhli() {
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex items-center justify-between overflow-x-auto">
           <nav className="flex">
             {NAV_SECTIONS.map((s) => (
-              <a
+              <button
                 key={s.id}
-                href={`#${s.id}`}
+                type="button"
+                onClick={() => scrollToSection(s.id)}
                 className={`font-semibold text-sm px-4 py-4 border-b-2 whitespace-nowrap transition-colors ${
                   activeSection === s.id
                     ? 'text-[#1479D6] border-[#1479D6]'
@@ -485,7 +495,7 @@ export default function ProfilAhli() {
                 }`}
               >
                 {s.label}
-              </a>
+              </button>
             ))}
           </nav>
 
@@ -509,7 +519,7 @@ export default function ProfilAhli() {
       </div>
 
       {/* ---------- 2 & 3 & 4. PROFIL: BIO, KATEGORI, KEAHLIAN ---------- */}
-      <section id="profil" className="scroll-mt-24 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-10 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+      <section id="profil" className="scroll-mt-16 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-10 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
         <div className="flex flex-col">
           {/* Tentang Saya */}
           <div className="pb-8 border-b border-gray-200">
@@ -641,7 +651,7 @@ export default function ProfilAhli() {
       </section>
 
       {/* ---------- 5 & 6. PENGALAMAN KERJA & PROYEK ---------- */}
-      <section id="pengalaman" className="scroll-mt-24 bg-[#FAFBF9] border-t border-gray-200">
+      <section id="pengalaman" className="scroll-mt-16 bg-[#FAFBF9] border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 grid grid-cols-1 md:grid-cols-2 gap-10">
           <div>
             <SectionHeading title="Pengalaman Kerja" eyebrow={`${profile.pengalamanKerja?.length || 0} posisi`} />
@@ -677,7 +687,7 @@ export default function ProfilAhli() {
       </section>
 
       {/* ---------- 7 & 8. SERTIFIKASI & PENDIDIKAN ---------- */}
-      <section id="kredensial" className="scroll-mt-24 border-t border-gray-200">
+      <section id="kredensial" className="scroll-mt-16 border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
           <SectionHeading title="Sertifikasi Keahlian" eyebrow="Kredensial aktif" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
@@ -723,7 +733,7 @@ export default function ProfilAhli() {
       </section>
 
       {/* ---------- 9, 10, 11, 12(narasumber), 13, 14. AKADEMIK ---------- */}
-      <section id="akademik" className="scroll-mt-24 bg-[#FAFBF9] border-t border-gray-200">
+      <section id="akademik" className="scroll-mt-16 bg-[#FAFBF9] border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 flex flex-col gap-12">
           {/* Profil Akademik */}
           {profile.profilAkademik && (
@@ -852,7 +862,7 @@ export default function ProfilAhli() {
       </section>
 
       {/* ---------- 15 & 16. PORTOFOLIO & STATISTIK ---------- */}
-      <section id="portofolio" className="scroll-mt-24 border-t border-gray-200">
+      <section id="portofolio" className="scroll-mt-16 border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
           {statistik && (
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-12">

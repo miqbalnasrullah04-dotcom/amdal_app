@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/client.js';
 
@@ -11,7 +11,9 @@ export default function MenungguVerifikasi() {
   const [rejectReason, setRejectReason] = useState('');
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
-
+  // Auto-polling setiap 60 detik saat halaman terbuka
+  const pollRef = useRef(null);
+  
   // Ambil email: prioritas dari state navigasi (baru daftar),
   // fallback ke localStorage (kalau halaman di-refresh).
   useEffect(() => {
@@ -25,12 +27,38 @@ export default function MenungguVerifikasi() {
 
     const savedEmail = localStorage.getItem('amdal_pending_email');
     if (!savedEmail) {
-      // Tidak ada data pendaftaran yang menunggu, kembalikan ke halaman daftar
       navigate('/daftar');
       return;
     }
     setEmail(savedEmail);
   }, [location.state, navigate]);
+
+  // Auto-polling setiap 60 detik (hanya ketika status masih pending)
+  useEffect(() => {
+    if (!email || status !== 'pending') return;
+
+    const doCheck = async () => {
+      try {
+        const res = await api.get('/register/status', { params: { email } });
+        const data = res.data;
+        if (data.status === 'approved') {
+          setStatus('approved');
+          localStorage.removeItem('amdal_pending_email');
+        } else if (data.status === 'rejected') {
+          setStatus('rejected');
+          setRejectReason(data.reason || '');
+        }
+      } catch (_) {
+        // Abaikan error polling otomatis — tidak perlu tampilkan ke user
+      }
+    };
+
+    // Cek pertama kali saat email tersedia
+    doCheck();
+
+    pollRef.current = setInterval(doCheck, 60_000);
+    return () => clearInterval(pollRef.current);
+  }, [email, status]);
 
   const handleCekStatus = async () => {
     if (!email) return;
@@ -67,26 +95,44 @@ export default function MenungguVerifikasi() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-6">
+    <div className="min-h-screen flex items-center justify-center bg-background px-6 py-12">
       <div className="w-full max-w-md text-center">
         <Link to="/" className="font-headline-md text-xl font-bold text-[#0284C7] block mb-10">
           TenagaAhli<span className="text-[#7DD3FC]">.com</span>
         </Link>
 
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* STATUS: MENUNGGU                                       */}
+        {/* ═══════════════════════════════════════════════════════ */}
         {status === 'pending' && (
           <div className="animate-fadeIn">
             <div className="w-24 h-24 bg-[#E0F2FE] rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="material-symbols-outlined text-5xl text-[#0284C7]">hourglass_top</span>
             </div>
             <h1 className="text-2xl font-bold text-on-background mb-2">Menunggu Verifikasi Admin</h1>
+
             <p className="text-sm text-on-surface-variant leading-relaxed mb-1">
               Pendaftaran Anda dengan email
             </p>
             <p className="text-sm font-bold text-[#0284C7] mb-4">{email}</p>
-            <p className="text-sm text-on-surface-variant leading-relaxed mb-8">
-              sedang ditinjau oleh tim TenagaAhli.com. Proses verifikasi biasanya memakan waktu 1–3 hari kerja.
-              Kami akan mengirimkan email pemberitahuan setelah akun Anda disetujui.
+
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
+              sedang ditinjau oleh tim TenagaAhli.com. Proses verifikasi biasanya memakan waktu{' '}
+              <strong>1–3 hari kerja</strong>.
             </p>
+
+            {/* Info email otomatis */}
+            <div className="bg-[#E0F2FE] border border-[#0EA5E9]/30 rounded-xl p-4 mb-6 flex gap-3 text-left">
+              <span className="material-symbols-outlined text-[#0284C7] text-[20px] shrink-0 mt-0.5">mark_email_read</span>
+              <div className="text-sm text-[#075985] leading-relaxed">
+                <p className="font-semibold mb-1">Notifikasi via Email</p>
+                <p>
+                  Kami akan mengirimkan email ke <strong>{email}</strong> segera setelah akun Anda
+                  disetujui atau jika ada perbaikan yang diperlukan. Periksa juga folder{' '}
+                  <em>Spam/Junk</em> jika email tidak masuk ke kotak masuk.
+                </p>
+              </div>
+            </div>
 
             {error && (
               <p className="bg-error-container text-on-error-container text-sm rounded-lg px-4 py-3 mb-5 text-left flex items-start gap-2">
@@ -109,7 +155,7 @@ export default function MenungguVerifikasi() {
               ) : (
                 <>
                   <span className="material-symbols-outlined text-[18px]">refresh</span>
-                  Cek Status
+                  Cek Status Sekarang
                 </>
               )}
             </button>
@@ -121,44 +167,81 @@ export default function MenungguVerifikasi() {
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               Kembali ke Beranda
             </Link>
+
+            <p className="text-xs text-on-surface-variant/50 mt-5">
+              Halaman ini otomatis memperbarui status setiap 60 detik.
+            </p>
           </div>
         )}
 
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* STATUS: DISETUJUI                                      */}
+        {/* ═══════════════════════════════════════════════════════ */}
         {status === 'approved' && (
           <div className="animate-fadeIn">
-            <div className="w-24 h-24 bg-[#E0F2FE] rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="material-symbols-outlined text-5xl text-[#0284C7]">how_to_reg</span>
+            <div className="w-24 h-24 bg-[#DCFCE7] rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="material-symbols-outlined text-5xl text-[#166534]">how_to_reg</span>
             </div>
             <h1 className="text-2xl font-bold text-on-background mb-2">Akun Anda Disetujui!</h1>
-            <p className="text-sm text-on-surface-variant leading-relaxed mb-8">
-              Selamat, pendaftaran Anda telah diverifikasi oleh admin. Sekarang Anda sudah bisa masuk ke akun Anda.
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-4">
+              Selamat, pendaftaran Anda telah diverifikasi oleh admin.
             </p>
+
+            <div className="bg-[#DCFCE7] border border-[#86EFAC] rounded-xl p-4 mb-8 flex gap-3 text-left">
+              <span className="material-symbols-outlined text-[#166534] text-[20px] shrink-0 mt-0.5">mark_email_read</span>
+              <div className="text-sm text-[#14532D] leading-relaxed">
+                <p className="font-semibold mb-1">Email konfirmasi telah dikirim</p>
+                <p>
+                  Kami sudah mengirimkan email konfirmasi ke <strong>{email}</strong>. Kini Anda
+                  dapat masuk dan mulai melengkapi profil Anda.
+                </p>
+              </div>
+            </div>
+
             <Link
               to="/sign-in"
-              className="w-full inline-block bg-[#0EA5E9] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0284C7] active:scale-[0.99] transition-all"
+              className="w-full inline-block bg-[#0EA5E9] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0284C7] active:scale-[0.99] transition-all text-center"
             >
               Masuk Sekarang
             </Link>
           </div>
         )}
 
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* STATUS: DITOLAK                                        */}
+        {/* ═══════════════════════════════════════════════════════ */}
         {status === 'rejected' && (
           <div className="animate-fadeIn">
             <div className="w-24 h-24 bg-error-container rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="material-symbols-outlined text-5xl text-on-error-container">cancel</span>
             </div>
-            <h1 className="text-2xl font-bold text-on-background mb-2">Pendaftaran Ditolak</h1>
-            <p className="text-sm text-on-surface-variant leading-relaxed mb-2">
+            <h1 className="text-2xl font-bold text-on-background mb-2">Perlu Perbaikan Data</h1>
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-4">
               Mohon maaf, pendaftaran Anda belum dapat kami setujui.
             </p>
+
             {rejectReason && (
-              <p className="bg-error-container text-on-error-container text-sm rounded-lg px-4 py-3 mb-6 text-left">
-                <strong>Alasan:</strong> {rejectReason}
-              </p>
+              <div className="bg-error-container border border-red-200 border-l-4 border-l-red-500 rounded-r-xl px-4 py-3 mb-4 text-left">
+                <p className="text-xs font-bold text-red-700 uppercase tracking-wide mb-1">Catatan dari Admin</p>
+                <p className="text-sm text-on-error-container leading-relaxed">{rejectReason}</p>
+              </div>
             )}
-            <p className="text-sm text-on-surface-variant leading-relaxed mb-8">
-              Silakan perbaiki data Anda dan lakukan pendaftaran ulang.
+
+            <div className="bg-[#FFF7ED] border border-orange-200 rounded-xl p-4 mb-8 flex gap-3 text-left">
+              <span className="material-symbols-outlined text-orange-500 text-[20px] shrink-0 mt-0.5">mark_email_read</span>
+              <div className="text-sm text-orange-800 leading-relaxed">
+                <p className="font-semibold mb-1">Email notifikasi telah dikirim</p>
+                <p>
+                  Detail penolakan dan panduan perbaikan sudah dikirim ke <strong>{email}</strong>.
+                  Silakan periksa kotak masuk Anda.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
+              Perbaiki data sesuai catatan di atas, lalu lakukan pendaftaran ulang.
             </p>
+
             <button
               type="button"
               onClick={handleDaftarUlang}

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegistrationApproved;
+use App\Mail\RegistrationRejected;
 use App\Models\Expert;
 use App\Models\Order;
 use App\Models\Package;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -123,18 +126,25 @@ class ExpertController extends Controller
         $user = $request->user();
         $expert = Expert::where('user_id', $user->id)->firstOrFail();
 
-        if ($expert->profile_status === 'aktif') {
-            return response()->json(['message' => 'Profil sudah aktif, hubungi admin untuk perubahan.'], 403);
+        // Jika hanya update package_id (dari halaman PilihPaket)
+        if ($request->has('package_id') && count($request->all()) === 1) {
+            $expert->update(['package_id' => $request->package_id]);
+            return response()->json($expert);
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'institution' => ['nullable', 'string', 'max:255'],
-            'field' => ['nullable', 'string', 'max:255'],
-            'kriteria' => ['nullable', 'string', 'max:255'],
-            'alamat_lengkap' => ['nullable', 'string'],
-            'alamat_kota' => ['nullable', 'string', 'max:255'],
+            'name'            => ['sometimes', 'required', 'string', 'max:255'],
+            'institution'     => ['nullable', 'string', 'max:255'],
+            'field'           => ['nullable', 'string', 'max:255'],
+            'phone'           => ['nullable', 'string', 'max:20'],
+            'kriteria'        => ['nullable', 'string', 'max:255'],
+            'alamat_lengkap'  => ['nullable', 'string'],
+            'alamat_kota'     => ['nullable', 'string', 'max:255'],
             'alamat_provinsi' => ['nullable', 'string', 'max:255'],
+            'tempat_lahir'    => ['nullable', 'string', 'max:255'],
+            'tanggal_lahir'   => ['nullable', 'date'],
+            'pengalaman'      => ['nullable', 'string'],
+            'package_id'      => ['nullable', 'exists:packages,id'],
         ]);
 
         if ($validator->fails()) {
@@ -192,7 +202,6 @@ class ExpertController extends Controller
         if (!$expert->field) $missing[] = 'Bidang Keahlian';
         if (!$expert->alamat_kota) $missing[] = 'Kota';
         if ($expert->educations()->count() === 0) $missing[] = 'Pendidikan (minimal 1)';
-        if ($expert->documents()->where('type', 'foto_profil')->count() === 0) $missing[] = 'Foto Profil';
 
         return $missing;
     }
@@ -276,7 +285,7 @@ class ExpertController extends Controller
 
     public function verifyProfile(Request $request, $id)
     {
-        $expert = Expert::findOrFail($id);
+        $expert = Expert::with('user')->findOrFail($id);
 
         $missing = $this->checkCompleteness($expert);
         if (!empty($missing)) {
@@ -285,12 +294,24 @@ class ExpertController extends Controller
 
         $expert->update(['profile_status' => 'aktif', 'verified' => true, 'reject_reason' => null]);
 
+        // Kirim email notifikasi ke user
+        $recipientEmail = $expert->user?->email ?? $expert->email;
+        if ($recipientEmail) {
+            $loginUrl = rtrim(config('app.frontend_url', config('app.url')), '/') . '/sign-in';
+            try {
+                Mail::to($recipientEmail)->send(new RegistrationApproved($expert, $loginUrl));
+            } catch (\Throwable $e) {
+                // Gagal kirim email tidak boleh membatalkan verifikasi
+                \Log::warning('Gagal kirim email RegistrationApproved: ' . $e->getMessage());
+            }
+        }
+
         return response()->json($expert);
     }
 
     public function rejectProfile(Request $request, $id)
     {
-        $expert = Expert::findOrFail($id);
+        $expert = Expert::with('user')->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'reject_reason' => ['nullable', 'string', 'max:500'],
@@ -300,10 +321,23 @@ class ExpertController extends Controller
             return response()->json(['message' => $validator->errors()->first()], 422);
         }
 
+        $reason = $request->reject_reason ?? '';
+
         $expert->update([
             'profile_status' => 'ditolak',
-            'reject_reason' => $request->reject_reason,
+            'reject_reason'  => $reason,
         ]);
+
+        // Kirim email notifikasi ke user
+        $recipientEmail = $expert->user?->email ?? $expert->email;
+        if ($recipientEmail) {
+            $registerUrl = rtrim(config('app.frontend_url', config('app.url')), '/') . '/daftar';
+            try {
+                Mail::to($recipientEmail)->send(new RegistrationRejected($expert, $reason, $registerUrl));
+            } catch (\Throwable $e) {
+                \Log::warning('Gagal kirim email RegistrationRejected: ' . $e->getMessage());
+            }
+        }
 
         return response()->json($expert);
     }

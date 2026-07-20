@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import RouteLoader from './components/RouteLoader.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+
+// Public pages
 import Home from './pages/Home.jsx';
 import TentangKami from './pages/TentangKami.jsx';
 import Member from './pages/Member.jsx';
@@ -17,17 +19,16 @@ import TenagaAhli from './pages/TenagaAhli';
 import InstrukturPengajar from './pages/InstrukturPengajar';
 import PenelitiArtikelJurnal from './pages/PenelitiArtikelJurnal';
 import ProfilAhli from './pages/ProfilAhli';
-import ProfilSaya from './pages/ProfilSaya.jsx';
 
-// User (setelah login)
+// Dashboard user (protected)
 import Dashboard from './pages/Dashboard.jsx';
-import LengkapiProfil from './pages/LengkapiProfil.jsx';
+import ProfilSaya from './pages/ProfilSaya.jsx';
 import PilihPaket from './pages/PilihPaket.jsx';
 import Pembayaran from './pages/Pembayaran.jsx';
-import RiwayatPembayaran from './pages/RiwayatPembayaran.jsx';
 import ProfilPublik from './pages/ProfilPublik.jsx';
+import Pengaturan from './pages/Pengaturan.jsx';
 
-// Admin - list
+// Admin
 import AdminLayout from './layouts/AdminLayout.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminExperts from './pages/admin/AdminExperts.jsx';
@@ -36,14 +37,13 @@ import AdminUserVerification from './pages/admin/AdminUserVerification.jsx';
 import AdminPackages from './pages/admin/AdminPackages.jsx';
 import AdminReports from './pages/admin/AdminReports.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
-
-// Admin - form (tambah/edit)
 import AdminExpertForm from './pages/admin/AdminExpertForm.jsx';
 import AdminPackageForm from './pages/admin/AdminPackageForm.jsx';
 
 export default function App() {
   return (
     <Routes>
+      {/* ── ADMIN ── */}
       <Route
         path="/admin"
         element={
@@ -55,25 +55,24 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="verifikasi" element={<AdminUserVerification />} />
         <Route path="pembayaran" element={<AdminPayments />} />
-
         <Route path="paket" element={<AdminPackages />} />
         <Route path="paket/tambah" element={<AdminPackageForm />} />
         <Route path="paket/:id/edit" element={<AdminPackageForm />} />
-
         <Route path="tenaga-ahli" element={<AdminExperts />} />
         <Route path="tenaga-ahli/tambah" element={<AdminExpertForm />} />
         <Route path="tenaga-ahli/:id/edit" element={<AdminExpertForm />} />
-
         <Route path="laporan" element={<AdminReports />} />
         <Route path="pengaturan" element={<AdminSettings />} />
       </Route>
 
+      {/* ── PUBLIC + USER ── */}
       <Route
         path="/*"
         element={
           <RouteLoader>
             <Layout>
               <Routes>
+                {/* Public */}
                 <Route path="/" element={<Home />} />
                 <Route path="/tentang-kami" element={<TentangKami />} />
                 <Route path="/member" element={<Member />} />
@@ -89,54 +88,13 @@ export default function App() {
                 <Route path="/peneliti-artikel-jurnal" element={<PenelitiArtikelJurnal />} />
                 <Route path="/profil/:slug" element={<ProfilAhli />} />
 
-                <Route
-                  path="/pengaturan"
-                  element={
-                    <ProtectedRoute>
-                      <ProfilSaya />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profil-publik"
-                  element={
-                    <ProtectedRoute>
-                      <ProfilPublik />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/lengkapi-profil"
-                  element={
-                    <ProtectedRoute>
-                      <LengkapiProfil />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/paket"
-                  element={
-                    <ProtectedRoute>
-                      <PilihPaket />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/pembayaran"
-                  element={
-                    <ProtectedRoute>
-                      <RiwayatPembayaran />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Dashboard user (protected) */}
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/profil-saya" element={<ProtectedRoute><ProfilSaya /></ProtectedRoute>} />
+                <Route path="/paket" element={<ProtectedRoute><PilihPaket /></ProtectedRoute>} />
+                <Route path="/pembayaran" element={<ProtectedRoute><Pembayaran /></ProtectedRoute>} />
+                <Route path="/profil-publik" element={<ProtectedRoute><ProfilPublik /></ProtectedRoute>} />
+                <Route path="/pengaturan" element={<ProtectedRoute><Pengaturan /></ProtectedRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
