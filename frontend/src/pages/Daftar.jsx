@@ -208,18 +208,56 @@ export default function Daftar() {
     <div className="min-h-screen flex">
       {/* ── Panel kiri — brand ─────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[42%] relative bg-gradient-to-br from-[#0369A1] via-[#0EA5E9] to-[#0284C7] overflow-hidden">
-        <svg
-          className="absolute inset-0 w-full h-full opacity-[0.18]"
-          viewBox="0 0 600 900"
-          preserveAspectRatio="xMidYMid slice"
-          fill="none"
-        >
-          <path d="M-50 200 Q150 100 300 220 T650 180" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 320 Q150 220 300 340 T650 300" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 440 Q150 340 300 460 T650 420" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 560 Q150 460 300 580 T650 540" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 680 Q150 580 300 700 T650 660" stroke="#BAE6FD" strokeWidth="1.5" />
-        </svg>
+        {/* ── Animated ocean-wave background ─────────────────────────
+            Each <svg> layer draws the SAME wave shape twice, back to
+            back (0–600 then 600–1200 in viewBox units). Because the
+            wave itself has a period of 300 units, shifting the whole
+            layer left by exactly 600 units (= 50% of its own rendered
+            width) lands on a pixel-identical frame — so the CSS loop
+            never shows a seam. Three layers at different speeds /
+            opacities / vertical offsets give it a parallax, "swell"
+            feel instead of one flat scroll. */}
+        <div className="absolute inset-0 overflow-hidden">
+          <svg
+            className="wave-layer wave-layer-back"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+            fill="none"
+          >
+            <g opacity="0.12" stroke="#BAE6FD" strokeWidth="1.5">
+              <path d="M0,140 Q75,110 150,140 T300,140 T450,140 T600,140 T750,140 T900,140 T1050,140 T1200,140" />
+              <path d="M0,360 Q75,330 150,360 T300,360 T450,360 T600,360 T750,360 T900,360 T1050,360 T1200,360" />
+              <path d="M0,580 Q75,550 150,580 T300,580 T450,580 T600,580 T750,580 T900,580 T1050,580 T1200,580" />
+              <path d="M0,800 Q75,770 150,800 T300,800 T450,800 T600,800 T750,800 T900,800 T1050,800 T1200,800" />
+            </g>
+          </svg>
+
+          <svg
+            className="wave-layer wave-layer-mid"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+            fill="none"
+          >
+            <g opacity="0.16" stroke="#BAE6FD" strokeWidth="1.5">
+              <path d="M0,220 Q75,175 150,220 T300,220 T450,220 T600,220 T750,220 T900,220 T1050,220 T1200,220" />
+              <path d="M0,440 Q75,395 150,440 T300,440 T450,440 T600,440 T750,440 T900,440 T1050,440 T1200,440" />
+              <path d="M0,660 Q75,615 150,660 T300,660 T450,660 T600,660 T750,660 T900,660 T1050,660 T1200,660" />
+            </g>
+          </svg>
+
+          <svg
+            className="wave-layer wave-layer-front"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+            fill="none"
+          >
+            <g opacity="0.20" stroke="#E0F2FE" strokeWidth="1.5">
+              <path d="M0,300 Q75,265 150,300 T300,300 T450,300 T600,300 T750,300 T900,300 T1050,300 T1200,300" />
+              <path d="M0,520 Q75,485 150,520 T300,520 T450,520 T600,520 T750,520 T900,520 T1050,520 T1200,520" />
+              <path d="M0,740 Q75,705 150,740 T300,740 T450,740 T600,740 T750,740 T900,740 T1050,740 T1200,740" />
+            </g>
+          </svg>
+        </div>
 
         <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
           <Link to="/" className="font-headline-md text-2xl font-bold tracking-tight">
@@ -249,6 +287,32 @@ export default function Daftar() {
 
           <p className="text-white/50 text-xs">© 2026 TenagaAhli.com — System Dynamics Center</p>
         </div>
+
+        <style>{`
+          .wave-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 200%;
+          }
+          @keyframes wave-scroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+          }
+          .wave-layer-back {
+            animation: wave-scroll 26s linear infinite;
+          }
+          .wave-layer-mid {
+            animation: wave-scroll 18s linear infinite;
+          }
+          .wave-layer-front {
+            animation: wave-scroll 12s linear infinite reverse;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .wave-layer { animation: none; }
+          }
+        `}</style>
       </div>
 
       {/* ── Panel kanan — form ─────────────────────────────────────── */}
@@ -493,8 +557,15 @@ export default function Daftar() {
                 <div className="flex flex-col gap-4">
                   {/* Nama Lengkap */}
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
                       Nama Lengkap <span className="text-red-500">*</span>
+                      <div className="group relative inline-flex">
+                        <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                        <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-64 sm:w-72 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                          Gunakan nama lengkap sesuai KTP atau identitas resmi. Nama ini akan ditampilkan di profil publik Anda.
+                          <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                        </div>
+                      </div>
                     </label>
                     <input
                       type="text"
@@ -508,8 +579,15 @@ export default function Daftar() {
 
                   {/* No. HP */}
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
                       No. HP / WhatsApp <span className="text-red-500">*</span>
+                      <div className="group relative inline-flex">
+                        <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                        <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-64 sm:w-72 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                          Nomor WhatsApp aktif untuk komunikasi verifikasi dan notifikasi penting. Pastikan nomor dapat dihubungi.
+                          <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                        </div>
+                      </div>
                     </label>
                     <PhoneInput
                       value={form.phone}
@@ -526,8 +604,15 @@ export default function Daftar() {
 
                   {/* Institusi */}
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
                       Institusi / Perusahaan <span className="text-red-500">*</span>
+                      <div className="group relative inline-flex">
+                        <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                        <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-64 sm:w-72 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                          Nama instansi, universitas, lembaga penelitian, atau perusahaan tempat Anda bekerja atau berafiliasi saat ini.
+                          <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                        </div>
+                      </div>
                     </label>
                     <input
                       type="text"
@@ -541,8 +626,15 @@ export default function Daftar() {
 
                   {/* Bidang Keahlian */}
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
                       Bidang Keahlian <span className="text-red-500">*</span>
+                      <div className="group relative inline-flex">
+                        <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                        <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-64 sm:w-80 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                          Spesialisasi atau fokus keahlian utama Anda. Contoh: Ahli Lingkungan Hidup, Ahli Kehutanan, Konsultan AMDAL, dll.
+                          <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                        </div>
+                      </div>
                     </label>
                     <input
                       type="text"
@@ -593,8 +685,15 @@ export default function Daftar() {
                   {/* Riwayat Pendidikan — dinamis */}
                   <div>
                     <div className="flex items-center justify-between mt-1 mb-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                      <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
                         Riwayat Pendidikan
+                        <div className="group relative inline-flex">
+                          <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                          <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-72 sm:w-80 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                            Minimal 1 riwayat pendidikan wajib diisi (Jenjang & Institusi). Anda dapat menambahkan lebih dari satu pendidikan jika memiliki gelar ganda atau pendidikan lanjutan.
+                            <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                          </div>
+                        </div>
                       </label>
                       <button
                         type="button"
@@ -627,9 +726,11 @@ export default function Daftar() {
                                 className={INPUT_CLS}
                               >
                                 <option value="">Pilih Jenjang</option>
-                                {['S1','S2','S3','Profesor','D3','D4','SMA/SMK'].map(j => (
-                                  <option key={j} value={j}>{j}</option>
-                                ))}
+                                <option value="S1 - Sarjana">S1 - Sarjana</option>
+                                <option value="S2 - Magister">S2 - Magister</option>
+                                <option value="S3 - Doktor">S3 - Doktor</option>
+                                <option value="Profesi">Profesi</option>
+                                <option value="Spesialis">Spesialis</option>
                               </select>
                             </div>
                             <div>
@@ -672,8 +773,15 @@ export default function Daftar() {
 
                   {/* Ringkasan Pengalaman */}
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
                       Ringkasan Pengalaman
+                      <div className="group relative inline-flex">
+                        <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                        <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-72 sm:w-96 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                          Ceritakan pengalaman profesional Anda sebagai tenaga ahli, konsultan, peneliti, atau narasumber. Sertakan proyek penting, posisi yang pernah dipegang, atau kontribusi signifikan di bidang Anda.
+                          <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                        </div>
+                      </div>
                     </label>
                     <textarea
                       rows={4}
@@ -704,8 +812,17 @@ export default function Daftar() {
                   <div className="bg-white rounded-xl border border-outline-variant/30 p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="material-symbols-outlined text-[#0EA5E9]">description</span>
-                      <div>
-                        <h3 className="text-sm font-bold text-on-background">Curriculum Vitae (CV)</h3>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="text-sm font-bold text-on-background">Curriculum Vitae (CV)</h3>
+                          <div className="group relative inline-flex">
+                            <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-64 sm:w-80 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                              Upload CV terbaru dalam format PDF. CV harus mencantumkan riwayat pendidikan, pengalaman kerja, dan keahlian profesional Anda.
+                              <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                            </div>
+                          </div>
+                        </div>
                         <p className="text-xs text-on-surface-variant">Format PDF, maksimal 5MB</p>
                       </div>
                     </div>
@@ -746,8 +863,17 @@ export default function Daftar() {
                   <div className="bg-white rounded-xl border border-outline-variant/30 p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="material-symbols-outlined text-[#0EA5E9]">photo_camera</span>
-                      <div>
-                        <h3 className="text-sm font-bold text-on-background">Pas Foto Formal</h3>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="text-sm font-bold text-on-background">Pas Foto Formal</h3>
+                          <div className="group relative inline-flex">
+                            <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-64 sm:w-80 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                              Foto formal terbaru dengan latar belakang polos, berpakaian rapi, dan terlihat jelas. Foto ini akan ditampilkan di profil publik Anda.
+                              <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                            </div>
+                          </div>
+                        </div>
                         <p className="text-xs text-on-surface-variant">Format JPG/PNG, maksimal 2MB</p>
                       </div>
                     </div>
@@ -794,8 +920,17 @@ export default function Daftar() {
                   <div className="bg-white rounded-xl border border-outline-variant/30 p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="material-symbols-outlined text-[#0EA5E9]">workspace_premium</span>
-                      <div>
-                        <h3 className="text-sm font-bold text-on-background">Bukti Kompetensi</h3>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="text-sm font-bold text-on-background">Bukti Kompetensi</h3>
+                          <div className="group relative inline-flex">
+                            <span className="material-symbols-outlined text-[14px] text-[#0EA5E9] cursor-help">info</span>
+                            <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 w-72 sm:w-96 bg-[#1F2A22] text-white text-[11px] leading-relaxed rounded-lg px-3 py-2.5 shadow-2xl z-50 pointer-events-none whitespace-normal">
+                              Dokumen pendukung seperti sertifikat keahlian, ijazah terakhir, surat tugas sebagai tenaga ahli, SK, kontrak kerja, atau dokumen lain yang membuktikan kompetensi Anda di bidang yang didaftarkan.
+                              <div className="absolute left-3 top-full w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-[#1F2A22]"></div>
+                            </div>
+                          </div>
+                        </div>
                         <p className="text-xs text-on-surface-variant">Sertifikat, ijazah, atau dokumen pendukung (PDF/JPG/PNG, maks 5MB)</p>
                       </div>
                     </div>

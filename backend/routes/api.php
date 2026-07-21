@@ -8,10 +8,19 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EducationController;
 use App\Http\Controllers\Api\ExperienceController;
 use App\Http\Controllers\Api\ExpertController;
+use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PartnerApiController;
 use Illuminate\Support\Facades\Route;
+
+// Health Check Endpoint
+Route::get('/health-check', [HealthCheckController::class, 'index']);
+
+// File viewing and download (public access for viewing uploaded files)
+Route::get('/files/{path}', [FileController::class, 'view'])->where('path', '.*')->name('api.file.view');
+Route::get('/files/{path}/info', [FileController::class, 'info'])->where('path', '.*')->name('api.file.info');
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -55,6 +64,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my/documents', [DocumentController::class, 'index']);
     Route::post('/my/documents', [DocumentController::class, 'store']);
     Route::delete('/my/documents/{id}', [DocumentController::class, 'destroy']);
+
+    // File upload endpoint for profile images
+    Route::post('/upload/profile-image', [FileController::class, 'uploadProfileImage']);
 
     // Paket & pembayaran (user)
     Route::post('/my/choose-package', [OrderController::class, 'choosePackage']);

@@ -35,17 +35,35 @@ export default function Navbar() {
 
   // Cek status login & ambil data user dari localStorage
   useEffect(() => {
-    const token = localStorage.getItem('amdal_token');
-    const user = localStorage.getItem('amdal_user');
+    const loadUser = () => {
+      const token = localStorage.getItem('amdal_token');
+      const user = localStorage.getItem('amdal_user');
 
-    setIsLoggedIn(!!token);
-    if (user) {
-      try {
-        setUserData(JSON.parse(user));
-      } catch (e) {
-        console.error('Error parsing user data', e);
+      setIsLoggedIn(!!token);
+      if (user) {
+        try {
+          setUserData(JSON.parse(user));
+        } catch (e) {
+          console.error('Error parsing user data', e);
+        }
+      } else {
+        setUserData(null);
       }
-    }
+    };
+
+    loadUser(); // jalan saat mount & saat location berubah
+
+    // Dengarkan event custom: dipicu manual saat profil di-update di halaman
+    // lain (mis. setelah upload foto di /profil-saya) tanpa perlu reload.
+    window.addEventListener('amdal-user-updated', loadUser);
+    // Dengarkan storage event bawaan browser: berguna kalau ada tab lain
+    // yang mengubah localStorage (native, tapi tidak jalan di tab yang sama).
+    window.addEventListener('storage', loadUser);
+
+    return () => {
+      window.removeEventListener('amdal-user-updated', loadUser);
+      window.removeEventListener('storage', loadUser);
+    };
   }, [location]);
 
   // Menutup dropdown profil jika klik di luar area menu

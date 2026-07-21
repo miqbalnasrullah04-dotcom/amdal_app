@@ -6,14 +6,12 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // ---------------------------------------------------------------------------
-// Theme constants — matched to TenagaAhli.com's real brand (the sky-blue
-// "Masuk" button + deep navy hero on the sign-in page): a confident primary
-// blue for actions/links, a deep navy for high-contrast bands, and a
-// slightly brighter sky blue reserved for verification/credential accents.
+// TenagaAhli.com Brand Colors - Matching the website's design system
+// Updated from AMDAL.id to TenagaAhli.com branding
 // ---------------------------------------------------------------------------
-const BRAND_BLUE = '#1479D6';
-const NAVY_DARK = '#0B2A4D';
-const ACCENT_SKY = '#0EA5E9';
+const BRAND_BLUE = '#0EA5E9';     // Primary sky blue from TenagaAhli.com
+const NAVY_DARK = '#0B2A4D';      // Deep navy for contrast
+const ACCENT_SKY = '#1479D6';     // Darker blue for verification badges
 
 // Demo data used only if /api/experts/:slug is unreachable.
 const FALLBACK_PROFILE = {
@@ -249,8 +247,8 @@ function SectionHeading({ eyebrow, title, id }) {
 
 function Chip({ children, tone = 'blue' }) {
   const tones = {
-    blue: 'bg-[#1479D6]/10 text-[#1479D6]',
-    sky: 'bg-[#0EA5E9]/10 text-[#0EA5E9]',
+    blue: 'bg-[#0EA5E9]/10 text-[#0EA5E9]',
+    sky: 'bg-[#1479D6]/10 text-[#1479D6]',
     gray: 'bg-gray-100 text-gray-600',
   };
   return <span className={`inline-flex items-center text-sm font-medium px-3.5 py-1.5 rounded-full ${tones[tone]}`}>{children}</span>;
@@ -259,7 +257,7 @@ function Chip({ children, tone = 'blue' }) {
 function StatBlock({ icon, value, label }) {
   return (
     <div className="flex flex-col items-start gap-1 bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <span className="material-symbols-outlined text-[20px] text-[#1479D6]">{icon}</span>
+      <span className="material-symbols-outlined text-[20px] text-[#0EA5E9]">{icon}</span>
       <span className="text-xl font-bold text-gray-900 leading-none">{value}</span>
       <span className="text-xs text-gray-500">{label}</span>
     </div>
@@ -271,10 +269,10 @@ function StatBlock({ icon, value, label }) {
 function TimelineItem({ isLast, period, title, subtitle, description, tag }) {
   return (
     <div className="relative pl-8">
-      <span className="absolute left-0 top-1 w-3 h-3 rounded-full bg-[#1479D6] ring-4 ring-[#1479D6]/15" />
+      <span className="absolute left-0 top-1 w-3 h-3 rounded-full bg-[#0EA5E9] ring-4 ring-[#0EA5E9]/15" />
       {!isLast && <span className="absolute left-[5px] top-4 bottom-[-1.5rem] w-px bg-gray-200" />}
       <div className="flex flex-wrap items-center gap-2 mb-1">
-        <span className="text-xs font-semibold text-[#1479D6] tracking-wide">{period}</span>
+        <span className="text-xs font-semibold text-[#0EA5E9] tracking-wide">{period}</span>
         {tag && <Chip tone="gray">{tag}</Chip>}
       </div>
       <h4 className="text-sm font-bold text-gray-900">{title}</h4>
@@ -316,9 +314,16 @@ export default function ProfilAhli() {
   useEffect(() => {
     setLoading(true);
     api
-      .get(`/experts/${slug || FALLBACK_PROFILE.slug}`)
-      .then((res) => setProfile(res.data))
-      .catch(() => setProfile(FALLBACK_PROFILE))
+      .get(`/experts/${slug}`)
+      .then((res) => {
+        console.log('Expert data loaded:', res.data);
+        setProfile(res.data);
+      })
+      .catch((error) => {
+        console.error('Failed to load expert data:', error);
+        // Fallback to demo data if API fails
+        setProfile(FALLBACK_PROFILE);
+      })
       .finally(() => setLoading(false));
   }, [slug]);
 
@@ -398,16 +403,40 @@ export default function ProfilAhli() {
 
   if (loading) {
     return (
-      <div className="pt-24 min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <span className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-          <p className="text-on-surface-variant text-sm">Memuat profil...</p>
+      <div className="pt-24 min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <span className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#0EA5E9] animate-spin block" />
+          </div>
+          <div className="text-center">
+            <p className="text-gray-900 font-medium">Memuat profil tenaga ahli...</p>
+            <p className="text-gray-500 text-sm mt-1">Menghubungkan ke database TenagaAhli.com</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <div className="pt-24 min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="material-symbols-outlined text-red-600 text-[24px]">person_off</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Profil Tidak Ditemukan</h2>
+          <p className="text-gray-600 mb-4">Tenaga ahli yang Anda cari tidak dapat ditemukan atau belum terverifikasi.</p>
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 bg-[#0EA5E9] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#0284C7] transition-colors"
+          >
+            <span className="material-symbols-outlined text-[18px]">home</span>
+            Kembali ke Beranda
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen">
@@ -469,7 +498,7 @@ export default function ProfilAhli() {
             <div className="flex items-center gap-2 shrink-0">
               <a
                 href={`mailto:${profile.email}`}
-                className="bg-[#1479D6] text-white h-10 px-5 rounded-full flex items-center gap-1.5 font-semibold text-sm hover:bg-[#0F63B0] transition-colors whitespace-nowrap shadow-lg"
+                className="bg-[#0EA5E9] text-white h-10 px-5 rounded-full flex items-center gap-1.5 font-semibold text-sm hover:bg-[#0284C7] transition-colors whitespace-nowrap shadow-lg"
               >
                 <span className="material-symbols-outlined text-[16px]">mail</span>
                 Hubungi
@@ -490,7 +519,7 @@ export default function ProfilAhli() {
                 onClick={() => scrollToSection(s.id)}
                 className={`font-semibold text-sm px-4 py-4 border-b-2 whitespace-nowrap transition-colors ${
                   activeSection === s.id
-                    ? 'text-[#1479D6] border-[#1479D6]'
+                    ? 'text-[#0EA5E9] border-[#0EA5E9]'
                     : 'text-gray-400 border-transparent hover:text-gray-600'
                 }`}
               >
@@ -589,7 +618,7 @@ export default function ProfilAhli() {
         <aside className="flex flex-col gap-5 lg:sticky lg:top-24 self-start">
           <Card>
             <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">Alamat Email</h3>
-            <a href={`mailto:${profile.email}`} className="text-[#1479D6] text-sm font-medium hover:underline break-all">
+            <a href={`mailto:${profile.email}`} className="text-[#0EA5E9] text-sm font-medium hover:underline break-all">
               {profile.email}
             </a>
           </Card>
@@ -604,7 +633,7 @@ export default function ProfilAhli() {
                   href={`https://maps.google.com/?q=${encodeURIComponent(profile.lokasi.label)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[#1479D6] text-sm font-medium hover:underline flex items-center gap-1"
+                  className="text-[#0EA5E9] text-sm font-medium hover:underline flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[16px]">directions</span>
                   Get Directions
@@ -624,7 +653,7 @@ export default function ProfilAhli() {
                     target="_blank"
                     rel="noreferrer"
                     title={s.label}
-                    className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#1479D6] hover:text-white text-gray-600 transition-colors"
+                    className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#0EA5E9] hover:text-white text-gray-600 transition-colors"
                   >
                     <SocialIcon type={s.type} />
                   </a>
@@ -640,7 +669,7 @@ export default function ProfilAhli() {
                 <Link
                   key={k.label}
                   to={k.to}
-                  className="text-xs bg-gray-100 hover:bg-[#1479D6]/10 hover:text-[#1479D6] text-gray-600 px-3 py-1.5 rounded-full transition-colors"
+                  className="text-xs bg-gray-100 hover:bg-[#0EA5E9]/10 hover:text-[#0EA5E9] text-gray-600 px-3 py-1.5 rounded-full transition-colors"
                 >
                   {k.label}
                 </Link>
@@ -695,9 +724,9 @@ export default function ProfilAhli() {
               <Card key={i} className="flex flex-col gap-2.5">
                 <span
                   className="w-9 h-9 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${ACCENT_SKY}1A` }}
+                  style={{ backgroundColor: `${BRAND_BLUE}1A` }}
                 >
-                  <span className="material-symbols-outlined text-[18px]" style={{ color: ACCENT_SKY }}>
+                  <span className="material-symbols-outlined text-[18px]" style={{ color: BRAND_BLUE }}>
                     workspace_premium
                   </span>
                 </span>
@@ -708,7 +737,7 @@ export default function ProfilAhli() {
                   <span>Berlaku s.d. {s.berlakuHingga}</span>
                 </div>
                 {s.dokumen && (
-                  <a href={s.dokumen} className="text-[#1479D6] text-xs font-semibold hover:underline flex items-center gap-1 mt-1">
+                  <a href={s.dokumen} className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 mt-1">
                     <span className="material-symbols-outlined text-[14px]">description</span>
                     Lihat dokumen
                   </a>
@@ -746,7 +775,7 @@ export default function ProfilAhli() {
                     href={a.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#1479D6]/40 hover:shadow-sm transition-all"
+                    className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
                   >
                     <span className="text-sm font-bold text-gray-900">{a.label}</span>
                     <span className="text-xs text-gray-500">{a.metrik}</span>
@@ -768,7 +797,7 @@ export default function ProfilAhli() {
                         <h4 className="text-sm font-bold text-gray-900">{o.nama}</h4>
                         <span className="text-xs text-gray-400 whitespace-nowrap">{o.periode}</span>
                       </div>
-                      <p className="text-sm text-[#1479D6] font-medium mt-0.5">{o.jabatan}</p>
+                      <p className="text-sm text-[#0EA5E9] font-medium mt-0.5">{o.jabatan}</p>
                       <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">{o.kontribusi}</p>
                     </Card>
                   ))}
@@ -811,7 +840,7 @@ export default function ProfilAhli() {
                       <p className="text-sm font-semibold text-gray-900 leading-snug">{p.judul}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{p.penerbit}</p>
                     </div>
-                    <a href={p.link} className="text-[#1479D6] text-xs font-semibold hover:underline flex items-center gap-1 shrink-0">
+                    <a href={p.link} className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 shrink-0">
                       Lihat publikasi
                       <span className="material-symbols-outlined text-[14px]">arrow_outward</span>
                     </a>
@@ -877,32 +906,32 @@ export default function ProfilAhli() {
           <SectionHeading title="Portofolio" eyebrow="Dokumen pendukung" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {profile.portofolio?.cv && (
-              <a href={profile.portofolio.cv} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 hover:border-[#1479D6]/40 hover:shadow-sm transition-all">
-                <span className="material-symbols-outlined text-[#1479D6] text-[20px]">description</span>
+              <a href={profile.portofolio.cv} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all">
+                <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">description</span>
                 <span className="text-sm font-semibold text-gray-900">Unduh CV</span>
               </a>
             )}
             {profile.portofolio?.video && (
-              <a href={profile.portofolio.video} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 hover:border-[#1479D6]/40 hover:shadow-sm transition-all">
-                <span className="material-symbols-outlined text-[#1479D6] text-[20px]">play_circle</span>
+              <a href={profile.portofolio.video} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all">
+                <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">play_circle</span>
                 <span className="text-sm font-semibold text-gray-900">Video Perkenalan</span>
               </a>
             )}
             {profile.portofolio?.sertifikat?.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2">
-                <span className="material-symbols-outlined text-[#1479D6] text-[20px]">workspace_premium</span>
+                <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">workspace_premium</span>
                 <span className="text-sm font-semibold text-gray-900 mb-1">Sertifikat</span>
                 {profile.portofolio.sertifikat.map((f, i) => (
-                  <a key={i} href="#" className="text-xs text-gray-500 hover:text-[#1479D6] hover:underline truncate">{f}</a>
+                  <a key={i} href="#" className="text-xs text-gray-500 hover:text-[#0EA5E9] hover:underline truncate">{f}</a>
                 ))}
               </div>
             )}
             {profile.portofolio?.dokumentasi?.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2">
-                <span className="material-symbols-outlined text-[#1479D6] text-[20px]">photo_library</span>
+                <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">photo_library</span>
                 <span className="text-sm font-semibold text-gray-900 mb-1">Dokumentasi Kegiatan</span>
                 {profile.portofolio.dokumentasi.map((f, i) => (
-                  <a key={i} href="#" className="text-xs text-gray-500 hover:text-[#1479D6] hover:underline truncate">{f}</a>
+                  <a key={i} href="#" className="text-xs text-gray-500 hover:text-[#0EA5E9] hover:underline truncate">{f}</a>
                 ))}
               </div>
             )}
@@ -920,7 +949,7 @@ export default function ProfilAhli() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
               href={`mailto:${profile.email}`}
-              className="bg-white text-[#1479D6] h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/90 transition-colors shadow-lg"
+              className="bg-white text-[#0EA5E9] h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/90 transition-colors shadow-lg"
             >
               <span className="material-symbols-outlined text-[18px]">chat</span>
               Kirim Pesan

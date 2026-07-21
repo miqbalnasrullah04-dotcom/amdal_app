@@ -66,18 +66,56 @@ export default function SignIn() {
     <div className="min-h-screen flex">
       {/* Panel kiri — brand */}
       <div className="hidden lg:flex lg:w-[42%] relative bg-gradient-to-br from-[#0369A1] to-[#0EA5E9] overflow-hidden">
-        <svg
-          className="absolute inset-0 w-full h-full opacity-[0.18]"
-          viewBox="0 0 600 900"
-          preserveAspectRatio="xMidYMid slice"
-          fill="none"
-        >
-          <path d="M-50 200 Q150 100 300 220 T650 180" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 320 Q150 220 300 340 T650 300" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 440 Q150 340 300 460 T650 420" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 560 Q150 460 300 580 T650 540" stroke="#BAE6FD" strokeWidth="1.5" />
-          <path d="M-50 680 Q150 580 300 700 T650 660" stroke="#BAE6FD" strokeWidth="1.5" />
-        </svg>
+        {/* ── Animated ocean-wave background ─────────────────────────
+            Each <svg> layer draws the SAME wave shape twice, back to
+            back (0–600 then 600–1200 in viewBox units). Because the
+            wave itself has a period of 300 units, shifting the whole
+            layer left by exactly 600 units (= 50% of its own rendered
+            width) lands on a pixel-identical frame — so the CSS loop
+            never shows a seam. Three layers at different speeds /
+            opacities / vertical offsets give it a parallax, "swell"
+            feel instead of one flat scroll. */}
+        <div className="absolute inset-0 overflow-hidden">
+          <svg
+            className="wave-layer wave-layer-back"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+            fill="none"
+          >
+            <g opacity="0.12" stroke="#BAE6FD" strokeWidth="1.5">
+              <path d="M0,140 Q75,110 150,140 T300,140 T450,140 T600,140 T750,140 T900,140 T1050,140 T1200,140" />
+              <path d="M0,360 Q75,330 150,360 T300,360 T450,360 T600,360 T750,360 T900,360 T1050,360 T1200,360" />
+              <path d="M0,580 Q75,550 150,580 T300,580 T450,580 T600,580 T750,580 T900,580 T1050,580 T1200,580" />
+              <path d="M0,800 Q75,770 150,800 T300,800 T450,800 T600,800 T750,800 T900,800 T1050,800 T1200,800" />
+            </g>
+          </svg>
+
+          <svg
+            className="wave-layer wave-layer-mid"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+            fill="none"
+          >
+            <g opacity="0.16" stroke="#BAE6FD" strokeWidth="1.5">
+              <path d="M0,220 Q75,175 150,220 T300,220 T450,220 T600,220 T750,220 T900,220 T1050,220 T1200,220" />
+              <path d="M0,440 Q75,395 150,440 T300,440 T450,440 T600,440 T750,440 T900,440 T1050,440 T1200,440" />
+              <path d="M0,660 Q75,615 150,660 T300,660 T450,660 T600,660 T750,660 T900,660 T1050,660 T1200,660" />
+            </g>
+          </svg>
+
+          <svg
+            className="wave-layer wave-layer-front"
+            viewBox="0 0 1200 900"
+            preserveAspectRatio="xMidYMid slice"
+            fill="none"
+          >
+            <g opacity="0.20" stroke="#E0F2FE" strokeWidth="1.5">
+              <path d="M0,300 Q75,265 150,300 T300,300 T450,300 T600,300 T750,300 T900,300 T1050,300 T1200,300" />
+              <path d="M0,520 Q75,485 150,520 T300,520 T450,520 T600,520 T750,520 T900,520 T1050,520 T1200,520" />
+              <path d="M0,740 Q75,705 150,740 T300,740 T450,740 T600,740 T750,740 T900,740 T1050,740 T1200,740" />
+            </g>
+          </svg>
+        </div>
 
         <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
           <Link to="/" className="font-headline-md text-2xl font-bold tracking-tight">
@@ -108,6 +146,32 @@ export default function SignIn() {
 
           <p className="text-white/50 text-xs">© 2026 TenagaAhli.com — System Dynamics Center</p>
         </div>
+
+        <style>{`
+          .wave-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 200%;
+          }
+          @keyframes wave-scroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+          }
+          .wave-layer-back {
+            animation: wave-scroll 26s linear infinite;
+          }
+          .wave-layer-mid {
+            animation: wave-scroll 18s linear infinite;
+          }
+          .wave-layer-front {
+            animation: wave-scroll 12s linear infinite reverse;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .wave-layer { animation: none; }
+          }
+        `}</style>
       </div>
 
       {/* Panel kanan — form */}

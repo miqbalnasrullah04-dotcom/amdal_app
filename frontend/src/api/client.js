@@ -1,19 +1,68 @@
 import axios from 'axios';
 
-// In dev, Vite proxies /api to the Laravel backend (see vite.config.js).
-// In production, set VITE_API_URL to your deployed Laravel API base URL.
-const baseURL = import.meta.env.VITE_API_URL || '/api';
+// API Configuration
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
+// Create axios instance with base configuration
 const api = axios.create({
   baseURL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  timeout: 10000, // 10 seconds timeout
 });
 
-// Attach the auth token (if the user is signed in) to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('amdal_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// Request interceptor - attach auth token and handle requests
+api.interceptors.request.use(
+  (config) => {
+    // Attach auth token if available
+    const token = localStorage.getItem('amdal_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // Log request for debugging
+    console.log(`🔄 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    
+    return config;
+  },
+  (error) => {
+    console.error('❌ Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor - handle responses and errors
+api.interceptors.response.use(
+  (response) => {
+    console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
+    return response;
+  },
+  (error) => {
+    console.error('❌ Response Error:', error.response?.data || error.message);
+    
+    // Handle 401 Unauthorized - redirect to login
+    if (error.response?.status === 401) {
+      localStorage.removeItem('amdal_token');
+      localStorage.removeItem('amdal_user');
+      window.location.href = '/login';
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// Test database connection
+export const testConnection = async () => {
+  try {
+    const response = await api.get('/health-check');
+    console.log('✅ Database connection test successful');
+    return response.data;
+  } catch (error) {
+    console.error('❌ Database connection test failed:', error);
+    throw error;
+  }
+};
 
 export default api;

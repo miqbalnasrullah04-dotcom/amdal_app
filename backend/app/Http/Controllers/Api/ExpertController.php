@@ -57,41 +57,125 @@ class ExpertController extends Controller
 
     public function show(string $slug)
     {
-        $expert = Expert::where('slug', $slug)->where('profile_status', 'aktif')->firstOrFail();
+        $expert = Expert::with(['educations', 'experiences', 'certificates'])
+            ->where('slug', $slug)
+            ->where('profile_status', 'aktif')
+            ->firstOrFail();
 
         $routeMap = Expert::kriteriaRouteMap();
         $kriteriaList = $expert->kriteria_list ?: [$expert->kriteria];
 
+        // Calculate years of experience
+        $yearsActive = $expert->active_since ? now()->year - $expert->active_since : 0;
+
         $profile = [
             'slug' => $expert->slug,
             'name' => $expert->name,
+            'gelar' => $expert->field ? "Ahli {$expert->field}" : '',
+            'profesi' => $expert->field ?? 'Tenaga Ahli',
             'institution' => $expert->institution,
             'verified' => $expert->verified,
             'activeSince' => $expert->active_since,
-            'photo' => $expert->photo,
-            'cover' => $expert->cover,
+            'photo' => $expert->photo ? (filter_var($expert->photo, FILTER_VALIDATE_URL) ? $expert->photo : asset('storage/' . $expert->photo)) : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
+            'cover' => $expert->cover ? (filter_var($expert->cover, FILTER_VALIDATE_URL) ? $expert->cover : asset('storage/' . $expert->cover)) : 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1400',
             'email' => $expert->email,
-            'keahlian' => $expert->keahlian ?? [],
+            'ketersediaan' => [
+                'status' => 'tersedia',
+                'label' => 'Tersedia untuk kerja sama baru'
+            ],
+
+            // Bio dan keahlian
+            'tentangSaya' => $expert->pengalaman ?? 'Tenaga ahli berpengalaman dengan dedikasi tinggi dalam bidang keahliannya.',
+            'ringkasanKeahlian' => "Spesialis {$expert->field} dengan pengalaman lebih dari {$yearsActive} tahun.",
+            'bidangUtama' => $expert->keahlian ?? [$expert->field ?? 'Konsultasi Profesional'],
+            'keahlian' => $expert->keahlian ?? [$expert->field ?? 'Keahlian Profesional'],
+            'spesialisasi' => $expert->keahlian ?? ['Konsultasi', 'Analisis', 'Perencanaan'],
+            'kompetensi' => ['Analisis Data', 'Penyusunan Laporan', 'Konsultasi Profesional'],
+            'kategoriProfesional' => $kriteriaList,
+
+            // Lokasi dan alamat
             'alamat' => [
                 'lengkap' => $expert->alamat_lengkap,
                 'kota' => $expert->alamat_kota,
                 'provinsi' => $expert->alamat_provinsi,
             ],
             'lokasi' => [
-                'label' => $expert->lokasi_label,
-                'lat' => $expert->lat,
-                'lng' => $expert->lng,
+                'label' => $expert->lokasi_label ?: "{$expert->alamat_kota}, {$expert->alamat_provinsi}",
+                'lat' => $expert->lat ?: -6.5622,
+                'lng' => $expert->lng ?: 106.7297,
             ],
+
+            // Data dari relasi
+            'pendidikan' => $expert->educations->map(function ($edu) {
+                return [
+                    'jenjang' => $edu->jenjang,
+                    'institusi' => $edu->institusi,
+                    'prodi' => $edu->jurusan,
+                    'gelar' => $edu->jenjang,
+                    'tahun' => $edu->tahun_lulus,
+                ];
+            }),
+            'pengalamanKerja' => $expert->experiences->map(function ($exp) {
+                $startYear = $exp->tahun_mulai;
+                $endYear = $exp->tahun_selesai ?: 'Sekarang';
+                return [
+                    'jabatan' => $exp->posisi,
+                    'institusi' => $exp->instansi,
+                    'periode' => "{$startYear} — {$endYear}",
+                    'deskripsi' => $exp->deskripsi,
+                ];
+            }),
+            'sertifikasi' => $expert->certificates->map(function ($cert) {
+                $filePath = $cert->file_path;
+                $fileUrl = null;
+                $downloadUrl = null;
+
+                if ($filePath) {
+                    if (filter_var($filePath, FILTER_VALIDATE_URL)) {
+                        $fileUrl = $filePath;
+                        $downloadUrl = $filePath;
+                    } else {
+                        $fileUrl = asset('storage/' . $filePath);
+                        $downloadUrl = route('api.file.view', ['path' => $filePath]) . '?download=1';
+                    }
+                }
+
+                return [
+                    'nama' => $cert->nama_sertifikat,
+                    'lembaga' => $cert->penerbit,
+                    'nomor' => '-',
+                    'tahun' => $cert->tahun,
+                    'berlakuHingga' => 'Seumur hidup',
+                    'dokumen' => $fileUrl ?: '#',
+                    'downloadUrl' => $downloadUrl,
+                ];
+            }),
+
+            // Sosial media dan kriteria
             'sosial' => $expert->sosial ?? [],
             'kriteria' => collect($kriteriaList)->map(fn ($label) => [
                 'label' => $label,
                 'to' => $routeMap[$label] ?? '/',
             ])->values(),
+
+            // Riwayat kegiatan
             'narasumber' => $expert->narasumber_riwayat ?? [],
             'kajian' => $expert->kajian_riwayat ?? [],
-            'educations' => $expert->educations,
-            'experiences' => $expert->experiences,
-            'certificates' => $expert->certificates,
+
+            // Data tambahan untuk template
+            'pengalamanProyek' => [], // Akan diisi dari experiences jika ada
+            'organisasi' => [],
+            'publikasi' => [],
+            'reviewerJurnal' => [],
+            'instruktur' => [],
+            'profilAkademik' => null,
+            'portofolio' => [
+                'cv' => $expert->cv_path,
+                'sertifikat' => $expert->certificates->pluck('file_path')->filter()->toArray(),
+                'dokumentasi' => [],
+                'dokumenProyek' => [],
+                'video' => null,
+            ],
         ];
 
         return response()->json($profile);
@@ -145,13 +229,39 @@ class ExpertController extends Controller
             'tanggal_lahir'   => ['nullable', 'date'],
             'pengalaman'      => ['nullable', 'string'],
             'package_id'      => ['nullable', 'exists:packages,id'],
+            'photo'           => ['nullable', 'image', 'max:2048'], // 2MB max
+            'cover'           => ['nullable', 'image', 'max:5120'], // 5MB max
         ]);
 
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
         }
 
-        $expert->update($validator->validated());
+        $data = $validator->validated();
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($expert->photo && \Storage::disk('public')->exists($expert->photo)) {
+                \Storage::disk('public')->delete($expert->photo);
+            }
+
+            $photoPath = $request->file('photo')->store('experts/photos', 'public');
+            $data['photo'] = $photoPath;
+        }
+
+        // Handle cover upload
+        if ($request->hasFile('cover')) {
+            // Delete old cover if exists
+            if ($expert->cover && \Storage::disk('public')->exists($expert->cover)) {
+                \Storage::disk('public')->delete($expert->cover);
+            }
+
+            $coverPath = $request->file('cover')->store('experts/covers', 'public');
+            $data['cover'] = $coverPath;
+        }
+
+        $expert->update($data);
 
         if ($expert->profile_status === 'ditolak') {
             $expert->update(['profile_status' => 'draft', 'reject_reason' => null]);

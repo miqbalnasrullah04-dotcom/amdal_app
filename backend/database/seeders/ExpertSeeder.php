@@ -3,192 +3,193 @@
 namespace Database\Seeders;
 
 use App\Models\Expert;
+use App\Models\Education;
+use App\Models\Experience;
+use App\Models\Certificate;
 use Illuminate\Database\Seeder;
 
 class ExpertSeeder extends Seeder
 {
     public function run(): void
     {
-        $experts = [
-            [
-                'slug' => 'dr-irman-firmansyah-s-hut-m-si',
-                'name' => 'Dr. Irman Firmansyah, S.Hut, M.Si',
-                'field' => 'Ahli Kehutanan & Tata Ruang',
-                'kriteria' => 'Narasumber/Pembicara',
-                'kriteria_list' => ['Narasumber/Pembicara', 'Instruktur Pengajar'],
-                'location' => 'Bogor',
-                'lat' => -6.5622,
-                'lng' => 106.7297,
-                'rating' => 4.9,
-                'photo' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
-                'cover' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1400',
-                'verified' => true,
-                'featured' => true,
-                'institution' => 'PSL - IPB University',
-                'active_since' => 2011,
-                'email' => 'irmanf@gmail.com',
-                'keahlian' => ['Ilmu Kehutanan', 'Ilmu Lingkungan', 'System Dynamics', 'Spasial Dynamics'],
-                'alamat_lengkap' => 'Komplek IPB 2, Blok C No. 4 Sindang Barang, Bogor 16117',
-                'alamat_kota' => 'Kota Bogor',
-                'alamat_provinsi' => 'Jawa Barat',
-                'lokasi_label' => 'Jl. Mercurius No.4, RW.5, Ciherang, Kec. Dramaga, Kabupaten Bogor, Jawa Barat 16680',
-                'sosial' => [
-                    ['label' => 'Instagram', 'type' => 'instagram', 'url' => 'https://www.instagram.com/dr.irman/'],
-                    ['label' => 'Facebook', 'type' => 'facebook', 'url' => 'https://www.facebook.com/wearecase27/'],
-                    ['label' => 'YouTube', 'type' => 'youtube', 'url' => 'https://www.youtube.com/channel/UCva2ULajnzEhorlabr_yDpA'],
-                    ['label' => 'Twitter', 'type' => 'twitter', 'url' => 'https://twitter.com/collective27'],
+        // Expert 1: Dr. Irman Firmansyah
+        $expert1 = Expert::create([
+            'slug' => 'dr-irman-firmansyah-s-hut-m-si',
+            'name' => 'Dr. Irman Firmansyah, S.Hut, M.Si',
+            'field' => 'Kajian Lingkungan Hidup Strategis',
+            'kriteria' => 'Tenaga Ahli',
+            'kriteria_list' => ['Tenaga Ahli', 'Narasumber/Pembicara', 'Peneliti'],
+            'institution' => 'PSL - IPB University',
+            'active_since' => 2011,
+            'email' => 'irmanf@psl.ipb.ac.id',
+            'phone' => '+62812345678901',
+            'photo' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200',
+            'cover' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1400',
+            'verified' => true,
+            'featured' => true,
+            'profile_status' => 'aktif',
+            'rating' => 4.8,
+            'alamat_lengkap' => 'Komplek IPB 2, Blok C No. 4 Sindang Barang, Bogor 16117',
+            'alamat_kota' => 'Kota Bogor',
+            'alamat_provinsi' => 'Jawa Barat',
+            'lokasi_label' => 'Jl. Mercurius No.4, RW.5, Ciherang, Kec. Dramaga, Kabupaten Bogor, Jawa Barat 16680',
+            'lat' => -6.5622,
+            'lng' => 106.7297,
+            'keahlian' => ['Ilmu Kehutanan', 'Ilmu Lingkungan', 'System Dynamics', 'Spasial Dynamics'],
+            'pengalaman' => 'Bekerja pada irisan antara ilmu kehutanan, lingkungan, dan pemodelan sistem dinamik untuk mendukung perencanaan pembangunan yang berkelanjutan. Selama lebih dari satu dekade terlibat dalam penyusunan KLHS, kajian daya dukung lingkungan, dan pendampingan kebijakan tata ruang di berbagai daerah di Indonesia.',
+            'sosial' => [
+                ['label' => 'Instagram', 'type' => 'instagram', 'url' => 'https://www.instagram.com/dr.irman/'],
+                ['label' => 'Facebook', 'type' => 'facebook', 'url' => 'https://www.facebook.com/wearecase27/'],
+                ['label' => 'YouTube', 'type' => 'youtube', 'url' => 'https://www.youtube.com/channel/UCva2ULajnzEhorlabr_yDpA'],
+            ],
+            'narasumber_riwayat' => [
+                [
+                    'title' => 'Identifikasi materi KRP & analisis pengaruh KLHS RDTR Kec. Selaawi–Banyuresmi',
+                    'penyelenggara' => 'Dinas Lingkungan Hidup Kab. Garut',
+                    'tempat' => 'Garut',
+                    'tanggal' => '15 Nov 2022'
                 ],
-                'narasumber_riwayat' => [
-                    [
-                        'title' => 'Identifikasi materi KRP & analisis pengaruh KLHS RDTR Kec. Selaawi–Banyuresmi',
-                        'penyelenggara' => 'Dinas Lingkungan Hidup Kab. Garut',
-                        'tempat' => 'Garut',
-                        'tanggal' => '15 Nov 2022',
-                    ],
-                    [
-                        'title' => 'Penyepakatan isu pembangunan berkelanjutan strategis KLHS RDTR Kec. Selaawi–Banyuresmi',
-                        'penyelenggara' => 'Dinas Lingkungan Hidup Kab. Garut',
-                        'tempat' => 'Garut',
-                        'tanggal' => '21 Sep 2022',
-                    ],
-                ],
-                'kajian_riwayat' => [
-                    [
-                        'title' => 'Kajian sistem dinamik untuk KLHS RPJMD Kota Manado',
-                        'tempat' => 'Manado',
-                        'tanggal' => 'Jun–Agt 2021',
-                    ],
+                [
+                    'title' => 'Penyepakatan isu pembangunan berkelanjutan strategis KLHS RDTR Kec. Selaawi–Banyuresmi',
+                    'penyelenggara' => 'Dinas Lingkungan Hidup Kab. Garut',
+                    'tempat' => 'Garut',
+                    'tanggal' => '21 Sep 2022'
                 ],
             ],
-            [
-                'slug' => 'ir-nurul-hidayah-m-t',
-                'name' => 'Ir. Nurul Hidayah, M.T.',
-                'field' => 'Ahli Kualitas Udara & Kebisingan',
-                'kriteria' => 'Narasumber/Pembicara',
-                'kriteria_list' => ['Narasumber/Pembicara'],
-                'location' => 'Depok',
-                'lat' => -6.4025,
-                'lng' => 106.7942,
-                'rating' => 4.7,
-                'photo' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
-                'cover' => 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&q=80&w=800',
-                'verified' => true,
-                'featured' => false,
-                'institution' => 'Universitas Indonesia',
-                'active_since' => 2015,
-                'email' => 'nurul.hidayah@example.com',
-                'keahlian' => ['Kualitas Udara', 'Kebisingan Lingkungan'],
-                'alamat_kota' => 'Depok',
-                'alamat_provinsi' => 'Jawa Barat',
-                'lokasi_label' => 'Depok, Jawa Barat',
-                'sosial' => [],
-                'narasumber_riwayat' => [],
-                'kajian_riwayat' => [],
-            ],
-            [
-                'slug' => 'dr-agus-purnomo-s-si-m-env',
-                'name' => 'Dr. Agus Purnomo, S.Si, M.Env',
-                'field' => 'Ahli Hidrologi & Kualitas Air',
-                'kriteria' => 'Narasumber/Pembicara',
-                'kriteria_list' => ['Narasumber/Pembicara'],
-                'location' => 'Jakarta',
-                'lat' => -6.2088,
-                'lng' => 106.8456,
-                'rating' => 5.0,
-                'photo' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=100',
-                'cover' => 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800',
-                'verified' => false,
-                'featured' => false,
-                'institution' => 'Universitas Indonesia',
-                'active_since' => 2018,
-                'email' => 'agus.purnomo@example.com',
-                'keahlian' => ['Hidrologi', 'Kualitas Air'],
-                'alamat_kota' => 'Jakarta',
-                'alamat_provinsi' => 'DKI Jakarta',
-                'lokasi_label' => 'Jakarta',
-                'sosial' => [],
-                'narasumber_riwayat' => [],
-                'kajian_riwayat' => [],
-            ],
-            [
-                'slug' => 'dr-andi-prasetyo-m-pd',
-                'name' => 'Dr. Andi Prasetyo, M.Pd.',
-                'field' => 'Instruktur Pelatihan Kepemimpinan',
-                'kriteria' => 'Instruktur Pengajar',
-                'kriteria_list' => ['Instruktur Pengajar'],
-                'location' => 'Bandung',
-                'lat' => -6.9175,
-                'lng' => 107.6191,
-                'rating' => 4.8,
-                'photo' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100',
-                'cover' => 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800',
-                'verified' => true,
-                'featured' => false,
-                'institution' => 'Universitas Pendidikan Indonesia',
-                'active_since' => 2013,
-                'email' => 'andi.prasetyo@example.com',
-                'keahlian' => ['Kepemimpinan', 'Pelatihan Manajemen'],
-                'alamat_kota' => 'Bandung',
-                'alamat_provinsi' => 'Jawa Barat',
-                'lokasi_label' => 'Bandung, Jawa Barat',
-                'sosial' => [],
-                'narasumber_riwayat' => [],
-                'kajian_riwayat' => [],
-            ],
-            [
-                'slug' => 'dra-ratna-kusuma-m-si',
-                'name' => 'Dra. Ratna Kusuma, M.Si.',
-                'field' => 'Instruktur Pengembangan Kurikulum',
-                'kriteria' => 'Instruktur Pengajar',
-                'kriteria_list' => ['Instruktur Pengajar'],
-                'location' => 'Semarang',
-                'lat' => -6.9932,
-                'lng' => 110.4203,
-                'rating' => 4.6,
-                'photo' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
-                'cover' => 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&q=80&w=800',
-                'verified' => true,
-                'featured' => false,
-                'institution' => 'Universitas Diponegoro',
-                'active_since' => 2016,
-                'email' => 'ratna.kusuma@example.com',
-                'keahlian' => ['Pengembangan Kurikulum', 'Pendidikan'],
-                'alamat_kota' => 'Semarang',
-                'alamat_provinsi' => 'Jawa Tengah',
-                'lokasi_label' => 'Semarang, Jawa Tengah',
-                'sosial' => [],
-                'narasumber_riwayat' => [],
-                'kajian_riwayat' => [],
-            ],
-            [
-                'slug' => 'drs-yusuf-hidayat-m-m',
-                'name' => 'Drs. Yusuf Hidayat, M.M.',
-                'field' => 'Instruktur Manajemen & Kewirausahaan',
-                'kriteria' => 'Instruktur Pengajar',
-                'kriteria_list' => ['Instruktur Pengajar'],
-                'location' => 'Surabaya',
-                'lat' => -7.2575,
-                'lng' => 112.7521,
-                'rating' => 4.9,
-                'photo' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=100',
-                'cover' => 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800',
-                'verified' => false,
-                'featured' => false,
-                'institution' => 'Universitas Airlangga',
-                'active_since' => 2014,
-                'email' => 'yusuf.hidayat@example.com',
-                'keahlian' => ['Manajemen', 'Kewirausahaan'],
-                'alamat_kota' => 'Surabaya',
-                'alamat_provinsi' => 'Jawa Timur',
-                'lokasi_label' => 'Surabaya, Jawa Timur',
-                'sosial' => [],
-                'narasumber_riwayat' => [],
-                'kajian_riwayat' => [],
-            ],
-        ];
+        ]);
 
-        foreach ($experts as $expert) {
-            Expert::updateOrCreate(['slug' => $expert['slug']], $expert);
-        }
+        // Add Education for Expert 1
+        Education::create([
+            'expert_id' => $expert1->id,
+            'jenjang' => 'S3 · Doktor',
+            'institusi' => 'IPB University',
+            'jurusan' => 'Ilmu Pengetahuan Kehutanan',
+            'tahun_lulus' => 2018,
+        ]);
+
+        Education::create([
+            'expert_id' => $expert1->id,
+            'jenjang' => 'S2 · Magister',
+            'institusi' => 'IPB University',
+            'jurusan' => 'Ilmu Lingkungan',
+            'tahun_lulus' => 2010,
+        ]);
+
+        Education::create([
+            'expert_id' => $expert1->id,
+            'jenjang' => 'S1 · Sarjana',
+            'institusi' => 'IPB University',
+            'jurusan' => 'Kehutanan',
+            'tahun_lulus' => 2006,
+        ]);
+
+        // Add Experience for Expert 1
+        Experience::create([
+            'expert_id' => $expert1->id,
+            'posisi' => 'Peneliti & Dosen',
+            'instansi' => 'Pusat Studi Lingkungan (PSL), IPB University',
+            'tahun_mulai' => 2011,
+            'tahun_selesai' => null, // Still working
+            'deskripsi' => 'Mengampu riset dan pengajaran pada bidang perencanaan lingkungan, dengan fokus pemodelan sistem dinamik untuk kajian daya dukung wilayah.',
+        ]);
+
+        Experience::create([
+            'expert_id' => $expert1->id,
+            'posisi' => 'Konsultan Lingkungan Independen',
+            'instansi' => 'Freelance / Berbagai Pemerintah Daerah',
+            'tahun_mulai' => 2013,
+            'tahun_selesai' => null,
+            'deskripsi' => 'Menyusun dan memfasilitasi Kajian Lingkungan Hidup Strategis (KLHS) untuk RTRW, RDTR, dan RPJMD di lebih dari 15 kabupaten/kota.',
+        ]);
+
+        // Add Certificates for Expert 1
+        Certificate::create([
+            'expert_id' => $expert1->id,
+            'nama_sertifikat' => 'Ahli Kajian Lingkungan Hidup Strategis (KLHS)',
+            'penerbit' => 'Kementerian Lingkungan Hidup dan Kehutanan',
+            'tahun' => 2019,
+        ]);
+
+        Certificate::create([
+            'expert_id' => $expert1->id,
+            'nama_sertifikat' => 'Fasilitator Pemodelan Sistem Dinamik',
+            'penerbit' => 'System Dynamics Society Indonesia',
+            'tahun' => 2020,
+        ]);
+
+        // Expert 2: Prof. Dr. Sari Wijayanti
+        $expert2 = Expert::create([
+            'slug' => 'prof-dr-sari-wijayanti-m-si',
+            'name' => 'Prof. Dr. Sari Wijayanti, M.Si',
+            'field' => 'Ekonomi Lingkungan dan Sumber Daya Alam',
+            'kriteria' => 'Tenaga Ahli',
+            'kriteria_list' => ['Tenaga Ahli', 'Peneliti', 'Instruktur Pengajar'],
+            'institution' => 'Fakultas Ekonomi dan Manajemen - IPB University',
+            'active_since' => 2008,
+            'email' => 'sari.wijayanti@ipb.ac.id',
+            'phone' => '+62812345678902',
+            'photo' => 'https://images.unsplash.com/photo-1494790108755-2616b332c76c?auto=format&fit=crop&q=80&w=200',
+            'cover' => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1400',
+            'verified' => true,
+            'featured' => true,
+            'profile_status' => 'aktif',
+            'rating' => 4.9,
+            'alamat_lengkap' => 'Jl. Kamper, Kampus IPB Dramaga, Bogor 16680',
+            'alamat_kota' => 'Kabupaten Bogor',
+            'alamat_provinsi' => 'Jawa Barat',
+            'lokasi_label' => 'Fakultas Ekonomi dan Manajemen IPB, Jl. Kamper, Dramaga, Bogor',
+            'lat' => -6.5588,
+            'lng' => 106.7291,
+            'keahlian' => ['Ekonomi Lingkungan', 'Valuasi Ekonomi SDA', 'Environmental Accounting', 'Green Economy'],
+            'pengalaman' => 'Ahli ekonomi lingkungan dengan spesialisasi valuasi ekonomi sumber daya alam dan jasa ekosistem. Berpengalaman dalam penyusunan kebijakan ekonomi hijau dan instrumen ekonomi lingkungan untuk pembangunan berkelanjutan.',
+            'sosial' => [
+                ['label' => 'Instagram', 'type' => 'instagram', 'url' => 'https://www.instagram.com/prof.sari/'],
+                ['label' => 'Twitter', 'type' => 'twitter', 'url' => 'https://twitter.com/sari_ekonomi'],
+            ],
+        ]);
+
+        // Add Education for Expert 2
+        Education::create([
+            'expert_id' => $expert2->id,
+            'jenjang' => 'S3 · Doktor',
+            'institusi' => 'University of Queensland, Australia',
+            'jurusan' => 'Environmental and Resource Economics',
+            'tahun_lulus' => 2015,
+        ]);
+
+        Education::create([
+            'expert_id' => $expert2->id,
+            'jenjang' => 'S2 · Magister',
+            'institusi' => 'IPB University',
+            'jurusan' => 'Ilmu Ekonomi Pertanian',
+            'tahun_lulus' => 2008,
+        ]);
+
+        // Expert 3: Ir. Bambang Susanto
+        Expert::create([
+            'slug' => 'ir-bambang-susanto-m-t',
+            'name' => 'Ir. Bambang Susanto, M.T',
+            'field' => 'Teknik Lingkungan dan Pengelolaan Limbah',
+            'kriteria' => 'Tenaga Ahli',
+            'kriteria_list' => ['Tenaga Ahli', 'Narasumber/Pembicara'],
+            'institution' => 'PT. Enviro Konsultan Indonesia',
+            'active_since' => 2005,
+            'email' => 'bambang.susanto@enviro.co.id',
+            'phone' => '+62812345678903',
+            'photo' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
+            'cover' => 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&q=80&w=1400',
+            'verified' => true,
+            'featured' => false,
+            'profile_status' => 'aktif',
+            'rating' => 4.7,
+            'alamat_lengkap' => 'Jl. Raya Pajajaran No. 123, Bogor Tengah',
+            'alamat_kota' => 'Kota Bogor',
+            'alamat_provinsi' => 'Jawa Barat',
+            'lokasi_label' => 'Jl. Raya Pajajaran No. 123, Bogor Tengah, Bogor',
+            'lat' => -6.5944,
+            'lng' => 106.8229,
+            'keahlian' => ['Teknik Lingkungan', 'Pengelolaan Limbah B3', 'IPAL Industri', 'Environmental Audit'],
+            'pengalaman' => 'Praktisi teknik lingkungan dengan pengalaman lebih dari 18 tahun dalam desain dan implementasi sistem pengelolaan lingkungan industri. Spesialis dalam penanganan limbah B3 dan audit lingkungan.',
+        ]);
     }
 }

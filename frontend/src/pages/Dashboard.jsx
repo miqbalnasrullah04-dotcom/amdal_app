@@ -123,7 +123,15 @@ export default function Dashboard() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs text-on-surface-variant uppercase tracking-wider font-bold mb-1">Paket Aktif</p>
-              <p className="font-bold text-on-background text-sm mb-1.5 truncate">{packageName}</p>
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <p className="font-bold text-on-background text-sm truncate">{packageName}</p>
+                {hasPackage && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-[#E3F2E7] text-[#2E5E3B] px-2 py-0.5 rounded-full">
+                    <span className="material-symbols-outlined text-[11px]">check_circle</span>
+                    Aktif
+                  </span>
+                )}
+              </div>
               {hasPackage ? (
                 <p className="text-xs text-on-surface-variant">Langganan aktif</p>
               ) : (

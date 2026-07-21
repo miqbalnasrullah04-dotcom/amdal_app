@@ -48,43 +48,78 @@ function formatRupiah(value) {
 export default function PilihPaket() {
   const navigate = useNavigate();
   const [packages, setPackages] = useState(STATIC_PACKAGES);
+  const [expert, setExpert] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/packages')
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
+    // Load packages dan expert profile
+    Promise.all([
+      api.get('/packages'),
+      api.get('/my/profile'),
+    ])
+      .then(([packagesRes, profileRes]) => {
+        const data = Array.isArray(packagesRes.data) ? packagesRes.data : [];
         if (data.length > 0) {
           const normalised = data.map((pkg) => ({
             ...pkg,
-            features: Array.isArray(pkg.features)
+            features: Array.isArray(pkg.benefits)
+              ? pkg.benefits
+              : Array.isArray(pkg.features)
               ? pkg.features
               : (pkg.description?.split('\n').filter(Boolean) ?? []),
           }));
           setPackages(normalised);
         }
+        setExpert(profileRes.data);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
+
+  const activePackageId = expert?.package_id;
 
   const handleContinue = async () => {
     if (!selected) return;
     setSubmitting(true);
     setError('');
     try {
-      await api.patch('/my/profile', { package_id: selected.id });
-    } catch {}
-    finally {
-      setSubmitting(false);
+      // Gunakan endpoint /my/choose-package yang sudah ada
+      const res = await api.post('/my/choose-package', { package_id: selected.id });
+
       if (selected.price === 0) {
+        // Paket Free langsung aktif
         navigate('/dashboard');
       } else {
-        navigate('/pembayaran', { state: { package: selected } });
+        // Paket Premium perlu pembayaran
+        if (res.data?.order) {
+          navigate('/pembayaran');
+        } else {
+          navigate('/pembayaran', { state: { package: selected } });
+        }
       }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal memilih paket. Silakan coba lagi.');
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout
+        title="Pilih Paket Keanggotaan"
+        subtitle="Pilih paket yang sesuai untuk mengaktifkan publikasi profil Anda."
+      >
+        <div className="flex items-center gap-3 text-[#5B6660]">
+          <span className="w-5 h-5 rounded-full border-2 border-[#0EA5E9]/30 border-t-[#0EA5E9] animate-spin" />
+          Memuat data paket...
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout
@@ -99,24 +134,36 @@ export default function PilihPaket() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           {packages.map((pkg) => {
             const isSelected = selected?.id === pkg.id;
+            const isActive = activePackageId === pkg.id;
             return (
               <button
                 key={pkg.id}
                 type="button"
-                onClick={() => setSelected(pkg)}
+                onClick={() => !isActive && setSelected(pkg)}
+                disabled={isActive}
                 className={`text-left rounded-2xl border-2 p-6 flex flex-col gap-4 transition-all bg-white w-full ${
-                  isSelected
+                  isActive
+                    ? 'border-[#2E5E3B] ring-2 ring-[#2E5E3B]/20 cursor-default'
+                    : isSelected
                     ? 'border-[#0EA5E9] ring-2 ring-[#0EA5E9]/20'
                     : pkg.highlighted
-                    ? 'border-[#0EA5E9]/40'
+                    ? 'border-[#0EA5E9]/40 hover:border-[#0EA5E9]'
                     : 'border-outline-variant/30 hover:border-[#0EA5E9]/40'
                 }`}
               >
-                {pkg.badge && (
-                  <span className="self-start text-[10px] font-bold uppercase tracking-wide bg-[#0EA5E9] text-white px-2.5 py-1 rounded-full">
-                    {pkg.badge}
-                  </span>
-                )}
+                <div className="flex items-start justify-between gap-2">
+                  {pkg.badge && !isActive && (
+                    <span className="self-start text-[10px] font-bold uppercase tracking-wide bg-[#0EA5E9] text-white px-2.5 py-1 rounded-full">
+                      {pkg.badge}
+                    </span>
+                  )}
+                  {isActive && (
+                    <span className="self-start text-[10px] font-bold uppercase tracking-wide bg-[#2E5E3B] text-white px-2.5 py-1 rounded-full flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                      Paket Aktif
+                    </span>
+                  )}
+                </div>
                 <div>
                   <h3 className="text-xl font-bold text-on-background">{pkg.name}</h3>
                   <p className="text-2xl font-bold text-[#0EA5E9] mt-1">
@@ -134,23 +181,32 @@ export default function PilihPaket() {
                     </li>
                   ))}
                 </ul>
-                {pkg.note && (
+                {pkg.note && !isActive && (
                   <p className="text-xs text-on-surface-variant/70 bg-[#F0F9FF] rounded-lg px-3 py-2 border border-[#0EA5E9]/20">
                     {pkg.note}
                   </p>
                 )}
-                <div className={`w-full text-center text-sm font-semibold py-2.5 rounded-xl border-2 transition-colors ${
-                  isSelected
-                    ? 'bg-[#0EA5E9] text-white border-[#0EA5E9]'
-                    : 'border-[#0EA5E9]/40 text-[#0EA5E9] hover:bg-[#0EA5E9]/5'
-                }`}>
-                  {isSelected ? (
+                {isActive ? (
+                  <div className="w-full text-center text-sm font-semibold py-2.5 rounded-xl border-2 bg-[#E3F2E7] text-[#2E5E3B] border-[#2E5E3B]">
                     <span className="flex items-center justify-center gap-1.5">
-                      <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                      Dipilih
+                      <span className="material-symbols-outlined text-[16px]">verified</span>
+                      Paket Anda Saat Ini
                     </span>
-                  ) : 'Pilih Paket Ini'}
-                </div>
+                  </div>
+                ) : (
+                  <div className={`w-full text-center text-sm font-semibold py-2.5 rounded-xl border-2 transition-colors ${
+                    isSelected
+                      ? 'bg-[#0EA5E9] text-white border-[#0EA5E9]'
+                      : 'border-[#0EA5E9]/40 text-[#0EA5E9] hover:bg-[#0EA5E9]/5'
+                  }`}>
+                    {isSelected ? (
+                      <span className="flex items-center justify-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                        Dipilih
+                      </span>
+                    ) : 'Pilih Paket Ini'}
+                  </div>
+                )}
               </button>
             );
           })}
@@ -167,22 +223,36 @@ export default function PilihPaket() {
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <button
-            type="button"
-            disabled={!selected || submitting}
-            onClick={handleContinue}
-            className="bg-[#0EA5E9] text-white py-3.5 px-12 rounded-full font-bold text-sm hover:bg-[#0284C7] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {submitting ? (
-              <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Memproses...</>
-            ) : selected?.price === 0 ? (
-              <><span className="material-symbols-outlined text-[18px]">check_circle</span>Aktifkan Paket Free</>
-            ) : (
-              <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>Lanjut ke Pembayaran</>
-            )}
-          </button>
-        </div>
+        {!activePackageId && (
+          <div className="flex justify-center">
+            <button
+              type="button"
+              disabled={!selected || submitting}
+              onClick={handleContinue}
+              className="bg-[#0EA5E9] text-white py-3.5 px-12 rounded-full font-bold text-sm hover:bg-[#0284C7] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {submitting ? (
+                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Memproses...</>
+              ) : selected?.price === 0 ? (
+                <><span className="material-symbols-outlined text-[18px]">check_circle</span>Aktifkan Paket Free</>
+              ) : (
+                <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>Lanjut ke Pembayaran</>
+              )}
+            </button>
+          </div>
+        )}
+
+        {activePackageId && (
+          <div className="bg-[#E3F2E7] rounded-xl p-5 flex items-start gap-3 text-sm text-[#1C3822]">
+            <span className="material-symbols-outlined text-[#2E5E3B] text-[20px] shrink-0 mt-0.5">info</span>
+            <div>
+              <p className="font-semibold mb-1">Paket Sudah Aktif</p>
+              <p className="leading-relaxed">
+                Anda sudah memiliki paket aktif. Jika ingin mengganti paket, silakan hubungi admin atau tunggu masa berlaku paket saat ini berakhir.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
