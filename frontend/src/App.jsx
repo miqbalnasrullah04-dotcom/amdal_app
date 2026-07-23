@@ -11,7 +11,7 @@ import PeraturanAMDAL from './pages/PeraturanAMDAL';
 import Pamflet from './pages/Pamflet.jsx';
 import SignIn from './pages/SignIn.jsx';
 import Daftar from './pages/Daftar.jsx';
-import MenungguVerifikasi from './pages/MenungguVerifikasi.jsx';
+import VerifikasiEmail from './pages/VerifikasiEmail.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Search from './pages/Search.jsx';
 import Narasumber from './pages/Narasumber';
@@ -80,7 +80,7 @@ export default function App() {
                 <Route path="/pamflet" element={<Pamflet />} />
                 <Route path="/sign-in" element={<SignIn />} />
                 <Route path="/daftar" element={<Daftar />} />
-                <Route path="/menunggu-verifikasi" element={<MenungguVerifikasi />} />
+                <Route path="/verifikasi-email" element={<VerifikasiEmail />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/narasumber" element={<Narasumber />} />
                 <Route path="/tenaga-ahli" element={<TenagaAhli />} />
@@ -89,12 +89,12 @@ export default function App() {
                 <Route path="/profil/:slug" element={<ProfilAhli />} />
 
                 {/* Dashboard user (protected) */}
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/profil-saya" element={<ProtectedRoute><ProfilSaya /></ProtectedRoute>} />
-                <Route path="/paket" element={<ProtectedRoute><PilihPaket /></ProtectedRoute>} />
-                <Route path="/pembayaran" element={<ProtectedRoute><Pembayaran /></ProtectedRoute>} />
-                <Route path="/profil-publik" element={<ProtectedRoute><ProfilPublik /></ProtectedRoute>} />
-                <Route path="/pengaturan" element={<ProtectedRoute><Pengaturan /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute requiredRole="user"><Dashboard /></ProtectedRoute>} />
+                <Route path="/profil-saya" element={<ProtectedRoute requiredRole="user"><ProfilSaya /></ProtectedRoute>} />
+                <Route path="/paket" element={<ProtectedRoute requiredRole="user"><PilihPaket /></ProtectedRoute>} />
+                <Route path="/pembayaran" element={<ProtectedRoute requiredRole="user"><Pembayaran /></ProtectedRoute>} />
+                <Route path="/profil-publik" element={<ProtectedRoute requiredRole="user"><ProfilPublik /></ProtectedRoute>} />
+                <Route path="/pengaturan" element={<ProtectedRoute requiredRole="user"><Pengaturan /></ProtectedRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

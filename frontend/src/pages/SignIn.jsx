@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/client.js';
 
@@ -9,7 +9,18 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const justRegistered = location.state?.registered;
+  const messageFromState = location.state?.message;
+
+  // Set success message from navigation state on component mount
+  useEffect(() => {
+    if (messageFromState) {
+      setSuccessMessage(messageFromState);
+      // Clear message from state after displaying
+      window.history.replaceState({}, document.title);
+    }
+  }, [messageFromState]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,6 +31,7 @@ export default function SignIn() {
       localStorage.setItem('amdal_token', res.data.token);
       localStorage.setItem('amdal_user', JSON.stringify(res.data.user));
 
+      // Redirect berdasarkan role
       if (res.data.user?.role === 'admin') {
         navigate('/admin');
       } else {
@@ -28,23 +40,11 @@ export default function SignIn() {
     } catch (err) {
       console.error('Login error:', err);
 
-      // NOTE: sesuaikan kondisi ini dengan kontrak API backend kamu.
-      // Asumsi di sini: saat akun belum diverifikasi admin, backend
-      // mengirim status 403 dengan data.status === 'pending' (atau
-      // pesan yang mengandung kata "verifikasi"). Ganti sesuai respons
-      // API sebenarnya.
       const status = err.response?.status;
-      const accountStatus = err.response?.data?.status;
       const message = err.response?.data?.message || '';
 
-      if (status === 403 && (accountStatus === 'pending' || /verifikasi/i.test(message))) {
-        navigate('/menunggu-verifikasi', { state: { email: form.email } });
-        return;
-      }
-
-      if (status === 403 && (accountStatus === 'rejected' || /ditolak/i.test(message))) {
-        setError(message || 'Pendaftaran Anda ditolak. Silakan hubungi admin untuk informasi lebih lanjut.');
-      } else if (status === 422) {
+      // Handle berbagai error
+      if (status === 422) {
         const errors = err.response?.data?.errors;
         const firstError = errors ? Object.values(errors)[0]?.[0] : null;
         setError(firstError || message || 'Data tidak valid.');
@@ -186,9 +186,10 @@ export default function SignIn() {
           <h2 className="font-headline-md text-2xl font-bold text-on-background mb-1">Selamat datang kembali</h2>
           <p className="text-sm text-on-surface-variant mb-8">Masuk untuk mengelola profil tenaga ahli Anda.</p>
 
-          {justRegistered && !error && (
-            <p className="bg-[#E0F2FE] text-[#0369A1] text-sm rounded-lg px-4 py-3 mb-5">
-              Pendaftaran berhasil. Silakan masuk dengan akun Anda.
+          {(justRegistered || successMessage) && !error && (
+            <p className="bg-[#E0F2FE] text-[#0369A1] text-sm rounded-lg px-4 py-3 mb-5 flex items-start gap-2">
+              <span className="material-symbols-outlined text-[18px] mt-0.5 shrink-0">check_circle</span>
+              <span>{successMessage || 'Pendaftaran berhasil. Silakan masuk dengan akun Anda.'}</span>
             </p>
           )}
 

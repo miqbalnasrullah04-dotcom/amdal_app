@@ -15,6 +15,10 @@ const menuItems = [
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState({ experts: [], articles: [], partners: [] });
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     const raw = localStorage.getItem('amdal_user');
@@ -27,6 +31,51 @@ export default function AdminLayout() {
     }
   }, []);
 
+  // Search functionality
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults({ experts: [], articles: [], partners: [] });
+      setShowResults(false);
+      return;
+    }
+
+    const delaySearch = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const [expertsRes, articlesRes, partnersRes] = await Promise.allSettled([
+          api.get('/admin/experts', { params: { keyword: searchQuery } }),
+          api.get('/admin/articles'),
+          api.get('/admin/partners'),
+        ]);
+
+        // Filter experts
+        const allExperts = expertsRes.status === 'fulfilled' ? expertsRes.value.data : [];
+        const experts = allExperts.slice(0, 5);
+
+        // Filter articles locally
+        const allArticles = articlesRes.status === 'fulfilled' ? articlesRes.value.data : [];
+        const articles = allArticles
+          .filter((a) => a.title?.toLowerCase().includes(searchQuery.toLowerCase()))
+          .slice(0, 5);
+
+        // Filter partners locally
+        const allPartners = partnersRes.status === 'fulfilled' ? partnersRes.value.data : [];
+        const partners = allPartners
+          .filter((p) => p.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+          .slice(0, 5);
+
+        setSearchResults({ experts, articles, partners });
+        setShowResults(true);
+      } catch (err) {
+        console.error('Search error:', err);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300); // Debounce 300ms
+
+    return () => clearTimeout(delaySearch);
+  }, [searchQuery]);
+
   const handleLogout = async () => {
     try {
       await api.post('/logout');
@@ -36,6 +85,19 @@ export default function AdminLayout() {
       localStorage.removeItem('amdal_token');
       localStorage.removeItem('amdal_user');
       navigate('/');
+    }
+  };
+
+  const handleSearchSelect = (type, id) => {
+    setSearchQuery('');
+    setShowResults(false);
+    
+    if (type === 'expert') {
+      navigate(`/admin/tenaga-ahli/${id}/edit`);
+    } else if (type === 'article') {
+      navigate(`/admin/artikel/${id}/edit`);
+    } else if (type === 'partner') {
+      navigate(`/admin/mitra/${id}/edit`);
     }
   };
 
@@ -91,9 +153,116 @@ export default function AdminLayout() {
             search
           </span>
           <input
-            placeholder="Cari data ahli, artikel, atau lembaga..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => searchQuery && setShowResults(true)}
+            onBlur={() => setTimeout(() => setShowResults(false), 200)}
+            placeholder=""
             className="w-full pl-10 pr-4 py-2 bg-[#F5F4F0] border-none rounded-full text-sm focus:ring-2 focus:ring-[#0284C7]/40"
           />
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setShowResults(false);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#414844]/40 hover:text-[#0284C7] transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          )}
+
+          {/* Search Results Dropdown */}
+          {showResults && searchQuery && (
+            <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-xl shadow-xl border border-[#0284C7]/15 max-h-96 overflow-y-auto z-50">
+              {searchLoading ? (
+                <div className="p-6 text-center text-[#414844]/70 text-sm">
+                  <span className="material-symbols-outlined animate-spin text-[24px]">progress_activity</span>
+                  <p className="mt-2">Mencari...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Experts Results */}
+                  {searchResults.experts.length > 0 && (
+                    <div className="border-b border-[#0284C7]/10">
+                      <div className="px-4 py-2 bg-[#0284C7]/5">
+                        <p className="text-xs font-bold text-[#0284C7] uppercase tracking-wider">Tenaga Ahli</p>
+                      </div>
+                      {searchResults.experts.map((exp) => (
+                        <button
+                          key={exp.id}
+                          onClick={() => handleSearchSelect('expert', exp.id)}
+                          className="w-full px-4 py-3 hover:bg-[#0284C7]/5 transition-colors text-left flex items-center gap-3"
+                        >
+                          <span className="material-symbols-outlined text-[#0284C7] text-[20px]">person</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-[#1F2A22] truncate">{exp.name}</p>
+                            <p className="text-xs text-[#414844]/60 truncate">{exp.email || exp.institution}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Articles Results */}
+                  {searchResults.articles.length > 0 && (
+                    <div className="border-b border-[#0284C7]/10">
+                      <div className="px-4 py-2 bg-[#0284C7]/5">
+                        <p className="text-xs font-bold text-[#0284C7] uppercase tracking-wider">Artikel</p>
+                      </div>
+                      {searchResults.articles.map((article) => (
+                        <button
+                          key={article.id}
+                          onClick={() => handleSearchSelect('article', article.id)}
+                          className="w-full px-4 py-3 hover:bg-[#0284C7]/5 transition-colors text-left flex items-center gap-3"
+                        >
+                          <span className="material-symbols-outlined text-[#0284C7] text-[20px]">article</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-[#1F2A22] truncate">{article.title}</p>
+                            <p className="text-xs text-[#414844]/60">
+                              {article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID') : 'Draft'}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Partners Results */}
+                  {searchResults.partners.length > 0 && (
+                    <div>
+                      <div className="px-4 py-2 bg-[#0284C7]/5">
+                        <p className="text-xs font-bold text-[#0284C7] uppercase tracking-wider">Lembaga</p>
+                      </div>
+                      {searchResults.partners.map((partner) => (
+                        <button
+                          key={partner.id}
+                          onClick={() => handleSearchSelect('partner', partner.id)}
+                          className="w-full px-4 py-3 hover:bg-[#0284C7]/5 transition-colors text-left flex items-center gap-3"
+                        >
+                          <span className="material-symbols-outlined text-[#0284C7] text-[20px]">handshake</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-[#1F2A22] truncate">{partner.name}</p>
+                            <p className="text-xs text-[#414844]/60 truncate">{partner.type}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* No Results */}
+                  {searchResults.experts.length === 0 && 
+                   searchResults.articles.length === 0 && 
+                   searchResults.partners.length === 0 && (
+                    <div className="p-6 text-center text-[#414844]/70 text-sm">
+                      <span className="material-symbols-outlined text-[40px] text-[#414844]/30">search_off</span>
+                      <p className="mt-2">Tidak ditemukan hasil untuk "{searchQuery}"</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-4">

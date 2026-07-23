@@ -18,9 +18,11 @@ const statusLabel = {
 
 export default function AdminUserVerification() {
   const [experts, setExperts] = useState([]);
+  const [filteredExperts, setFilteredExperts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('menunggu_verifikasi');
+  const [searchQuery, setSearchQuery] = useState('');
   const [detailTarget, setDetailTarget] = useState(null);
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -30,7 +32,10 @@ export default function AdminUserVerification() {
     setLoading(true);
     api
       .get('/admin/experts', { params: filter ? { status: filter } : {} })
-      .then((res) => setExperts(res.data))
+      .then((res) => {
+        setExperts(res.data);
+        setFilteredExperts(res.data);
+      })
       .catch(() => setError('Gagal memuat data.'))
       .finally(() => setLoading(false));
   };
@@ -39,6 +44,28 @@ export default function AdminUserVerification() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
+
+  // Filter experts berdasarkan search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredExperts(experts);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = experts.filter((exp) => {
+      return (
+        exp.name?.toLowerCase().includes(query) ||
+        exp.email?.toLowerCase().includes(query) ||
+        exp.user?.email?.toLowerCase().includes(query) ||
+        exp.phone?.toLowerCase().includes(query) ||
+        exp.field?.toLowerCase().includes(query) ||
+        exp.institution?.toLowerCase().includes(query)
+      );
+    });
+
+    setFilteredExperts(filtered);
+  }, [searchQuery, experts]);
 
   const handleVerify = async (id) => {
     setActionError('');
@@ -79,6 +106,38 @@ export default function AdminUserVerification() {
       {error && <div className="mb-4 bg-[#FFDAD6] text-[#93000A] text-sm rounded-lg p-3">{error}</div>}
 
       <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm overflow-hidden">
+        {/* Search Bar */}
+        <div className="p-5 border-b border-[#0284C7]/15">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#414844]/40 text-[20px]">
+                search
+              </span>
+              <input
+                type="text"
+                placeholder="Cari nama, email, nomor HP, bidang, atau institusi..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-[#0284C7]/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0284C7]/30 focus:border-[#0284C7] transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#414844]/40 hover:text-[#0284C7] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              )}
+            </div>
+          </div>
+          {searchQuery && (
+            <p className="text-xs text-[#414844]/60 mt-2">
+              Menampilkan {filteredExperts.length} dari {experts.length} hasil
+            </p>
+          )}
+        </div>
+
+        {/* Filter Tabs */}
         <div className="p-5 border-b border-[#0284C7]/15 flex gap-2 overflow-x-auto">
           {['menunggu_verifikasi', 'aktif', 'ditolak'].map((s) => (
             <button
@@ -112,14 +171,14 @@ export default function AdminUserVerification() {
                     Memuat data...
                   </td>
                 </tr>
-              ) : experts.length === 0 ? (
+              ) : filteredExperts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-[#414844]/70">
-                    Tidak ada pendaftar pada status ini.
+                    {searchQuery ? `Tidak ditemukan hasil untuk "${searchQuery}"` : 'Tidak ada pendaftar pada status ini.'}
                   </td>
                 </tr>
               ) : (
-                experts.map((exp) => {
+                filteredExperts.map((exp) => {
                   const s = statusLabel[exp.profile_status] || statusLabel.draft;
                   return (
                     <tr key={exp.id} className="hover:bg-[#0284C7]/5 transition-colors">
@@ -202,12 +261,12 @@ export default function AdminUserVerification() {
                 </div>
               </div>
 
-              {/* Ringkasan Pengalaman */}
-              {detailTarget.pengalaman && (
+              {/* Catatan */}
+              {detailTarget.catatan && (
                 <div>
-                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Ringkasan Pengalaman</h4>
+                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Catatan</h4>
                   <p className="bg-[#F5F4EF] p-4 rounded-xl text-xs text-[#414844] leading-relaxed whitespace-pre-line border border-outline-variant/30">
-                    {detailTarget.pengalaman}
+                    {detailTarget.catatan}
                   </p>
                 </div>
               )}

@@ -252,12 +252,12 @@ export default function AdminExperts() {
                 </div>
               </div>
 
-              {/* Ringkasan Pengalaman */}
-              {detailTarget.pengalaman && (
+              {/* Catatan */}
+              {detailTarget.catatan && (
                 <div>
-                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Ringkasan Pengalaman</h4>
+                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Catatan</h4>
                   <p className="bg-[#F5F4EF] p-4 rounded-xl text-xs text-[#414844] leading-relaxed whitespace-pre-line border border-outline-variant/30">
-                    {detailTarget.pengalaman}
+                    {detailTarget.catatan}
                   </p>
                 </div>
               )}

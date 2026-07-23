@@ -6,13 +6,25 @@ const statusLabel = {
   menunggu_verifikasi: { text: 'Menunggu Konfirmasi', color: '#7A5900', bg: '#FFF4D6' },
   verified: { text: 'Berhasil', color: '#0284C7', bg: '#E0F2FE' },
   rejected: { text: 'Ditolak', color: '#B3261E', bg: '#FFDAD6' },
+  pending: { text: 'Pending', color: '#7A5900', bg: '#FFF4D6' },
+  settlement: { text: 'Lunas (Midtrans)', color: '#166534', bg: '#DCFCE7' },
+  expire: { text: 'Kedaluwarsa', color: '#414844', bg: '#F5F4F0' },
+  cancel: { text: 'Dibatalkan', color: '#B3261E', bg: '#FFDAD6' },
+  deny: { text: 'Ditolak', color: '#B3261E', bg: '#FFDAD6' },
+};
+
+const paymentTypeLabel = {
+  midtrans: { text: 'Midtrans', icon: 'credit_card', color: '#0EA5E9' },
+  manual: { text: 'Transfer Manual', icon: 'receipt', color: '#5B6660' },
 };
 
 export default function AdminPayments() {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('menunggu_verifikasi'); // Default filter matches the first tab
+  const [searchQuery, setSearchQuery] = useState('');
   const [previewImage, setPreviewImage] = useState(null);
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -21,7 +33,10 @@ export default function AdminPayments() {
     setLoading(true);
     api
       .get('/admin/orders', { params: filter ? { status: filter } : {} })
-      .then((res) => setOrders(res.data))
+      .then((res) => {
+        setOrders(res.data);
+        setFilteredOrders(res.data);
+      })
       .catch(() => setError('Gagal memuat data order.'))
       .finally(() => setLoading(false));
   };
@@ -30,6 +45,26 @@ export default function AdminPayments() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
+
+  // Filter orders berdasarkan search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredOrders(orders);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = orders.filter((order) => {
+      return (
+        order.expert?.name?.toLowerCase().includes(query) ||
+        order.expert?.email?.toLowerCase().includes(query) ||
+        order.reference_code?.toLowerCase().includes(query) ||
+        order.package?.name?.toLowerCase().includes(query)
+      );
+    });
+
+    setFilteredOrders(filtered);
+  }, [searchQuery, orders]);
 
   const handleVerify = async (order) => {
     try {
@@ -69,6 +104,36 @@ export default function AdminPayments() {
       {error && <div className="mb-4 bg-[#FFDAD6] text-[#93000A] text-sm rounded-lg p-3">{error}</div>}
 
       <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm overflow-hidden">
+        {/* Search Bar */}
+        <div className="p-5 border-b border-[#0284C7]/15">
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#414844]/40 text-[20px]">
+              search
+            </span>
+            <input
+              type="text"
+              placeholder="Cari nama user, kode referensi, atau nama paket..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-[#0284C7]/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0284C7]/30 focus:border-[#0284C7] transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#414844]/40 hover:text-[#0284C7] transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-xs text-[#414844]/60 mt-2">
+              Menampilkan {filteredOrders.length} dari {orders.length} hasil
+            </p>
+          )}
+        </div>
+
+        {/* Filter Tabs */}
         <div className="p-5 border-b border-[#0284C7]/15 flex gap-2 overflow-x-auto">
           {tabs.map((tab) => (
             <button
@@ -93,6 +158,7 @@ export default function AdminPayments() {
                 <th className="px-6 py-3">Kode Ref</th>
                 <th className="px-6 py-3">Paket</th>
                 <th className="px-6 py-3">Nominal</th>
+                <th className="px-6 py-3">Metode</th>
                 <th className="px-6 py-3">Bukti Transfer</th>
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Tanggal</th>
@@ -102,19 +168,22 @@ export default function AdminPayments() {
             <tbody className="divide-y divide-[#0284C7]/10">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-[#414844]/70">
+                  <td colSpan={9} className="px-6 py-8 text-center text-[#414844]/70">
                     Memuat data...
                   </td>
                 </tr>
-              ) : orders.length === 0 ? (
+              ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-[#414844]/70">
-                    Tidak ada data transaksi pada filter ini.
+                  <td colSpan={9} className="px-6 py-8 text-center text-[#414844]/70">
+                    {searchQuery ? `Tidak ditemukan hasil untuk "${searchQuery}"` : 'Tidak ada data transaksi pada filter ini.'}
                   </td>
                 </tr>
               ) : (
-                orders.map((o) => {
+                filteredOrders.map((o) => {
                   const s = statusLabel[o.status] || statusLabel.menunggu_pembayaran;
+                  const paymentType = o.payment_type || (o.snap_token ? 'midtrans' : 'manual');
+                  const pt = paymentTypeLabel[paymentType] || paymentTypeLabel.manual;
+                  
                   return (
                     <tr key={o.id} className="hover:bg-[#0284C7]/5">
                       <td className="px-6 py-4">
@@ -125,6 +194,21 @@ export default function AdminPayments() {
                       <td className="px-6 py-4 font-semibold text-[#1F2A22]">{o.package_name || 'Premium'}</td>
                       <td className="px-6 py-4 font-bold">Rp{Number(o.amount).toLocaleString('id-ID')}</td>
                       <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px]" style={{ color: pt.color }}>
+                            {pt.icon}
+                          </span>
+                          <span className="text-xs font-semibold" style={{ color: pt.color }}>
+                            {pt.text}
+                          </span>
+                        </div>
+                        {o.snap_token && (
+                          <span className="text-[9px] text-[#5B6660]/60 block mt-0.5">
+                            Snap Token: {o.snap_token.substring(0, 20)}...
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
                         {o.proof_url ? (
                           <button
                             onClick={() => setPreviewImage(o.proof_url)}
@@ -132,6 +216,11 @@ export default function AdminPayments() {
                           >
                             <span className="material-symbols-outlined text-sm">visibility</span> Lihat Bukti
                           </button>
+                        ) : paymentType === 'midtrans' ? (
+                          <span className="text-xs text-[#0EA5E9] italic flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[14px]">payment</span>
+                            Dibayar via Midtrans
+                          </span>
                         ) : (
                           <span className="text-xs text-[#414844]/50 italic">Belum diunggah</span>
                         )}
@@ -145,7 +234,7 @@ export default function AdminPayments() {
                         {new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-6 py-4">
-                        {o.status === 'menunggu_verifikasi' && (
+                        {o.status === 'menunggu_verifikasi' && paymentType === 'manual' && (
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleVerify(o)}
@@ -160,6 +249,18 @@ export default function AdminPayments() {
                               <span className="material-symbols-outlined text-[14px]">cancel</span> Tolak
                             </button>
                           </div>
+                        )}
+                        {paymentType === 'midtrans' && o.status === 'settlement' && (
+                          <span className="text-[10px] text-[#166534] flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[14px]">verified</span>
+                            Otomatis Verified
+                          </span>
+                        )}
+                        {paymentType === 'midtrans' && o.status === 'pending' && (
+                          <span className="text-[10px] text-[#7A5900] flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[14px]">schedule</span>
+                            Menunggu Pembayaran
+                          </span>
                         )}
                       </td>
                     </tr>

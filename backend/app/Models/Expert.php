@@ -14,9 +14,17 @@ class Expert extends Model
         'slug', 'name', 'field', 'kriteria', 'kriteria_list',
         'location', 'lat', 'lng', 'rating', 'photo', 'cover', 'verified', 'featured',
         'institution', 'active_since', 'email', 'phone', 'tempat_lahir', 'tanggal_lahir',
-        'pendidikan', 'pengalaman', 'cv_path', 'bukti_kompetensi_path', 'keahlian', 'alamat_lengkap',
+        'pendidikan', 'catatan', 'cv_path', 'bukti_kompetensi_path', 'keahlian', 'alamat_lengkap',
         'alamat_kota', 'alamat_provinsi', 'lokasi_label', 'sosial',
         'narasumber_riwayat', 'kajian_riwayat',
+        // Profil Bio
+        'tentang_saya', 'ringkasan_keahlian', 'bidang_utama',
+        // Link Akademik
+        'scopus_url', 'scopus_metrics', 'google_scholar_url', 'google_scholar_metrics',
+        'sinta_url', 'sinta_metrics', 'orcid_url', 'orcid_metrics',
+        'researchgate_url', 'researchgate_metrics',
+        // Reviewer, Publikasi, Organisasi, Instruktur
+        'reviewer_jurnal', 'publikasi', 'organisasi', 'instruktur',
     ];
 
     protected function casts(): array
@@ -33,6 +41,11 @@ class Expert extends Model
             'narasumber_riwayat' => 'array',
             'kajian_riwayat' => 'array',
             'tanggal_lahir' => 'date',
+            'bidang_utama' => 'array',
+            'reviewer_jurnal' => 'array',
+            'publikasi' => 'array',
+            'organisasi' => 'array',
+            'instruktur' => 'array',
         ];
     }
 

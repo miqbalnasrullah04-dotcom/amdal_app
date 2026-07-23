@@ -26,6 +26,24 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Helper untuk resolve foto URL (sama seperti di ProfilSaya)
+  const getPhotoUrl = (user) => {
+    if (!user) return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80';
+    
+    const photoUrl = user.avatar_url || user.foto;
+    if (!photoUrl) return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80';
+    
+    // Jika sudah full URL (http/https), return dengan cache buster
+    if (photoUrl.startsWith('http')) {
+      // Tambahkan timestamp untuk cache-busting jika belum ada
+      return photoUrl.includes('?') ? photoUrl : `${photoUrl}?t=${Date.now()}`;
+    }
+    
+    // Jika masih path relatif, resolve dengan backend URL + cache buster
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+    return `${baseUrl}/storage/${photoUrl}?t=${Date.now()}`;
+  };
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
@@ -42,9 +60,14 @@ export default function Navbar() {
       setIsLoggedIn(!!token);
       if (user) {
         try {
-          setUserData(JSON.parse(user));
+          const parsedUser = JSON.parse(user);
+          console.log('📸 Navbar load user data:', parsedUser);
+          
+          // Force update dengan timestamp baru untuk memaksa re-render
+          setUserData({ ...parsedUser, _loadedAt: Date.now() });
         } catch (e) {
           console.error('Error parsing user data', e);
+          setUserData(null);
         }
       } else {
         setUserData(null);
@@ -55,13 +78,18 @@ export default function Navbar() {
 
     // Dengarkan event custom: dipicu manual saat profil di-update di halaman
     // lain (mis. setelah upload foto di /profil-saya) tanpa perlu reload.
-    window.addEventListener('amdal-user-updated', loadUser);
+    const handleUserUpdate = () => {
+      console.log('📸 Navbar menerima event amdal-user-updated');
+      loadUser();
+    };
+    
+    window.addEventListener('amdal-user-updated', handleUserUpdate);
     // Dengarkan storage event bawaan browser: berguna kalau ada tab lain
     // yang mengubah localStorage (native, tapi tidak jalan di tab yang sama).
     window.addEventListener('storage', loadUser);
 
     return () => {
-      window.removeEventListener('amdal-user-updated', loadUser);
+      window.removeEventListener('amdal-user-updated', handleUserUpdate);
       window.removeEventListener('storage', loadUser);
     };
   }, [location]);
@@ -84,19 +112,22 @@ export default function Navbar() {
   }, [location.pathname]);
 
   const handleLogout = async () => {
-    // Always clear local state first — ignore 401 from server (token already expired)
+    try {
+      await api.post('/logout');
+    } catch {
+      // Ignore — token might be expired
+    }
+    
+    // Clear local state
     localStorage.removeItem('amdal_token');
     localStorage.removeItem('amdal_user');
     setIsLoggedIn(false);
     setMenuOpen(false);
     setProfileOpen(false);
     setUserData(null);
-    try {
-      await api.post('/logout');
-    } catch {
-      // Ignore — already logged out locally
-    }
-    navigate('/');
+    
+    // Force navigate to home
+    navigate('/', { replace: true });
   };
 
   // Neutral frosted glass: backdrop-blur only, no tinted/colored glow and
@@ -157,11 +188,7 @@ export default function Navbar() {
                   style={{ '--tw-ring-color': BRAND_BLUE }}
                 >
                   <img
-                    src={
-                      userData?.avatar_url ||
-                      userData?.foto ||
-                      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'
-                    }
+                    src={getPhotoUrl(userData)}
                     alt="Profile"
                     className={`w-10 h-10 rounded-full object-cover border-2 ${isDark ? 'border-white/80' : 'border-gray-200'}`}
                   />
@@ -263,11 +290,7 @@ export default function Navbar() {
             <>
               <div className="flex items-center gap-3 py-4">
                 <img
-                  src={
-                    userData?.avatar_url ||
-                    userData?.foto ||
-                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'
-                  }
+                  src={getPhotoUrl(userData)}
                   alt="Profile"
                   className="w-11 h-11 rounded-full object-cover border border-gray-200"
                 />

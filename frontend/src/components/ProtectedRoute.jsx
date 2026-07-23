@@ -12,12 +12,16 @@ export default function ProtectedRoute({ children, requiredRole }) {
     user = null;
   }
 
+  // Tidak ada token atau user -> redirect ke login
   if (!token || !user) {
     return <Navigate to="/sign-in" replace />;
   }
 
+  // Ada requiredRole tapi role user tidak sesuai -> redirect ke dashboard masing-masing
   if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to={user.role === 'admin' ? '/admin' : '/member'} replace />;
+    // Admin mencoba akses halaman user -> redirect ke /admin
+    // User mencoba akses halaman admin -> redirect ke /dashboard
+    return <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace />;
   }
 
   return children;

@@ -7,6 +7,7 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [keyword, setKeyword] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const loadData = () => {
@@ -18,6 +19,8 @@ export default function AdminCategories() {
   };
 
   useEffect(() => { loadData(); }, []);
+
+  const filtered = categories.filter((c) => (c.name || '').toLowerCase().includes(keyword.toLowerCase()));
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -49,6 +52,14 @@ export default function AdminCategories() {
       {error && <div className="mb-4 bg-[#FFDAD6] text-[#93000A] text-sm rounded-lg p-3">{error}</div>}
 
       <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-[#0284C7]/15">
+          <input
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="Cari nama kategori..."
+            className="w-full max-w-sm px-4 py-2 text-sm border border-[#0284C7]/30 rounded-lg focus:ring-[#0284C7] focus:border-[#0284C7]"
+          />
+        </div>
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="bg-[#0284C7]/5 text-[#414844]">
@@ -61,10 +72,10 @@ export default function AdminCategories() {
           <tbody className="divide-y divide-[#0284C7]/10">
             {loading ? (
               <tr><td colSpan={4} className="px-6 py-8 text-center text-[#414844]/70">Memuat data...</td></tr>
-            ) : categories.length === 0 ? (
-              <tr><td colSpan={4} className="px-6 py-8 text-center text-[#414844]/70">Tidak ada data.</td></tr>
+            ) : filtered.length === 0 ? (
+              <tr><td colSpan={4} className="px-6 py-8 text-center text-[#414844]/70">{keyword ? `Tidak ditemukan hasil untuk "${keyword}"` : 'Tidak ada data.'}</td></tr>
             ) : (
-              categories.map((c) => (
+              filtered.map((c) => (
                 <tr key={c.id} className="hover:bg-[#0284C7]/5">
                   <td className="px-6 py-4 font-semibold text-[#0284C7]">{c.name}</td>
                   <td className="px-6 py-4 text-[#414844]/80">{c.icon || '-'}</td>

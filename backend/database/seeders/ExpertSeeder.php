@@ -36,7 +36,7 @@ class ExpertSeeder extends Seeder
             'lat' => -6.5622,
             'lng' => 106.7297,
             'keahlian' => ['Ilmu Kehutanan', 'Ilmu Lingkungan', 'System Dynamics', 'Spasial Dynamics'],
-            'pengalaman' => 'Bekerja pada irisan antara ilmu kehutanan, lingkungan, dan pemodelan sistem dinamik untuk mendukung perencanaan pembangunan yang berkelanjutan. Selama lebih dari satu dekade terlibat dalam penyusunan KLHS, kajian daya dukung lingkungan, dan pendampingan kebijakan tata ruang di berbagai daerah di Indonesia.',
+            'catatan' => 'Bekerja pada irisan antara ilmu kehutanan, lingkungan, dan pemodelan sistem dinamik untuk mendukung perencanaan pembangunan yang berkelanjutan. Selama lebih dari satu dekade terlibat dalam penyusunan KLHS, kajian daya dukung lingkungan, dan pendampingan kebijakan tata ruang di berbagai daerah di Indonesia.',
             'sosial' => [
                 ['label' => 'Instagram', 'type' => 'instagram', 'url' => 'https://www.instagram.com/dr.irman/'],
                 ['label' => 'Facebook', 'type' => 'facebook', 'url' => 'https://www.facebook.com/wearecase27/'],
@@ -141,7 +141,7 @@ class ExpertSeeder extends Seeder
             'lat' => -6.5588,
             'lng' => 106.7291,
             'keahlian' => ['Ekonomi Lingkungan', 'Valuasi Ekonomi SDA', 'Environmental Accounting', 'Green Economy'],
-            'pengalaman' => 'Ahli ekonomi lingkungan dengan spesialisasi valuasi ekonomi sumber daya alam dan jasa ekosistem. Berpengalaman dalam penyusunan kebijakan ekonomi hijau dan instrumen ekonomi lingkungan untuk pembangunan berkelanjutan.',
+            'catatan' => 'Ahli ekonomi lingkungan dengan spesialisasi valuasi ekonomi sumber daya alam dan jasa ekosistem. Berpengalaman dalam penyusunan kebijakan ekonomi hijau dan instrumen ekonomi lingkungan untuk pembangunan berkelanjutan.',
             'sosial' => [
                 ['label' => 'Instagram', 'type' => 'instagram', 'url' => 'https://www.instagram.com/prof.sari/'],
                 ['label' => 'Twitter', 'type' => 'twitter', 'url' => 'https://twitter.com/sari_ekonomi'],
@@ -189,7 +189,7 @@ class ExpertSeeder extends Seeder
             'lat' => -6.5944,
             'lng' => 106.8229,
             'keahlian' => ['Teknik Lingkungan', 'Pengelolaan Limbah B3', 'IPAL Industri', 'Environmental Audit'],
-            'pengalaman' => 'Praktisi teknik lingkungan dengan pengalaman lebih dari 18 tahun dalam desain dan implementasi sistem pengelolaan lingkungan industri. Spesialis dalam penanganan limbah B3 dan audit lingkungan.',
+            'catatan' => 'Praktisi teknik lingkungan dengan pengalaman lebih dari 18 tahun dalam desain dan implementasi sistem pengelolaan lingkungan industri. Spesialis dalam penanganan limbah B3 dan audit lingkungan.',
         ]);
     }
 }

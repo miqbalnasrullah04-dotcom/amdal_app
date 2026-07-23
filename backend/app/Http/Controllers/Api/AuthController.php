@@ -10,6 +10,7 @@ use App\Models\Education;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 
@@ -61,14 +62,16 @@ class AuthController extends Controller
             'name'              => ['required', 'string', 'max:255'],
             'email'             => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password'          => ['required', 'string', 'min:8'],
-            'phone'             => ['required', 'string', 'max:20'],
-            'institution'       => ['required', 'string', 'max:255'],
-            'field'             => ['required', 'string', 'max:255'],
+            'password_confirmation' => ['required', 'string', 'same:password'],
+            'phone'             => ['nullable', 'string', 'max:20'],
+            'institution'       => ['nullable', 'string', 'max:255'],
+            'field'             => ['nullable', 'string', 'max:255'],
             'tempat_lahir'      => ['nullable', 'string', 'max:255'],
             'tanggal_lahir'     => ['nullable', 'date'],
             'alamat_kota'       => ['nullable', 'string', 'max:255'],
             'alamat_provinsi'   => ['nullable', 'string', 'max:255'],
-            'pengalaman'        => ['nullable', 'string'],
+            'catatan'           => ['nullable', 'string'],
+            'kriteria_list'     => ['nullable', 'json'],
             'foto'              => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
             'cv'                => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
             'bukti_kompetensi'  => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
@@ -78,103 +81,185 @@ class AuthController extends Controller
             return response()->json(['message' => $validator->errors()->first()], 422);
         }
 
-        // 1. Create User
+        // 1. Create User dengan OTP
+        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otpExpiresAt = now()->addMinutes(10); // OTP berlaku 10 menit
+
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'user',
+            'name'            => $request->name,
+            'email'           => $request->email,
+            'password'        => Hash::make($request->password),
+            'role'            => 'user',
+            'otp_code'        => $otpCode,
+            'otp_expires_at'  => $otpExpiresAt,
         ]);
 
-        // 2. Upload files if any
-        $fotoPath  = null;
-        $cvPath    = null;
-        $buktiPath = null;
-
-        if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('dokumen', 'public');
-        }
-        if ($request->hasFile('cv')) {
-            $cvPath = $request->file('cv')->store('dokumen', 'public');
-        }
-        if ($request->hasFile('bukti_kompetensi')) {
-            $buktiPath = $request->file('bukti_kompetensi')->store('dokumen', 'public');
-        }
-
-        // 3. Create Expert
-        $expert = Expert::create([
-            'user_id'               => $user->id,
-            'slug'                  => Str::slug($request->name) . '-' . Str::random(5),
-            'name'                  => $request->name,
-            'email'                 => $request->email,
-            'phone'                 => $request->phone,
-            'institution'           => $request->institution,
-            'field'                 => $request->field,
-            'tempat_lahir'          => $request->tempat_lahir,
-            'tanggal_lahir'         => $request->tanggal_lahir,
-            'alamat_kota'           => $request->alamat_kota,
-            'alamat_provinsi'       => $request->alamat_provinsi,
-            'pengalaman'            => $request->pengalaman,
-            'photo'                 => $fotoPath,
-            'cv_path'               => $cvPath,
-            'bukti_kompetensi_path' => $buktiPath,
-            'kriteria'              => 'Tenaga Ahli',
-            'profile_status'        => 'menunggu_verifikasi',
-        ]);
-
-        // 4. Simpan riwayat pendidikan jika dikirim sebagai JSON
-        if ($request->filled('educations')) {
-            $educationsRaw = $request->input('educations');
-            $educationsList = is_string($educationsRaw) ? json_decode($educationsRaw, true) : $educationsRaw;
-
-            if (is_array($educationsList)) {
-                foreach ($educationsList as $edu) {
-                    if (!empty($edu['jenjang']) && !empty($edu['institusi'])) {
-                        $expert->educations()->create([
-                            'jenjang'     => $edu['jenjang'],
-                            'institusi'   => $edu['institusi'],
-                            'jurusan'     => $edu['jurusan'] ?? null,
-                            'tahun_lulus' => !empty($edu['tahun_lulus']) ? (int) $edu['tahun_lulus'] : null,
-                        ]);
-                    }
+        // 2. Kirim email OTP
+        try {
+            Mail::raw(
+                "Kode Verifikasi Email Anda:\n\n{$otpCode}\n\nKode berlaku selama 10 menit.\n\nJika Anda tidak mendaftar di TenagaAhli.com, abaikan email ini.",
+                function ($message) use ($user) {
+                    $message->to($user->email)
+                            ->subject('Kode Verifikasi Email - TenagaAhli.com');
                 }
-            }
+            );
+            \Log::info("OTP sent to {$user->email}: {$otpCode}");
+        } catch (\Exception $e) {
+            \Log::error('Failed to send OTP email: ' . $e->getMessage());
+            \Log::info("OTP for {$user->email} (email failed, use this code): {$otpCode}");
+            // Lanjutkan proses meski email gagal terkirim
         }
 
-        // 5. Create document records
-        if ($fotoPath) {
-            Document::create([
-                'expert_id' => $expert->id,
-                'type'      => 'foto_profil',
-                'label'     => 'Pas Foto Formal',
-                'file_path' => $fotoPath,
-            ]);
-        }
-        if ($cvPath) {
-            Document::create([
-                'expert_id' => $expert->id,
-                'type'      => 'lainnya',
-                'label'     => 'CV / Curriculum Vitae',
-                'file_path' => $cvPath,
-            ]);
-        }
-        if ($buktiPath) {
-            Document::create([
-                'expert_id' => $expert->id,
-                'type'      => 'lainnya',
-                'label'     => 'Bukti Kompetensi',
-                'file_path' => $buktiPath,
-            ]);
+        // Generate token (tapi user belum bisa login sampai email diverifikasi)
+        // Token hanya untuk tracking, bukan untuk auth
+        $token = $user->createToken('registration_token')->plainTextToken;
+
+        $response = [
+            'message' => 'Registrasi berhasil. Silakan cek email Anda untuk kode verifikasi.',
+            'user'   => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+            ],
+            'otp_sent' => true,
+        ];
+
+        // Untuk development: tampilkan OTP di response
+        if (config('app.debug') === true) {
+            $response['otp_code'] = $otpCode;
+            $response['otp_expires_at'] = $otpExpiresAt->format('Y-m-d H:i:s');
         }
 
-        // Generate token
-        $token = $user->createToken('auth_token')->plainTextToken;
+        return response()->json($response, 201);
+    }
+
+    /**
+     * Verifikasi email dengan OTP
+     */
+    public function verifyEmail(Request $request)
+    {
+        $request->validate([
+            'email'    => ['required', 'email'],
+            'otp_code' => ['required', 'string', 'size:6'],
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Email tidak ditemukan.'], 404);
+        }
+
+        if ($user->email_verified_at) {
+            return response()->json(['message' => 'Email sudah terverifikasi.'], 400);
+        }
+
+        // Debug logging
+        \Log::info("OTP Verification Attempt", [
+            'email' => $request->email,
+            'input_otp' => $request->otp_code,
+            'stored_otp' => $user->otp_code,
+            'expires_at' => $user->otp_expires_at,
+            'current_time' => now(),
+           'is_expired' => $user->otp_expires_at ? now()->gt($user->otp_expires_at) : null,
+        ]);
+
+        if ($user->otp_code !== $request->otp_code) {
+            return response()->json([
+                'message' => 'Kode OTP salah.',
+                'debug' => config('app.debug') ? [
+                    'input' => $request->otp_code,
+                    'stored' => $user->otp_code,
+                ] : null,
+            ], 422);
+        }
+
+       if ($user->otp_expires_at && now()->gt($user->otp_expires_at)) {
+            return response()->json(['message' => 'Kode OTP sudah kadaluarsa.'], 422);
+        }
+
+        // Verifikasi berhasil
+        $user->update([
+            'email_verified_at' => now(),
+            'otp_code'          => null,
+            'otp_expires_at'    => null,
+        ]);
+
+        // Buat Expert profile (kosong) untuk user
+        Expert::create([
+            'user_id'         => $user->id,
+            'slug'            => Str::slug($user->name) . '-' . Str::random(5),
+            'name'            => $user->name,
+            'email'           => $user->email,
+            'kriteria'        => 'Tenaga Ahli',
+            'profile_status'  => 'draft', // Draft sampai user lengkapi profil & submit
+        ]);
 
         return response()->json([
-            'user'   => $user,
-            'token'  => $token,
-            'expert' => $expert,
-        ], 201);
+            'message' => 'Email berhasil diverifikasi! Silakan login.',
+            'verified' => true,
+        ]);
+    }
+
+    /**
+     * Kirim ulang OTP
+     */
+    public function resendOTP(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Email tidak ditemukan.'], 404);
+        }
+
+        if ($user->email_verified_at) {
+            return response()->json(['message' => 'Email sudah terverifikasi.'], 400);
+        }
+
+        // Generate OTP baru
+        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otpExpiresAt = now()->addMinutes(10);
+
+        $user->update([
+            'otp_code'       => $otpCode,
+            'otp_expires_at' => $otpExpiresAt,
+        ]);
+
+        // Kirim email
+        try {
+            Mail::raw(
+                "Kode Verifikasi Email Anda:\n\n{$otpCode}\n\nKode berlaku selama 10 menit.\n\nJika Anda tidak mendaftar di TenagaAhli.com, abaikan email ini.",
+                function ($message) use ($user) {
+                    $message->to($user->email)
+                            ->subject('Kode Verifikasi Email - TenagaAhli.com');
+                }
+            );
+            \Log::info("OTP resent to {$user->email}: {$otpCode}");
+
+            $response = [
+                'message' => 'Kode OTP baru telah dikirim ke email Anda.',
+                'otp_sent' => true,
+            ];
+
+            // Untuk development: tampilkan OTP di response
+            if (config('app.debug') === true) {
+                $response['otp_code'] = $otpCode;
+                $response['otp_expires_at'] = $otpExpiresAt->format('Y-m-d H:i:s');
+            }
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send OTP email: ' . $e->getMessage());
+            \Log::info("OTP for {$user->email} (email failed, use this code): {$otpCode}");
+
+            return response()->json([
+                'message' => 'Kode OTP dibuat tetapi email gagal dikirim. Cek log server.',
+                'otp_sent' => false,
+            ], 500);
+        }
     }
 
     public function login(Request $request)
@@ -192,15 +277,21 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if user is a normal user (not admin) and check their verification status
-        if ($user->role === 'user') {
-            $expert = Expert::where('user_id', $user->id)->first();
-            if ($expert && $expert->profile_status === 'menunggu_verifikasi') {
-                throw ValidationException::withMessages([
-                    'email' => ['Pendaftaran Anda sedang menunggu verifikasi admin. Silakan coba lagi setelah status disetujui atau ditolak.'],
-                ]);
+        // Admin tidak perlu verifikasi email, bisa langsung login
+        if ($user->role !== 'admin') {
+            // Cek apakah email sudah diverifikasi (hanya untuk user biasa)
+            if (!$user->email_verified_at) {
+                return response()->json([
+                    'message' => 'Email Anda belum diverifikasi. Silakan cek email untuk kode verifikasi.',
+                    'email_verified' => false,
+                    'email' => $user->email,
+                ], 403);
             }
         }
+
+        // User yang sudah verify email BISA LOGIN
+        // Status profil (draft, menunggu_verifikasi, ditolak, aktif) akan ditangani di dashboard
+        // Mereka tetap bisa login dan melihat status profil mereka
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

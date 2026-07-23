@@ -77,6 +77,11 @@ export default function Home() {
   const [kategoriOpen, setKategoriOpen] = useState(false);
   const [experts, setExperts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totalExperts, setTotalExperts] = useState(0);
+  const [showAll, setShowAll] = useState(false);
+  
+  const displayLimit = 6;
+  const displayedExperts = showAll ? experts : experts.slice(0, displayLimit);
 
   const kategoriBoxRef = useRef(null);
 
@@ -99,26 +104,30 @@ export default function Home() {
   );
 
   useEffect(() => {
+    // Fetch tenaga ahli premium/featured
     api
-      .get('/experts', { params: { featured: 1 } })
+      .get('/experts', { params: { featured: 1, order: 'latest' } })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
 
-        // Memeriksa jika data kosong ATAU data dari API masih mendeteksi nama Iqbal
-        const isIqbalData = data.some(exp => exp.name && exp.name.toLowerCase().includes('iqbal'));
+        // Filter hanya yang punya package_id (premium)
+        const premiumExperts = data.filter(exp => exp.package_id || exp.featured);
 
-        if (data.length === 0 || isIqbalData) {
+        if (premiumExperts.length === 0) {
           setExperts(FALLBACK_FEATURED_EXPERTS);
+          setTotalExperts(FALLBACK_FEATURED_EXPERTS.length);
         } else {
-          setExperts(data);
+          setExperts(premiumExperts);
+          setTotalExperts(premiumExperts.length);
         }
       })
       .catch(() => {
         setExperts(FALLBACK_FEATURED_EXPERTS);
+        setTotalExperts(FALLBACK_FEATURED_EXPERTS.length);
       })
       .finally(() => {
         setLoading(false);
-        reportReady(); // lapor ke RouteLoader: data Home sudah siap
+        reportReady();
       });
   }, []);
 
@@ -139,7 +148,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40 z-10" />
 
         <div className="relative z-20 text-center px-margin-mobile max-w-4xl mx-auto">
-          <h1 className="font-display-lg text-display-lg md:text-[80px] mb-4 drop-shadow-lg">
+          {/* FIX: leading-[1.25] + pb-2 mencegah descender huruf "g" pada "TenagaAhli.com"
+              terpotong akibat line-height yang terlalu ketat pada teks berukuran besar
+              yang memakai background-clip: text (efek shiny). */}
+          <h1 className="font-display-lg text-display-lg md:text-[80px] mb-4 drop-shadow-lg leading-[1.25] pb-2">
             <ShinyText
               text="TenagaAhli.com"
               speed={2.5}
@@ -150,7 +162,7 @@ export default function Home() {
               direction="left"
               pauseOnHover={false}
               yoyo={false}
-              className="font-display-lg text-display-lg md:text-[80px]"
+              className="font-display-lg text-display-lg md:text-[80px] leading-[1.25]"
             />
           </h1>
           <p className="font-headline-lg text-white/90 max-w-2xl mx-auto uppercase tracking-widest text-sm md:text-base font-semibold">
@@ -160,7 +172,9 @@ export default function Home() {
 
         {/* Search Component */}
         <form onSubmit={handleSearch} className="relative z-30 w-full max-w-[1200px] mt-12 px-margin-mobile">
-          <div className="bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-2xl flex flex-col md:flex-row items-center gap-2 border border-white/20">
+          {/* FIX: rounded-full membuat bentuk jadi blob tidak rapi saat flex-col (mobile).
+              Sekarang mobile pakai rounded-3xl, desktop (md:) tetap rounded-full seperti semula. */}
+          <div className="bg-white/95 backdrop-blur-sm p-2 rounded-3xl md:rounded-full shadow-2xl flex flex-col md:flex-row items-center gap-2 border border-white/20">
             <div className="flex-1 flex items-center px-6 py-2 gap-3 border-r border-outline-variant/30 w-full">
               <span className="material-symbols-outlined text-[#0EA5E9]">search</span>
               <div className="flex flex-col flex-1">
@@ -281,36 +295,103 @@ export default function Home() {
             <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Temukan Tenaga Ahli Terverifikasi</h2>
             <p className="text-on-surface-variant">Telusuri tenaga ahli profesional dari berbagai bidang keahlian yang telah melalui proses verifikasi di TenagaAhli.com.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-            {loading ? null : (
-              experts.map((expert) => (
-                <div key={expert.id} className="relative group rounded-xl overflow-hidden shadow-lg bg-white border border-outline-variant/30">
-                  <div className="relative h-64">
-                    <img src={expert.cover} alt={expert.name} className="w-full h-full object-cover" />
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-1 rounded border border-outline-variant/20">
-                      <span className="material-symbols-outlined text-[#0EA5E9] text-sm">bolt</span>
-                    </div>
-                    {expert.slug && (
-                      <Link to={`/profil/${expert.slug}`} onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 bg-[#0EA5E9] hover:bg-[#0284C7] text-xs font-semibold text-white rounded-full px-3 py-1.5 shadow">
-                        Lihat Profil
-                      </Link>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden shrink-0">
-                        <img src={expert.photo} alt={expert.name} className="w-full h-full object-cover" />
+
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex items-center gap-3 text-[#5B6660]">
+                <span className="w-6 h-6 rounded-full border-2 border-[#0EA5E9]/30 border-t-[#0EA5E9] animate-spin" />
+                <span>Memuat tenaga ahli...</span>
+              </div>
+            </div>
+          ) : displayedExperts.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="w-16 h-16 rounded-full bg-[#F5F4F0] flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-3xl text-[#5B6660]/40">group</span>
+              </div>
+              <p className="text-on-surface-variant">Belum ada tenaga ahli premium yang terdaftar.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedExperts.map((expert) => (
+                  <div key={expert.id} className="relative group rounded-xl overflow-hidden shadow-lg bg-white border border-outline-variant/30 hover:shadow-xl transition-shadow">
+                    <div className="relative h-64">
+                      <img src={expert.cover} alt={expert.name} className="w-full h-full object-cover" />
+                      
+                      {/* Premium Badge */}
+                      <div className="absolute top-4 left-4 bg-gradient-to-r from-[#FFD700] to-[#FFA500] p-1.5 rounded-lg shadow-lg">
+                        <span className="material-symbols-outlined text-white text-base" style={{ fontVariationSettings: '"FILL" 1' }}>workspace_premium</span>
                       </div>
-                      <div className="flex items-center gap-1 min-w-0">
-                        <span className="text-white text-xs font-bold truncate">{expert.name}</span>
-                        {expert.verified && (
-                          <span className="material-symbols-outlined text-[#0EA5E9] text-[14px] shrink-0" style={{ fontVariationSettings: '"FILL" 1' }}>check_circle</span>
-                        )}
+
+                      {/* Lihat Profil Button */}
+                      {expert.slug && (
+                        <Link 
+                          to={`/profil/${expert.slug}`} 
+                          onClick={(e) => e.stopPropagation()} 
+                          className="absolute top-4 right-4 bg-[#0EA5E9] hover:bg-[#0284C7] text-xs font-semibold text-white rounded-full px-3 py-1.5 shadow-lg transition-colors"
+                        >
+                          Lihat Profil
+                        </Link>
+                      )}
+
+                      {/* Expert Info Overlay */}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-11 h-11 rounded-full border-2 border-white overflow-hidden shrink-0 shadow-lg">
+                            <img src={expert.photo} alt={expert.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-white text-sm font-bold truncate">{expert.name}</span>
+                              {expert.verified && (
+                                <span className="material-symbols-outlined text-sky-400 text-[16px] shrink-0" style={{ fontVariationSettings: '"FILL" 1' }}>check_circle</span>
+                              )}
+                            </div>
+                            {expert.field && (
+                              <p className="text-white/80 text-xs truncate">{expert.field}</p>
+                            )}
+                            {expert.location && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <span className="material-symbols-outlined text-white/70 text-[12px]">location_on</span>
+                                <span className="text-white/70 text-[10px] truncate">{expert.location}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Tombol Lihat Ahli Lainnya */}
+              {totalExperts > displayLimit && (
+                <div className="flex justify-center mt-12">
+                  {!showAll ? (
+                    <button
+                      onClick={() => setShowAll(true)}
+                      className="flex items-center gap-2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-semibold px-8 py-3.5 rounded-full shadow-lg shadow-[#0EA5E9]/20 transition-all active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">expand_more</span>
+                      Lihat Ahli Lainnya ({totalExperts - displayLimit} lagi)
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setShowAll(false);
+                        // Scroll ke section ahli
+                        window.scrollTo({ top: 800, behavior: 'smooth' });
+                      }}
+                      className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#0EA5E9] font-semibold px-8 py-3.5 rounded-full border-2 border-[#0EA5E9] transition-all active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">expand_less</span>
+                      Tampilkan Lebih Sedikit
+                    </button>
+                  )}
                 </div>
-              ))
-            )}
-          </div>
+              )}
+            </>
+          )}
         </div>
       </section>
     </>

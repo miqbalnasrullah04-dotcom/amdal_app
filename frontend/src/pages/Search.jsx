@@ -253,9 +253,22 @@ export default function Search() {
         iconSize: [40, 40],
         iconAnchor: [20, 20],
       });
+      const popupContent = `
+        <div style="min-width:200px">
+          <b style="font-size:14px;color:#1F2A22">${e.name}</b>
+          <br/>
+          <span style="color:#6b7570;font-size:12px">${e.field || ''}</span>
+          <br/>
+          <a href="https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lng}" 
+             target="_blank" 
+             style="color:#0EA5E9;text-decoration:none;font-size:12px;display:inline-flex;align-items:center;gap:4px;margin-top:8px">
+            <span style="font-size:14px">📍</span> Buka di Google Maps
+          </a>
+        </div>
+      `;
       const marker = L.marker([e.lat, e.lng], { icon })
         .addTo(map)
-        .bindPopup(`<b>${e.name}</b><br/><span style="color:#6b7570">${e.field || ''}</span>`);
+        .bindPopup(popupContent);
       marker.on('click', () => {
         setActiveId(e.id);
         setActiveIndex(sortedExperts.findIndex((x) => x.id === e.id));

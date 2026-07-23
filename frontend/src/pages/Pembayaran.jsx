@@ -297,71 +297,85 @@ export default function Pembayaran() {
                 </div>
               </div>
 
-              {method === 'qris' && (
-                <div className="bg-white rounded-2xl border border-black/5 p-6 text-center">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-4">Scan QRIS untuk Bayar</p>
-                  {/* Ganti div ini dengan: <img src="/images/qris-tenagaahli.png" className="w-52 h-52 rounded-xl object-contain mx-auto mb-4" /> */}
-                  <div className="w-52 h-52 mx-auto bg-[#F5F4F0] border-2 border-dashed border-[#0EA5E9]/30 rounded-2xl flex flex-col items-center justify-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-6xl text-[#0EA5E9]/40">qr_code_2</span>
-                    <p className="text-[10px] text-[#5B6660] text-center px-4 leading-relaxed">Tambahkan gambar QRIS<br />merchant di sini</p>
+              {/* Tombol Bayar dengan Midtrans jika ada snap_token */}
+              {order.snap_token && (
+                <div className="bg-gradient-to-br from-[#0EA5E9] to-[#0284C7] rounded-2xl p-6 text-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="material-symbols-outlined text-3xl">payment</span>
+                    <div>
+                      <p className="font-bold text-lg">Pembayaran Online</p>
+                      <p className="text-sm text-white/80">Bayar dengan berbagai metode pembayaran</p>
+                    </div>
                   </div>
-                  <div className="bg-[#F0F9FF] rounded-xl p-4 text-left text-xs text-[#075985] space-y-1.5">
-                    <p className="font-bold mb-1">Cara Bayar dengan QRIS:</p>
-                    <p>1. Buka e-wallet atau m-banking (GoPay, OVO, DANA, BCA, dll)</p>
-                    <p>2. Pilih <strong>Scan QR</strong> atau <strong>Bayar</strong></p>
-                    <p>3. Arahkan kamera ke kode QR di atas</p>
-                    <p>4. Pastikan nominal <strong>{formatRupiah(order.amount)}</strong> benar</p>
-                    <p>5. Konfirmasi pembayaran lalu screenshot buktinya</p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.snap) {
+                        window.snap.pay(order.snap_token, {
+                          onSuccess: function(result) {
+                            console.log('Payment success:', result);
+                            setStep('success');
+                          },
+                          onPending: function(result) {
+                            console.log('Payment pending:', result);
+                            window.location.reload();
+                          },
+                          onError: function(result) {
+                            console.log('Payment error:', result);
+                            setError('Pembayaran gagal. Silakan coba lagi.');
+                          },
+                          onClose: function() {
+                            console.log('Payment popup closed');
+                          }
+                        });
+                      } else {
+                        // Load Midtrans Snap script
+                        const script = document.createElement('script');
+                        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+                        script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 'your-client-key');
+                        document.head.appendChild(script);
+                        
+                        script.onload = () => {
+                          window.snap.pay(order.snap_token, {
+                            onSuccess: function(result) {
+                              console.log('Payment success:', result);
+                              setStep('success');
+                            },
+                            onPending: function(result) {
+                              console.log('Payment pending:', result);
+                              window.location.reload();
+                            },
+                            onError: function(result) {
+                              console.log('Payment error:', result);
+                              setError('Pembayaran gagal. Silakan coba lagi.');
+                            },
+                            onClose: function() {
+                              console.log('Payment popup closed');
+                            }
+                          });
+                        };
+                      }
+                    }}
+                    className="w-full bg-white text-[#0284C7] py-3.5 rounded-xl font-bold text-sm hover:bg-white/95 transition-colors flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">credit_card</span>
+                    Bayar Sekarang
+                  </button>
+                  <p className="text-xs text-white/80 mt-3 text-center">
+                    Mendukung transfer bank, e-wallet, kartu kredit, dan lainnya
+                  </p>
                 </div>
               )}
 
-              {method === 'transfer_bank' && (
-                <div className="bg-white rounded-2xl border border-black/5 p-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-4">Rekening Tujuan</p>
-                  <div className="space-y-3">
-                    {BANK_ACCOUNTS.map(b => (
-                      <div key={b.bank} className="flex items-center justify-between bg-[#F5F4F0] rounded-xl px-4 py-3">
-                        <div>
-                          <p className="text-xs font-bold uppercase text-[#5B6660]">{b.bank}</p>
-                          <p className="font-mono font-bold text-[#1F2A22] text-sm">{b.norek}</p>
-                          <p className="text-xs text-[#5B6660]">a.n. {b.atas_nama}</p>
-                        </div>
-                        <CopyButton text={b.norek} />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-3 bg-[#FFF4D6] rounded-xl px-4 py-3 text-xs text-[#7A5900]">
-                    Transfer tepat <strong>{formatRupiah(order.amount)}</strong> ke salah satu rekening, lalu unggah bukti di bawah.
-                  </div>
-                </div>
-              )}
-
-              {method === 'e_wallet' && (
-                <div className="bg-white rounded-2xl border border-black/5 p-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-4">Nomor Tujuan</p>
-                  <div className="space-y-3">
-                    {EWALLET_ACCOUNTS.map(w => (
-                      <div key={w.name} className="flex items-center justify-between bg-[#F5F4F0] rounded-xl px-4 py-3">
-                        <div>
-                          <p className="text-xs font-bold uppercase text-[#5B6660]">{w.name}</p>
-                          <p className="font-bold text-[#1F2A22] text-sm">{w.number}</p>
-                          <p className="text-xs text-[#5B6660]">a.n. {w.atas_nama}</p>
-                        </div>
-                        <CopyButton text={w.number} />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-3 bg-[#FFF4D6] rounded-xl px-4 py-3 text-xs text-[#7A5900]">
-                    Kirim tepat <strong>{formatRupiah(order.amount)}</strong> ke salah satu nomor, lalu unggah bukti.
-                  </div>
-                </div>
-              )}
-
+              {/* Opsi manual payment (tetap ada sebagai fallback) */}
               <div className="bg-white rounded-2xl border border-black/5 p-5">
                 <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-3">
-                  Upload Bukti Pembayaran <span className="text-red-500">*</span>
+                  Atau Upload Bukti Transfer Manual
                 </p>
+                <p className="text-xs text-[#5B6660] mb-4">
+                  Jika Anda sudah melakukan transfer via ATM/m-banking, upload bukti transfer di sini
+                </p>
+
                 <input type="file" accept="image/*,.pdf" className="hidden" ref={proofRef}
                   onChange={e => {
                     const f = e.target.files?.[0];
@@ -385,7 +399,7 @@ export default function Pembayaran() {
                   </div>
                 ) : (
                   <button type="button" onClick={() => proofRef.current?.click()}
-                    className="w-full border-2 border-dashed border-[#0EA5E9]/30 rounded-xl py-8 flex flex-col items-center gap-2 hover:border-[#0EA5E9]/60 transition-colors">
+                    className="w-full border-2 border-dashed border-[#0EA5E9]/30 rounded-xl py-6 flex flex-col items-center gap-2 hover:border-[#0EA5E9]/60 transition-colors">
                     <span className="material-symbols-outlined text-3xl text-[#0EA5E9]/50">upload_file</span>
                     <span className="text-sm text-[#5B6660]">Klik untuk unggah screenshot bukti transfer</span>
                     <span className="text-xs text-[#5B6660]/60">JPG, PNG, atau PDF — maks. 5MB</span>

@@ -60,6 +60,16 @@ export default function MenungguVerifikasi() {
     return () => clearInterval(pollRef.current);
   }, [email, status]);
 
+  // Auto-redirect ke login setelah akun disetujui (delay 2 detik untuk user baca pesan)
+  useEffect(() => {
+    if (status === 'approved') {
+      const timer = setTimeout(() => {
+        navigate('/sign-in', { state: { message: 'Akun Anda telah diverifikasi! Silakan login.' } });
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, navigate]);
+
   const handleCekStatus = async () => {
     if (!email) return;
     setChecking(true);
@@ -187,7 +197,7 @@ export default function MenungguVerifikasi() {
               Selamat, pendaftaran Anda telah diverifikasi oleh admin.
             </p>
 
-            <div className="bg-[#DCFCE7] border border-[#86EFAC] rounded-xl p-4 mb-8 flex gap-3 text-left">
+            <div className="bg-[#DCFCE7] border border-[#86EFAC] rounded-xl p-4 mb-6 flex gap-3 text-left">
               <span className="material-symbols-outlined text-[#166534] text-[20px] shrink-0 mt-0.5">mark_email_read</span>
               <div className="text-sm text-[#14532D] leading-relaxed">
                 <p className="font-semibold mb-1">Email konfirmasi telah dikirim</p>
@@ -195,6 +205,13 @@ export default function MenungguVerifikasi() {
                   Kami sudah mengirimkan email konfirmasi ke <strong>{email}</strong>. Kini Anda
                   dapat masuk dan mulai melengkapi profil Anda.
                 </p>
+              </div>
+            </div>
+
+            <div className="bg-[#E0F2FE] border border-[#0EA5E9]/30 rounded-xl p-4 mb-6 flex gap-3 text-left">
+              <span className="material-symbols-outlined text-[#0284C7] text-[20px] shrink-0 mt-0.5 animate-spin">sync</span>
+              <div className="text-sm text-[#075985] leading-relaxed">
+                <p className="font-semibold">Mengarahkan ke halaman login...</p>
               </div>
             </div>
 

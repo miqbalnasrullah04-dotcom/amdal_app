@@ -9,10 +9,24 @@ use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Midtrans\Config;
+use Midtrans\Snap;
+use Midtrans\Notification;
 
 class OrderController extends Controller
 {
-    // User pilih paket -> set package_id di Expert, dan kalau berbayar, buat Order
+    public function __construct()
+    {
+        // Konfigurasi Midtrans
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = config('services.midtrans.is_sanitized');
+        Config::$is3ds = config('services.midtrans.is_3ds');
+    }
+
+class OrderController extends Controller
+{
+    // User pilih paket -> set package_id di Expert, dan kalau berbayar, buat Order dengan Midtrans
     public function choosePackage(Request $request)
     {
         $user = $request->user();
@@ -31,16 +45,58 @@ class OrderController extends Controller
         $expert->update(['package_id' => $package->id]);
 
         if ($package->price > 0) {
+            // Generate order reference
+            $referenceCode = 'ORD-'.strtoupper(Str::random(8));
+
             $order = Order::create([
                 'user_id' => $user->id,
                 'package_id' => $package->id,
                 'package_name' => $package->name,
                 'amount' => $package->price,
-                'reference_code' => 'ORD-'.strtoupper(Str::random(8)),
+                'reference_code' => $referenceCode,
                 'status' => 'menunggu_pembayaran',
             ]);
 
-            return response()->json(['expert' => $expert, 'order' => $order], 201);
+            // Create Midtrans transaction
+            try {
+                $params = [
+                    'transaction_details' => [
+                        'order_id' => $referenceCode,
+                        'gross_amount' => (int) $package->price,
+                    ],
+                    'customer_details' => [
+                        'first_name' => $user->name,
+                        'email' => $user->email,
+                        'phone' => $expert->phone ?? '',
+                    ],
+                    'item_details' => [
+                        [
+                            'id' => $package->id,
+                            'price' => (int) $package->price,
+                            'quantity' => 1,
+                            'name' => $package->name,
+                        ],
+                    ],
+                ];
+
+                $snapToken = Snap::getSnapToken($params);
+
+                $order->update([
+                    'snap_token' => $snapToken,
+                ]);
+
+                return response()->json([
+                    'expert' => $expert,
+                    'order' => $order,
+                    'snap_token' => $snapToken,
+                ], 201);
+            } catch (\Exception $e) {
+                \Log::error('Midtrans Snap Error: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Gagal membuat transaksi pembayaran. Silakan coba lagi.',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
         }
 
         // Paket gratis -> tidak perlu order/pembayaran
@@ -66,6 +122,54 @@ class OrderController extends Controller
             ->latest()
             ->get();
         return response()->json($orders);
+    }
+
+    // Webhook dari Midtrans untuk notification pembayaran
+    public function notification(Request $request)
+    {
+        try {
+            $notification = new Notification();
+
+            $transactionStatus = $notification->transaction_status;
+            $fraudStatus = $notification->fraud_status;
+            $orderId = $notification->order_id;
+
+            \Log::info('Midtrans Notification', [
+                'order_id' => $orderId,
+                'transaction_status' => $transactionStatus,
+                'fraud_status' => $fraudStatus,
+            ]);
+
+            $order = Order::where('reference_code', $orderId)->first();
+
+            if (!$order) {
+                return response()->json(['message' => 'Order not found'], 404);
+            }
+
+            if ($transactionStatus == 'capture') {
+                if ($fraudStatus == 'accept') {
+                    $order->update(['status' => 'verified']);
+                }
+            } elseif ($transactionStatus == 'settlement') {
+                $order->update([
+                    'status' => 'verified',
+                    'verified_at' => now(),
+                ]);
+            } elseif ($transactionStatus == 'pending') {
+                $order->update(['status' => 'menunggu_pembayaran']);
+            } elseif ($transactionStatus == 'deny') {
+                $order->update(['status' => 'rejected', 'reject_reason' => 'Payment denied']);
+            } elseif ($transactionStatus == 'expire') {
+                $order->update(['status' => 'rejected', 'reject_reason' => 'Payment expired']);
+            } elseif ($transactionStatus == 'cancel') {
+                $order->update(['status' => 'rejected', 'reject_reason' => 'Payment cancelled']);
+            }
+
+            return response()->json(['message' => 'Notification handled']);
+        } catch (\Exception $e) {
+            \Log::error('Midtrans Notification Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Notification error'], 500);
+        }
     }
 
     public function uploadProof(Request $request, $id)

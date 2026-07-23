@@ -33,6 +33,8 @@ const FALLBACK_PROFILE = {
   ringkasanKeahlian:
     'Pemodelan sistem dinamik dan analisis spasial untuk kajian lingkungan hidup strategis serta perencanaan tata ruang berbasis daya dukung.',
   bidangUtama: ['Kajian Lingkungan Hidup Strategis (KLHS)', 'Perencanaan Tata Ruang', 'Pemodelan Sistem Dinamik'],
+  pengalaman:
+    'Lebih dari 10 tahun sebagai peneliti, konsultan, dan tenaga ahli pendamping kebijakan pada berbagai kajian lingkungan hidup strategis dan tata ruang di lebih dari 15 kabupaten/kota di Indonesia.',
 
   // ---- Kategori Profesional --------------------------------------------
   kategoriProfesional: ['Tenaga Ahli / Konsultan', 'Peneliti', 'Narasumber', 'Akademisi'],
@@ -132,7 +134,7 @@ const FALLBACK_PROFILE = {
     { nama: 'Masyarakat Ekonomi Lingkungan Indonesia (MELI)', jabatan: 'Pengurus Bidang Riset', periode: '2019 — Sekarang', kontribusi: 'Mengoordinasikan kajian valuasi ekonomi lingkungan.' },
   ],
 
-  // ---- Profil Akademik ---------------------------------------------------
+  // ---- Profil Akademik (Old format - fallback) ---------------------------------------------------
   profilAkademik: {
     scopus: { url: 'https://www.scopus.com', label: 'Scopus', metrik: 'H-index 8 · 24 dokumen' },
     googleScholar: { url: 'https://scholar.google.com', label: 'Google Scholar', metrik: '312 sitasi' },
@@ -140,6 +142,18 @@ const FALLBACK_PROFILE = {
     orcid: { url: 'https://orcid.org', label: 'ORCID', metrik: '0000-0002-XXXX-XXXX' },
     researchGate: { url: 'https://www.researchgate.net', label: 'ResearchGate', metrik: 'RG Score 18.4' },
   },
+
+  // ---- Link Akademik (New format dari database) ---------------------------------------------------
+  scopus_url: 'https://www.scopus.com/authid/detail.uri?authorId=57220867183',
+  scopus_metrics: 'H-index 8 · 24 dokumen',
+  google_scholar_url: 'https://scholar.google.com/citations?user=aBcDeFgHiJk',
+  google_scholar_metrics: '312 sitasi',
+  sinta_url: 'https://sinta.kemdikbud.go.id/authors/profile/6008450',
+  sinta_metrics: 'Skor SINTA 3 · S3',
+  orcid_url: 'https://orcid.org/0000-0002-1234-5678',
+  orcid_metrics: '0000-0002-1234-5678',
+  researchgate_url: 'https://www.researchgate.net/profile/Irman-Firmansyah',
+  researchgate_metrics: 'RG Score 18.4',
 
   // ---- Reviewer Jurnal ---------------------------------------------------
   reviewerJurnal: [
@@ -547,21 +561,46 @@ export default function ProfilAhli() {
         </div>
       </div>
 
+      {/* ---------- STATISTIK PROFIL ---------- */}
+      {statistik && (
+        <div className="border-b border-gray-200 bg-white">
+          <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              <StatBlock icon="military_tech" value={`${statistik.tahunPengalaman}+`} label="Tahun Pengalaman" />
+              <StatBlock icon="engineering" value={statistik.jumlahProyek} label="Proyek" />
+              <StatBlock icon="article" value={statistik.jumlahPublikasi} label="Publikasi" />
+              <StatBlock icon="workspace_premium" value={statistik.jumlahSertifikasi} label="Sertifikasi" />
+              <StatBlock icon="campaign" value={statistik.jumlahKegiatan} label="Kegiatan" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ---------- 2 & 3 & 4. PROFIL: BIO, KATEGORI, KEAHLIAN ---------- */}
       <section id="profil" className="scroll-mt-16 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-10 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
         <div className="flex flex-col">
           {/* Tentang Saya */}
-          <div className="pb-8 border-b border-gray-200">
+          <div className="py-8 border-b border-gray-200">
             <SectionHeading title="Tentang Saya" />
-            <p className="text-sm text-gray-700 leading-relaxed mb-4">{profile.tentangSaya}</p>
-            <p className="text-sm text-gray-500 leading-relaxed italic">{profile.ringkasanKeahlian}</p>
+            <p className="text-sm text-gray-700 leading-relaxed mb-4">{profile.tentang_saya || profile.tentangSaya}</p>
+            {(profile.ringkasan_keahlian || profile.ringkasanKeahlian) && (
+              <p className="text-sm text-gray-500 leading-relaxed italic">{profile.ringkasan_keahlian || profile.ringkasanKeahlian}</p>
+            )}
 
             <div className="flex flex-wrap gap-2 mt-5">
-              {profile.kategoriProfesional?.map((k) => (
+              {(profile.kriteria_list || profile.kategoriProfesional)?.map((k) => (
                 <Chip key={k} tone="gray">{k}</Chip>
               ))}
             </div>
           </div>
+
+          {/* Catatan */}
+          {(profile.catatan || profile.pengalaman || profile.ringkasanPengalaman) && (
+            <div className="py-8 border-b border-gray-200">
+              <SectionHeading title="Catatan" />
+              <p className="text-sm text-gray-700 leading-relaxed">{profile.catatan || profile.pengalaman || profile.ringkasanPengalaman}</p>
+            </div>
+          )}
 
           {/* Bidang Keahlian */}
           <div className="py-8 border-b border-gray-200">
@@ -608,7 +647,7 @@ export default function ProfilAhli() {
               )}
               <li className="text-sm text-gray-800">
                 <span className="text-gray-500 font-medium">Bidang Utama : </span>
-                {profile.bidangUtama?.join(' · ')}
+                {(profile.bidang_utama || profile.bidangUtama)?.join(' · ')}
               </li>
             </ul>
           </div>
@@ -730,18 +769,18 @@ export default function ProfilAhli() {
                     workspace_premium
                   </span>
                 </span>
-                <h4 className="text-sm font-bold text-gray-900 leading-snug">{s.nama}</h4>
-                <p className="text-xs text-gray-500">{s.lembaga}</p>
+                <h4 className="text-sm font-bold text-gray-900 leading-snug">{s.nama || s.nama_sertifikat}</h4>
+                <p className="text-xs text-gray-500">{s.lembaga || s.penerbit}</p>
                 <div className="flex items-center justify-between text-xs text-gray-400 pt-2 mt-auto border-t border-gray-100">
-                  <span>No. {s.nomor}</span>
-                  <span>Berlaku s.d. {s.berlakuHingga}</span>
+                  <span>{s.nomor ? `No. ${s.nomor}` : (s.tahun ? `Tahun ${s.tahun}` : '')}</span>
+                  {s.berlakuHingga && <span>Berlaku s.d. {s.berlakuHingga}</span>}
                 </div>
-                {s.dokumen && (
-                  <a href={s.dokumen} className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 mt-1">
+                {(s.dokumen && s.dokumen !== '#') || s.file_url ? (
+                  <a href={s.dokumen && s.dokumen !== '#' ? s.dokumen : s.file_url} target="_blank" rel="noreferrer" className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 mt-1">
                     <span className="material-symbols-outlined text-[14px]">description</span>
                     Lihat dokumen
                   </a>
-                )}
+                ) : null}
               </Card>
             ))}
           </div>
@@ -752,9 +791,9 @@ export default function ProfilAhli() {
               <TimelineItem
                 key={i}
                 isLast={i === profile.pendidikan.length - 1}
-                period={p.tahun}
-                title={`${p.jenjang} — ${p.prodi}`}
-                subtitle={`${p.institusi} · Gelar ${p.gelar}`}
+                period={p.tahun || p.tahun_lulus}
+                title={p.prodi || p.jurusan ? `${p.jenjang} — ${p.prodi || p.jurusan}` : p.jenjang}
+                subtitle={p.gelar ? `${p.institusi} · Gelar ${p.gelar}` : p.institusi}
               />
             ))}
           </div>
@@ -764,41 +803,95 @@ export default function ProfilAhli() {
       {/* ---------- 9, 10, 11, 12(narasumber), 13, 14. AKADEMIK ---------- */}
       <section id="akademik" className="scroll-mt-16 bg-[#FAFBF9] border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 flex flex-col gap-12">
-          {/* Profil Akademik */}
-          {profile.profilAkademik && (
-            <div>
-              <SectionHeading title="Profil Akademik" eyebrow="Rekam jejak riset" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                {Object.values(profile.profilAkademik).map((a) => (
-                  <a
-                    key={a.label}
-                    href={a.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
-                  >
-                    <span className="text-sm font-bold text-gray-900">{a.label}</span>
-                    <span className="text-xs text-gray-500">{a.metrik}</span>
-                  </a>
-                ))}
-              </div>
+          {/* Profil Akademik - Link Scopus, Google Scholar, SINTA, dll */}
+          <div>
+            <SectionHeading title="Profil Akademik" eyebrow="Rekam jejak riset" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {profile.scopus_url && (
+                <a
+                  href={profile.scopus_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
+                >
+                  <span className="text-sm font-bold text-gray-900">Scopus</span>
+                  <span className="text-xs text-gray-500">{profile.scopus_metrics || 'Lihat Profil'}</span>
+                </a>
+              )}
+              {profile.google_scholar_url && (
+                <a
+                  href={profile.google_scholar_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
+                >
+                  <span className="text-sm font-bold text-gray-900">Google Scholar</span>
+                  <span className="text-xs text-gray-500">{profile.google_scholar_metrics || 'Lihat Profil'}</span>
+                </a>
+              )}
+              {profile.sinta_url && (
+                <a
+                  href={profile.sinta_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
+                >
+                  <span className="text-sm font-bold text-gray-900">SINTA</span>
+                  <span className="text-xs text-gray-500">{profile.sinta_metrics || 'Lihat Profil'}</span>
+                </a>
+              )}
+              {profile.orcid_url && (
+                <a
+                  href={profile.orcid_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
+                >
+                  <span className="text-sm font-bold text-gray-900">ORCID</span>
+                  <span className="text-xs text-gray-500">{profile.orcid_metrics || 'Lihat Profil'}</span>
+                </a>
+              )}
+              {profile.researchgate_url && (
+                <a
+                  href={profile.researchgate_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
+                >
+                  <span className="text-sm font-bold text-gray-900">ResearchGate</span>
+                  <span className="text-xs text-gray-500">{profile.researchgate_metrics || 'Lihat Profil'}</span>
+                </a>
+              )}
+              {/* Fallback ke profilAkademik jika ada */}
+              {profile.profilAkademik && !profile.scopus_url && Object.values(profile.profilAkademik).map((a) => (
+                <a
+                  key={a.label}
+                  href={a.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
+                >
+                  <span className="text-sm font-bold text-gray-900">{a.label}</span>
+                  <span className="text-xs text-gray-500">{a.metrik}</span>
+                </a>
+              ))}
             </div>
-          )}
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Organisasi */}
-            {profile.organisasi?.length > 0 && (
+            {((profile.organisasi && profile.organisasi.length > 0) || profile.organisasi) && (
               <div>
                 <SectionHeading title="Organisasi" />
                 <div className="flex flex-col gap-5">
-                  {profile.organisasi.map((o, i) => (
+                  {(profile.organisasi || []).map((o, i) => (
                     <Card key={i}>
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="text-sm font-bold text-gray-900">{o.nama}</h4>
                         <span className="text-xs text-gray-400 whitespace-nowrap">{o.periode}</span>
                       </div>
                       <p className="text-sm text-[#0EA5E9] font-medium mt-0.5">{o.jabatan}</p>
-                      <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">{o.kontribusi}</p>
+                      {o.kontribusi && <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">{o.kontribusi}</p>}
                     </Card>
                   ))}
                 </div>
@@ -806,11 +899,11 @@ export default function ProfilAhli() {
             )}
 
             {/* Reviewer Jurnal */}
-            {profile.reviewerJurnal?.length > 0 && (
+            {((profile.reviewer_jurnal && profile.reviewer_jurnal.length > 0) || profile.reviewerJurnal) && (
               <div>
                 <SectionHeading title="Reviewer Jurnal" />
                 <div className="flex flex-col gap-5">
-                  {profile.reviewerJurnal.map((r, i) => (
+                  {(profile.reviewer_jurnal || profile.reviewerJurnal || []).map((r, i) => (
                     <Card key={i}>
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="text-sm font-bold text-gray-900">{r.nama}</h4>
@@ -826,11 +919,11 @@ export default function ProfilAhli() {
           </div>
 
           {/* Publikasi */}
-          {profile.publikasi?.length > 0 && (
+          {((profile.publikasi && profile.publikasi.length > 0) || profile.publikasi) && (
             <div>
-              <SectionHeading title="Publikasi" eyebrow={`${profile.publikasi.length} karya`} />
+              <SectionHeading title="Publikasi" eyebrow={`${(profile.publikasi || []).length} karya`} />
               <ol className="flex flex-col gap-3">
-                {profile.publikasi.map((p, i) => (
+                {(profile.publikasi || []).map((p, i) => (
                   <li key={i} className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -840,10 +933,12 @@ export default function ProfilAhli() {
                       <p className="text-sm font-semibold text-gray-900 leading-snug">{p.judul}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{p.penerbit}</p>
                     </div>
-                    <a href={p.link} className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 shrink-0">
-                      Lihat publikasi
-                      <span className="material-symbols-outlined text-[14px]">arrow_outward</span>
-                    </a>
+                    {p.link && p.link !== '#' && (
+                      <a href={p.link} target="_blank" rel="noreferrer" className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 shrink-0">
+                        Lihat publikasi
+                        <span className="material-symbols-outlined text-[14px]">arrow_outward</span>
+                      </a>
+                    )}
                   </li>
                 ))}
               </ol>
@@ -866,11 +961,11 @@ export default function ProfilAhli() {
             )}
 
             {/* Instruktur / Trainer */}
-            {profile.instruktur?.length > 0 && (
+            {((profile.instruktur && profile.instruktur.length > 0) || profile.instruktur) && (
               <div>
                 <SectionHeading title="Instruktur / Trainer" />
                 <div className="flex flex-col gap-5">
-                  {profile.instruktur.map((it, i) => (
+                  {(profile.instruktur || []).map((it, i) => (
                     <Card key={i}>
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="text-sm font-bold text-gray-900">{it.nama}</h4>
@@ -890,19 +985,9 @@ export default function ProfilAhli() {
         </div>
       </section>
 
-      {/* ---------- 15 & 16. PORTOFOLIO & STATISTIK ---------- */}
+      {/* ---------- 15 & 16. PORTOFOLIO ---------- */}
       <section id="portofolio" className="scroll-mt-16 border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
-          {statistik && (
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-12">
-              <StatBlock icon="military_tech" value={`${statistik.tahunPengalaman}+`} label="Tahun Pengalaman" />
-              <StatBlock icon="engineering" value={statistik.jumlahProyek} label="Proyek" />
-              <StatBlock icon="article" value={statistik.jumlahPublikasi} label="Publikasi" />
-              <StatBlock icon="workspace_premium" value={statistik.jumlahSertifikasi} label="Sertifikasi" />
-              <StatBlock icon="campaign" value={statistik.jumlahKegiatan} label="Kegiatan" />
-            </div>
-          )}
-
           <SectionHeading title="Portofolio" eyebrow="Dokumen pendukung" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {profile.portofolio?.cv && (

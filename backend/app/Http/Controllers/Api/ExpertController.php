@@ -38,7 +38,11 @@ class ExpertController extends Controller
         }
 
         if ($request->boolean('featured')) {
-            $query->where('featured', true);
+            // Featured berarti yang punya package (premium) atau yang di-mark featured
+            $query->where(function ($q) {
+                $q->whereNotNull('package_id')
+                  ->orWhere('featured', true);
+            });
         }
 
         match ($request->input('order', 'latest')) {
@@ -49,7 +53,7 @@ class ExpertController extends Controller
 
         $experts = $query->get([
             'id', 'slug', 'name', 'field', 'kriteria', 'location',
-            'lat', 'lng', 'rating', 'photo', 'cover', 'verified', 'featured',
+            'lat', 'lng', 'rating', 'photo', 'cover', 'verified', 'featured', 'package_id',
         ]);
 
         return response()->json($experts);
@@ -85,7 +89,7 @@ class ExpertController extends Controller
             ],
 
             // Bio dan keahlian
-            'tentangSaya' => $expert->pengalaman ?? 'Tenaga ahli berpengalaman dengan dedikasi tinggi dalam bidang keahliannya.',
+            'tentangSaya' => $expert->catatan ?? 'Tenaga ahli berpengalaman dengan dedikasi tinggi dalam bidang keahliannya.',
             'ringkasanKeahlian' => "Spesialis {$expert->field} dengan pengalaman lebih dari {$yearsActive} tahun.",
             'bidangUtama' => $expert->keahlian ?? [$expert->field ?? 'Konsultasi Profesional'],
             'keahlian' => $expert->keahlian ?? [$expert->field ?? 'Keahlian Profesional'],
@@ -222,12 +226,29 @@ class ExpertController extends Controller
             'field'           => ['nullable', 'string', 'max:255'],
             'phone'           => ['nullable', 'string', 'max:20'],
             'kriteria'        => ['nullable', 'string', 'max:255'],
+            'kriteria_list'   => ['nullable', 'array'],
             'alamat_lengkap'  => ['nullable', 'string'],
             'alamat_kota'     => ['nullable', 'string', 'max:255'],
             'alamat_provinsi' => ['nullable', 'string', 'max:255'],
+            'location'        => ['nullable', 'string', 'max:255'],
+            'lat'             => ['nullable', 'numeric', 'between:-90,90'],
+            'lng'             => ['nullable', 'numeric', 'between:-180,180'],
             'tempat_lahir'    => ['nullable', 'string', 'max:255'],
             'tanggal_lahir'   => ['nullable', 'date'],
-            'pengalaman'      => ['nullable', 'string'],
+            'catatan'         => ['nullable', 'string'],
+            'tentang_saya'    => ['nullable', 'string'],
+            'ringkasan_keahlian' => ['nullable', 'string'],
+            'bidang_utama'    => ['nullable', 'array'],
+            'scopus_url'      => ['nullable', 'string', 'max:500'],
+            'scopus_metrics'  => ['nullable', 'string', 'max:255'],
+            'google_scholar_url' => ['nullable', 'string', 'max:500'],
+            'google_scholar_metrics' => ['nullable', 'string', 'max:255'],
+            'sinta_url'       => ['nullable', 'string', 'max:500'],
+            'sinta_metrics'   => ['nullable', 'string', 'max:255'],
+            'orcid_url'       => ['nullable', 'string', 'max:500'],
+            'orcid_metrics'   => ['nullable', 'string', 'max:255'],
+            'researchgate_url' => ['nullable', 'string', 'max:500'],
+            'researchgate_metrics' => ['nullable', 'string', 'max:255'],
             'package_id'      => ['nullable', 'exists:packages,id'],
             'photo'           => ['nullable', 'image', 'max:2048'], // 2MB max
             'cover'           => ['nullable', 'image', 'max:5120'], // 5MB max

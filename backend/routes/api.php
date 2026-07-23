@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PartnerApiController;
+use App\Http\Controllers\Api\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
 // Health Check Endpoint
@@ -23,8 +24,13 @@ Route::get('/files/{path}', [FileController::class, 'view'])->where('path', '.*'
 Route::get('/files/{path}/info', [FileController::class, 'info'])->where('path', '.*')->name('api.file.info');
 
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+Route::post('/resend-otp', [AuthController::class, 'resendOTP']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register/status', [AuthController::class, 'registrationStatus']);
+
+// Midtrans Webhook (no auth required, verified by Midtrans signature)
+Route::post('/midtrans/notification', [OrderController::class, 'notification']);
 
 Route::get('/experts', [ExpertController::class, 'index']);
 Route::get('/experts/{slug}', [ExpertController::class, 'show']);
@@ -73,6 +79,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/mine', [OrderController::class, 'myOrder']);
     Route::post('/orders/{id}/upload-proof', [OrderController::class, 'uploadProof']);
     Route::get('/orders/history', [OrderController::class, 'myOrders']);
+
+    // Pengajuan (user)
+    Route::post('/submissions', [SubmissionController::class, 'store']);
+    Route::get('/submissions/mine', [SubmissionController::class, 'mine']);
+    Route::get('/submissions/{id}', [SubmissionController::class, 'show']);
+
+    // Pengajuan (admin)
+    Route::get('/admin/submissions', [SubmissionController::class, 'adminIndex']);
+    Route::post('/admin/submissions/{id}/status', [SubmissionController::class, 'updateStatus']);
 
     // Endpoint khusus admin: data mentah
     Route::get('/admin/experts', [ExpertController::class, 'adminIndex']);
