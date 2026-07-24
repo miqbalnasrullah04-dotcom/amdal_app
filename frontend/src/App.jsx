@@ -25,6 +25,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import ProfilSaya from './pages/ProfilSaya.jsx';
 import PilihPaket from './pages/PilihPaket.jsx';
 import Pembayaran from './pages/Pembayaran.jsx';
+import Invoice from './pages/Invoice.jsx';
 import ProfilPublik from './pages/ProfilPublik.jsx';
 import Pengaturan from './pages/Pengaturan.jsx';
 
@@ -93,6 +94,7 @@ export default function App() {
                 <Route path="/profil-saya" element={<ProtectedRoute requiredRole="user"><ProfilSaya /></ProtectedRoute>} />
                 <Route path="/paket" element={<ProtectedRoute requiredRole="user"><PilihPaket /></ProtectedRoute>} />
                 <Route path="/pembayaran" element={<ProtectedRoute requiredRole="user"><Pembayaran /></ProtectedRoute>} />
+                <Route path="/invoice/:id" element={<ProtectedRoute requiredRole="user"><Invoice /></ProtectedRoute>} />
                 <Route path="/profil-publik" element={<ProtectedRoute requiredRole="user"><ProfilPublik /></ProtectedRoute>} />
                 <Route path="/pengaturan" element={<ProtectedRoute requiredRole="user"><Pengaturan /></ProtectedRoute>} />
 

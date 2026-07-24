@@ -65,11 +65,10 @@ export default function Daftar() {
         password_confirmation: form.password_confirmation,
       });
 
-      // Arahkan ke halaman verifikasi email dengan OTP
+      // Arahkan ke halaman verifikasi email
       navigate('/verifikasi-email', { 
         state: { 
-          email: form.email,
-          otpCode: res.data.otp_code // Untuk development
+          email: form.email
         } 
       });
     } catch (err) {

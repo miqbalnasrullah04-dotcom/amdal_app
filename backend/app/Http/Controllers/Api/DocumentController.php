@@ -66,6 +66,10 @@ class DocumentController extends Controller
         // Kalau ini foto profil, sinkronkan juga ke kolom 'photo' di Expert biar tampil di listing publik
         if ($request->type === 'foto_profil') {
             $expert->update(['photo' => $path]);
+        } elseif ($request->label === 'CV / Curriculum Vitae') {
+            $expert->update(['cv_path' => $path]);
+        } elseif ($request->label === 'Bukti Kompetensi') {
+            $expert->update(['bukti_kompetensi_path' => $path]);
         }
 
         return response()->json([

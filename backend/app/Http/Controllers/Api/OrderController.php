@@ -23,9 +23,6 @@ class OrderController extends Controller
         Config::$isSanitized = config('services.midtrans.is_sanitized');
         Config::$is3ds = config('services.midtrans.is_3ds');
     }
-
-class OrderController extends Controller
-{
     // User pilih paket -> set package_id di Expert, dan kalau berbayar, buat Order dengan Midtrans
     public function choosePackage(Request $request)
     {
@@ -42,6 +39,14 @@ class OrderController extends Controller
         $expert = Expert::where('user_id', $user->id)->firstOrFail();
         $package = Package::findOrFail($request->package_id);
 
+        // Prevent downgrading to Free if currently on active Premium
+        $currentPackage = $expert->package;
+        if ($currentPackage && $currentPackage->price > 0 && $package->price == 0) {
+            if (!$expert->package_expires_at || now()->lessThan($expert->package_expires_at)) {
+                return response()->json(['message' => 'Anda tidak bisa kembali ke Paket Free selama Paket Premium masih aktif.'], 422);
+            }
+        }
+
         $expert->update(['package_id' => $package->id]);
 
         if ($package->price > 0) {
@@ -57,46 +62,52 @@ class OrderController extends Controller
                 'status' => 'menunggu_pembayaran',
             ]);
 
-            // Create Midtrans transaction
-            try {
-                $params = [
-                    'transaction_details' => [
-                        'order_id' => $referenceCode,
-                        'gross_amount' => (int) $package->price,
-                    ],
-                    'customer_details' => [
-                        'first_name' => $user->name,
-                        'email' => $user->email,
-                        'phone' => $expert->phone ?? '',
-                    ],
-                    'item_details' => [
-                        [
-                            'id' => $package->id,
-                            'price' => (int) $package->price,
-                            'quantity' => 1,
-                            'name' => $package->name,
+            // Create Midtrans transaction if key is configured
+            if (Config::$serverKey && Config::$serverKey !== 'your-server-key-here') {
+                try {
+                    $params = [
+                        'transaction_details' => [
+                            'order_id' => $referenceCode,
+                            'gross_amount' => (int) $package->price,
                         ],
-                    ],
-                ];
+                        'customer_details' => [
+                            'first_name' => $user->name,
+                            'email' => $user->email,
+                            'phone' => $expert->phone ?? '',
+                        ],
+                        'item_details' => [
+                            [
+                                'id' => $package->id,
+                                'price' => (int) $package->price,
+                                'quantity' => 1,
+                                'name' => $package->name,
+                            ],
+                        ],
+                    ];
 
-                $snapToken = Snap::getSnapToken($params);
+                    $snapToken = Snap::getSnapToken($params);
 
-                $order->update([
-                    'snap_token' => $snapToken,
-                ]);
+                    $order->update([
+                        'snap_token' => $snapToken,
+                    ]);
 
-                return response()->json([
-                    'expert' => $expert,
-                    'order' => $order,
-                    'snap_token' => $snapToken,
-                ], 201);
-            } catch (\Exception $e) {
-                \Log::error('Midtrans Snap Error: ' . $e->getMessage());
-                return response()->json([
-                    'message' => 'Gagal membuat transaksi pembayaran. Silakan coba lagi.',
-                    'error' => $e->getMessage(),
-                ], 500);
+                    return response()->json([
+                        'expert' => $expert,
+                        'order' => $order,
+                        'snap_token' => $snapToken,
+                    ], 201);
+                } catch (\Exception $e) {
+                    \Log::error('Midtrans Snap Error: ' . $e->getMessage());
+                    // Fallback to manual payment if Snap fails
+                }
             }
+
+            // Fallback: return without snap_token (manual payment flow)
+            return response()->json([
+                'expert' => $expert,
+                'order' => $order,
+                'snap_token' => null,
+            ], 201);
         }
 
         // Paket gratis -> tidak perlu order/pembayaran
@@ -149,12 +160,26 @@ class OrderController extends Controller
             if ($transactionStatus == 'capture') {
                 if ($fraudStatus == 'accept') {
                     $order->update(['status' => 'verified']);
+                    $expert = \App\Models\Expert::where('user_id', $order->user_id)->first();
+                    if ($expert) {
+                        $expert->update([
+                            'package_expires_at' => now()->addYear(),
+                            'package_id' => $order->package_id
+                        ]);
+                    }
                 }
             } elseif ($transactionStatus == 'settlement') {
                 $order->update([
                     'status' => 'verified',
                     'verified_at' => now(),
                 ]);
+                $expert = \App\Models\Expert::where('user_id', $order->user_id)->first();
+                if ($expert) {
+                    $expert->update([
+                        'package_expires_at' => now()->addYear(),
+                        'package_id' => $order->package_id
+                    ]);
+                }
             } elseif ($transactionStatus == 'pending') {
                 $order->update(['status' => 'menunggu_pembayaran']);
             } elseif ($transactionStatus == 'deny') {
@@ -216,6 +241,14 @@ class OrderController extends Controller
             'verified_by' => $request->user()->id,
             'verified_at' => now(),
         ]);
+
+        $expert = \App\Models\Expert::where('user_id', $order->user_id)->first();
+        if ($expert) {
+            $expert->update([
+                'package_expires_at' => now()->addYear(),
+                'package_id' => $order->package_id
+            ]);
+        }
 
         return response()->json($order);
     }

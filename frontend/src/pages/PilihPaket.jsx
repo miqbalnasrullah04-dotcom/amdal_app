@@ -79,7 +79,10 @@ export default function PilihPaket() {
       .finally(() => setLoading(false));
   }, []);
 
-  const activePackageId = expert?.package_id;
+  const activePackageId = expert?.package_id || 'free';
+  const activePackage = packages.find(p => p.id === activePackageId);
+  const isFreePackageActive = activePackage && activePackage.price === 0;
+  const canUpgrade = !expert?.package_id || isFreePackageActive;
 
   const handleContinue = async () => {
     if (!selected) return;
@@ -253,7 +256,7 @@ export default function PilihPaket() {
                         <span className="material-symbols-outlined text-[16px]">check_circle</span>
                         Dipilih
                       </span>
-                    ) : 'Pilih Paket Ini'}
+                    ) : (pkg.id === 'premium' ? 'Upgrade Sekarang' : 'Pilih Paket Ini')}
                   </div>
                 )}
               </button>
@@ -272,7 +275,7 @@ export default function PilihPaket() {
           </div>
         </div>
 
-        {!activePackageId && (
+        {canUpgrade && (
           <div className="flex justify-center">
             <button
               type="button"
@@ -285,19 +288,19 @@ export default function PilihPaket() {
               ) : selected?.price === 0 ? (
                 <><span className="material-symbols-outlined text-[18px]">check_circle</span>Aktifkan Paket Free</>
               ) : (
-                <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>Lanjut ke Pembayaran</>
+                <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>{isFreePackageActive ? 'Upgrade ke Premium' : 'Lanjut ke Pembayaran'}</>
               )}
             </button>
           </div>
         )}
 
-        {activePackageId && (
+        {!canUpgrade && (
           <div className="bg-[#E3F2E7] rounded-xl p-5 flex items-start gap-3 text-sm text-[#1C3822]">
             <span className="material-symbols-outlined text-[#2E5E3B] text-[20px] shrink-0 mt-0.5">info</span>
             <div>
               <p className="font-semibold mb-1">Paket Sudah Aktif</p>
               <p className="leading-relaxed">
-                Anda sudah memiliki paket aktif. Jika ingin mengganti paket, silakan hubungi admin atau tunggu masa berlaku paket saat ini berakhir.
+                Anda sudah memiliki paket premium yang aktif. Jika ingin mengganti paket, silakan hubungi admin atau tunggu masa berlaku paket saat ini berakhir.
               </p>
             </div>
           </div>

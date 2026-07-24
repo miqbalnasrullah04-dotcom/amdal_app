@@ -79,23 +79,36 @@ export default function Pembayaran() {
   const [history,      setHistory]      = useState([]);
   const [tab,          setTab]          = useState('pay');
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (!pkg) {
-      api.get('/my/profile')
-        .then(r => { if (r.data?.package) setPkg(r.data.package); })
-        .catch(() => {});
-    }
-    api.get('/orders/history')
-      .then(r => setHistory(Array.isArray(r.data) ? r.data : []))
-      .catch(() => {});
-    api.get('/orders/mine')
-      .then(r => {
-        if (r.data?.status === 'menunggu_pembayaran') {
-          setOrder(r.data);
-          setStep('confirm');
+    Promise.all([
+      api.get('/my/profile').catch(() => ({ data: {} })),
+      api.get('/orders/history').catch(() => ({ data: [] })),
+      api.get('/orders/mine').catch(() => ({ data: {} }))
+    ]).then(([profileRes, historyRes, mineRes]) => {
+      
+      setHistory(Array.isArray(historyRes.data) ? historyRes.data : []);
+      
+      let currentOrder = null;
+      if (mineRes.data?.status === 'menunggu_pembayaran') {
+        currentOrder = mineRes.data;
+        setOrder(currentOrder);
+        setStep('confirm');
+      }
+
+      if (!pkg) {
+        if (profileRes.data?.package) {
+          setPkg(profileRes.data.package);
+        } else if (currentOrder?.package) {
+          setPkg(currentOrder.package);
+        } else if (currentOrder) {
+          setPkg({ name: currentOrder.package_name, id: currentOrder.package_id, price: currentOrder.amount });
         }
-      })
-      .catch(() => {});
+      }
+
+      setLoading(false);
+    });
   }, []);
 
   const handleChooseMethod = async () => {
@@ -136,12 +149,12 @@ export default function Pembayaran() {
     }
   };
 
-  if (!pkg && tab === 'pay') {
+  if (loading) {
     return (
       <DashboardLayout title="Pembayaran">
-        <div className="flex items-center gap-3 text-[#5B6660]">
+        <div className="flex items-center gap-3 text-[#5B6660] p-6">
           <span className="w-5 h-5 rounded-full border-2 border-[#0EA5E9]/30 border-t-[#0EA5E9] animate-spin" />
-          Memuat...
+          Memuat data pembayaran...
         </div>
       </DashboardLayout>
     );
@@ -194,12 +207,17 @@ export default function Pembayaran() {
                   {ord.reject_reason && (
                     <p className="mt-2 text-xs text-[#B3261E] bg-[#FFDAD6] rounded-lg px-3 py-2">Ditolak: {ord.reject_reason}</p>
                   )}
-                  {ord.proof_of_payment && (
-                    <a href={`${BACKEND_URL}/storage/${ord.proof_of_payment}`} target="_blank" rel="noreferrer"
-                      className="mt-2 text-xs text-[#0284C7] hover:underline flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">image</span>Lihat Bukti Transfer
-                    </a>
-                  )}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                    <button onClick={() => navigate(`/invoice/${ord.reference_code}`)} className="text-xs text-[#0EA5E9] font-bold hover:underline flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">receipt_long</span> Lihat Invoice
+                    </button>
+                    {ord.proof_of_payment && (
+                      <a href={`${BACKEND_URL}/storage/${ord.proof_of_payment}`} target="_blank" rel="noreferrer"
+                        className="text-xs text-[#0284C7] hover:underline flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">image</span> Bukti Transfer
+                      </a>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -290,8 +308,13 @@ export default function Pembayaran() {
                   <p className="text-xs font-bold uppercase tracking-wider text-[#0369A1]">Order Dibuat</p>
                   <StatusBadge status={order.status} />
                 </div>
-                <p className="font-mono text-sm font-bold text-[#075985]">{order.reference_code}</p>
-                <div className="flex items-center justify-between mt-2">
+                <div className="flex justify-between items-center mt-1">
+                  <p className="font-mono text-sm font-bold text-[#075985]">{order.reference_code}</p>
+                  <button onClick={() => navigate(`/invoice/${order.reference_code}`)} className="text-xs bg-white text-[#0369A1] px-2 py-1 rounded shadow-sm hover:bg-gray-50 flex items-center gap-1 font-semibold">
+                    <span className="material-symbols-outlined text-[14px]">receipt_long</span> Lihat Invoice
+                  </button>
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#0EA5E9]/20">
                   <span className="text-sm text-[#0369A1]">Total Pembayaran</span>
                   <span className="font-bold text-[#0EA5E9] text-lg">{formatRupiah(order.amount)}</span>
                 </div>

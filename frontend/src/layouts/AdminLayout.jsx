@@ -4,7 +4,7 @@ import api from '../api/client.js';
 
 const menuItems = [
   { to: '/admin', icon: 'home', label: 'Dashboard', end: true },
-  { to: '/admin/verifikasi', icon: 'how_to_reg', label: 'Verifikasi Pendaftaran' },
+  { to: '/admin/verifikasi', icon: 'how_to_reg', label: 'Verifikasi Data' },
   { to: '/admin/tenaga-ahli', icon: 'groups', label: 'Data Tenaga Ahli' },
   { to: '/admin/paket', icon: 'credit_card', label: 'Paket' },
   { to: '/admin/pembayaran', icon: 'payments', label: 'Pembayaran' },

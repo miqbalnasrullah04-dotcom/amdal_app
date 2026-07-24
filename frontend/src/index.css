@@ -28,3 +28,12 @@
   word-wrap: normal;
   direction: ltr;
 }
+
+/* Fix: peta Leaflet gak muncul karena Tailwind preflight override <img> */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+.leaflet-container img {
+  max-width: none !important;
+}

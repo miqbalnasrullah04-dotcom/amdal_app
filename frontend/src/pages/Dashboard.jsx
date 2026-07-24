@@ -32,9 +32,10 @@ export default function Dashboard() {
   const profileCompleteness = [hasBasicInfo, hasEducation, hasPhoto].filter(Boolean).length;
   const isProfileComplete = profileCompleteness >= 2; // Minimum: basic info + at least one more
   
-  // Package & publication status
-  const hasPackage = !!expert?.package_id;
-  const packageName = expert?.package?.name || 'Belum Dipilih';
+  // Package & publication status — approved users always have at least Free
+  const hasPackage = !!expert?.package_id || isApproved;
+  const packageName = expert?.package?.name || (isApproved ? 'Free' : 'Belum Dipilih');
+  const isFreePackage = !expert?.package_id || (expert?.package?.price === 0) || (packageName === 'Free');
   const isPublished = isApproved && hasPackage;
 
   return (
@@ -128,11 +129,16 @@ export default function Dashboard() {
                 {hasPackage && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-[#E3F2E7] text-[#2E5E3B] px-2 py-0.5 rounded-full">
                     <span className="material-symbols-outlined text-[11px]">check_circle</span>
-                    Aktif
+                    Paket Anda Saat Ini
                   </span>
                 )}
               </div>
-              {hasPackage ? (
+              {hasPackage && isFreePackage ? (
+                <Link to="/paket" className="text-xs text-[#0EA5E9] font-bold hover:underline inline-flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">upgrade</span>
+                  Upgrade Sekarang
+                </Link>
+              ) : hasPackage ? (
                 <p className="text-xs text-on-surface-variant">Langganan aktif</p>
               ) : (
                 <Link to="/paket" className="text-xs text-[#0EA5E9] font-bold hover:underline inline-flex items-center gap-1">
@@ -228,8 +234,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* APPROVED + BELUM PILIH PAKET */}
-        {isApproved && !hasPackage && (
+        {/* APPROVED + PAKET FREE — Upgrade Prompt */}
+        {isApproved && isFreePackage && (
           <div className="bg-gradient-to-br from-[#E0F2FE] to-[#DBEAFE] rounded-2xl p-6 border border-[#0EA5E9]/30 animate-fadeIn">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-start gap-4 flex-1">
@@ -237,10 +243,10 @@ export default function Dashboard() {
                   <span className="material-symbols-outlined text-[32px] text-[#0EA5E9]">rocket_launch</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-[#075985] text-lg mb-2">Satu Langkah Lagi!</h3>
+                  <h3 className="font-bold text-[#075985] text-lg mb-2">Tingkatkan ke Premium!</h3>
                   <p className="text-sm text-[#0369A1] leading-relaxed">
-                    Selamat, akun Anda telah <strong>disetujui oleh admin</strong>. Sekarang pilih paket keanggotaan 
-                    (Free atau Premium) agar profil keahlian Anda tayang di direktori publik.
+                    Anda menggunakan paket <strong>Free</strong>. Upgrade ke <strong>Premium</strong> untuk mendapatkan
+                    lencana verified, prioritas tampil di pencarian, dan fitur eksklusif lainnya.
                   </p>
                 </div>
               </div>
@@ -249,7 +255,7 @@ export default function Dashboard() {
                 className="bg-[#0EA5E9] text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-[#0284C7] shadow-lg shadow-[#0EA5E9]/20 transition-all hover:shadow-xl shrink-0 flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-[18px]">workspace_premium</span>
-                Pilih Paket Sekarang
+                Upgrade Sekarang
               </button>
             </div>
           </div>

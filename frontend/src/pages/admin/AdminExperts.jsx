@@ -276,6 +276,94 @@ export default function AdminExperts() {
                 </div>
               )}
 
+              {/* Profil Bio */}
+              {(detailTarget.tentang_saya || detailTarget.ringkasan_keahlian || detailTarget.kriteria_list?.length > 0) && (
+                <div>
+                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Profil Bio</h4>
+                  <div className="space-y-3">
+                    {detailTarget.kriteria_list?.length > 0 && (
+                      <div>
+                        <span className="text-xs text-[#414844]/60 block font-medium">Kriteria Profesional</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {detailTarget.kriteria_list.map((k, i) => (
+                            <span key={i} className="text-[10px] bg-[#0284C7]/10 text-[#0284C7] px-2 py-0.5 rounded-full font-bold">{k}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {detailTarget.tentang_saya && (
+                      <div>
+                        <span className="text-xs text-[#414844]/60 block font-medium">Tentang Saya</span>
+                        <p className="text-xs font-semibold text-[#1F2A22] mt-0.5">{detailTarget.tentang_saya}</p>
+                      </div>
+                    )}
+                    {detailTarget.ringkasan_keahlian && (
+                      <div>
+                        <span className="text-xs text-[#414844]/60 block font-medium">Ringkasan Keahlian</span>
+                        <p className="text-xs font-semibold text-[#1F2A22] mt-0.5">{detailTarget.ringkasan_keahlian}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Pengalaman Kerja */}
+              {detailTarget.experiences?.length > 0 && (
+                <div>
+                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Pengalaman Kerja</h4>
+                  <ul className="space-y-2">
+                    {detailTarget.experiences.map((e) => (
+                      <li key={e.id} className="text-xs bg-[#F5F4EF] p-2.5 rounded-lg border border-outline-variant/30">
+                        <div className="font-bold text-[#1F2A22]">{e.posisi}</div>
+                        <div className="text-[#414844]/80">{e.instansi} • {e.tahun_mulai} - {e.tahun_selesai || 'Sekarang'}</div>
+                        {e.deskripsi && <div className="mt-1 text-[#414844]/70">{e.deskripsi}</div>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Sertifikasi */}
+              {detailTarget.certificates?.length > 0 && (
+                <div>
+                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Sertifikasi</h4>
+                  <ul className="space-y-2">
+                    {detailTarget.certificates.map((c) => (
+                      <li key={c.id} className="text-xs bg-[#F5F4EF] p-2.5 rounded-lg border border-outline-variant/30 flex items-center justify-between">
+                        <div>
+                          <div className="font-bold text-[#1F2A22]">{c.nama_sertifikat}</div>
+                          <div className="text-[#414844]/80">{c.penerbit} • {c.tahun}</div>
+                        </div>
+                        {c.file_path && (
+                           <a href={c.file_path.startsWith('http') ? c.file_path : `/storage/${c.file_path}`} target="_blank" rel="noreferrer" className="text-[#0284C7] hover:underline font-bold">Lihat</a>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Link Akademik */}
+              {(detailTarget.google_scholar_url || detailTarget.scopus_url || detailTarget.sinta_url || detailTarget.orcid_url) && (
+                <div>
+                  <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-2">Link Akademik</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {detailTarget.google_scholar_url && (
+                      <a href={detailTarget.google_scholar_url} target="_blank" rel="noreferrer" className="text-[11px] text-[#0284C7] hover:underline bg-[#0284C7]/10 px-2.5 py-1 rounded-lg font-bold">Google Scholar</a>
+                    )}
+                    {detailTarget.scopus_url && (
+                      <a href={detailTarget.scopus_url} target="_blank" rel="noreferrer" className="text-[11px] text-[#0284C7] hover:underline bg-[#0284C7]/10 px-2.5 py-1 rounded-lg font-bold">Scopus</a>
+                    )}
+                    {detailTarget.sinta_url && (
+                      <a href={detailTarget.sinta_url} target="_blank" rel="noreferrer" className="text-[11px] text-[#0284C7] hover:underline bg-[#0284C7]/10 px-2.5 py-1 rounded-lg font-bold">SINTA</a>
+                    )}
+                    {detailTarget.orcid_url && (
+                      <a href={detailTarget.orcid_url} target="_blank" rel="noreferrer" className="text-[11px] text-[#0284C7] hover:underline bg-[#0284C7]/10 px-2.5 py-1 rounded-lg font-bold">ORCID</a>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Uploaded Documents */}
               <div>
                 <h4 className="font-bold text-[#0284C7] uppercase tracking-wider text-xs border-b border-[#0284C7]/10 pb-1.5 mb-3">Dokumen</h4>
@@ -307,41 +395,47 @@ export default function AdminExperts() {
                   {/* CV */}
                   <div className="bg-[#F5F4EF] rounded-xl p-3 border border-outline-variant/20 flex flex-col items-center justify-center text-center">
                     <p className="text-[10px] font-bold text-[#414844]/60 uppercase mb-2">Curriculum Vitae (CV)</p>
-                    {detailTarget.cv_path ? (
-                      <div className="space-y-2 text-center">
-                        <span className="material-symbols-outlined text-[36px] text-red-500">picture_as_pdf</span>
-                        <a
-                          href={`/storage/${detailTarget.cv_path}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[#0284C7] hover:underline text-xs font-bold block"
-                        >
-                          Buka Berkas CV
-                        </a>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-[#414844]/40 font-medium">Tidak ada berkas CV</span>
-                    )}
+                    {(() => {
+                      const cvPath = detailTarget.cv_path || detailTarget.documents?.find(d => d.type === 'lainnya' && d.label?.includes('CV'))?.file_path;
+                      return cvPath ? (
+                        <div className="space-y-2 text-center">
+                          <span className="material-symbols-outlined text-[36px] text-red-500">picture_as_pdf</span>
+                          <a
+                            href={cvPath.startsWith('http') ? cvPath : `/storage/${cvPath}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[#0284C7] hover:underline text-xs font-bold block"
+                          >
+                            Buka Berkas CV
+                          </a>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-[#414844]/40 font-medium">Tidak ada berkas CV</span>
+                      );
+                    })()}
                   </div>
 
                   {/* Bukti Kompetensi */}
                   <div className="bg-[#F5F4EF] rounded-xl p-3 border border-outline-variant/20 flex flex-col items-center justify-center text-center">
                     <p className="text-[10px] font-bold text-[#414844]/60 uppercase mb-2">Bukti Kompetensi</p>
-                    {detailTarget.bukti_kompetensi_path ? (
-                      <div className="space-y-2 text-center">
-                        <span className="material-symbols-outlined text-[36px] text-[#0284C7]">verified</span>
-                        <a
-                          href={`/storage/${detailTarget.bukti_kompetensi_path}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[#0284C7] hover:underline text-xs font-bold block"
-                        >
-                          Buka Bukti Berkas
-                        </a>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-[#414844]/40 font-medium">Tidak ada berkas bukti</span>
-                    )}
+                    {(() => {
+                      const buktiPath = detailTarget.bukti_kompetensi_path || detailTarget.documents?.find(d => d.type === 'lainnya' && d.label?.includes('Bukti'))?.file_path;
+                      return buktiPath ? (
+                        <div className="space-y-2 text-center">
+                          <span className="material-symbols-outlined text-[36px] text-[#0284C7]">verified</span>
+                          <a
+                            href={buktiPath.startsWith('http') ? buktiPath : `/storage/${buktiPath}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[#0284C7] hover:underline text-xs font-bold block"
+                          >
+                            Buka Bukti Berkas
+                          </a>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-[#414844]/40 font-medium">Tidak ada berkas bukti</span>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>

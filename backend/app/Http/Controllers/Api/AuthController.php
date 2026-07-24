@@ -96,13 +96,7 @@ class AuthController extends Controller
 
         // 2. Kirim email OTP
         try {
-            Mail::raw(
-                "Kode Verifikasi Email Anda:\n\n{$otpCode}\n\nKode berlaku selama 10 menit.\n\nJika Anda tidak mendaftar di TenagaAhli.com, abaikan email ini.",
-                function ($message) use ($user) {
-                    $message->to($user->email)
-                            ->subject('Kode Verifikasi Email - TenagaAhli.com');
-                }
-            );
+            Mail::to($user->email)->send(new \App\Mail\OtpVerification($otpCode));
             \Log::info("OTP sent to {$user->email}: {$otpCode}");
         } catch (\Exception $e) {
             \Log::error('Failed to send OTP email: ' . $e->getMessage());
@@ -123,12 +117,6 @@ class AuthController extends Controller
             ],
             'otp_sent' => true,
         ];
-
-        // Untuk development: tampilkan OTP di response
-        if (config('app.debug') === true) {
-            $response['otp_code'] = $otpCode;
-            $response['otp_expires_at'] = $otpExpiresAt->format('Y-m-d H:i:s');
-        }
 
         return response()->json($response, 201);
     }
@@ -166,10 +154,6 @@ class AuthController extends Controller
         if ($user->otp_code !== $request->otp_code) {
             return response()->json([
                 'message' => 'Kode OTP salah.',
-                'debug' => config('app.debug') ? [
-                    'input' => $request->otp_code,
-                    'stored' => $user->otp_code,
-                ] : null,
             ], 422);
         }
 
@@ -184,6 +168,9 @@ class AuthController extends Controller
             'otp_expires_at'    => null,
         ]);
 
+        // Cari paket free
+        $freePackage = \App\Models\Package::where('price', 0)->first();
+
         // Buat Expert profile (kosong) untuk user
         Expert::create([
             'user_id'         => $user->id,
@@ -192,6 +179,7 @@ class AuthController extends Controller
             'email'           => $user->email,
             'kriteria'        => 'Tenaga Ahli',
             'profile_status'  => 'draft', // Draft sampai user lengkapi profil & submit
+            'package_id'      => $freePackage ? $freePackage->id : null,
         ]);
 
         return response()->json([
@@ -230,25 +218,13 @@ class AuthController extends Controller
 
         // Kirim email
         try {
-            Mail::raw(
-                "Kode Verifikasi Email Anda:\n\n{$otpCode}\n\nKode berlaku selama 10 menit.\n\nJika Anda tidak mendaftar di TenagaAhli.com, abaikan email ini.",
-                function ($message) use ($user) {
-                    $message->to($user->email)
-                            ->subject('Kode Verifikasi Email - TenagaAhli.com');
-                }
-            );
+            Mail::to($user->email)->send(new \App\Mail\OtpVerification($otpCode));
             \Log::info("OTP resent to {$user->email}: {$otpCode}");
 
             $response = [
                 'message' => 'Kode OTP baru telah dikirim ke email Anda.',
                 'otp_sent' => true,
             ];
-
-            // Untuk development: tampilkan OTP di response
-            if (config('app.debug') === true) {
-                $response['otp_code'] = $otpCode;
-                $response['otp_expires_at'] = $otpExpiresAt->format('Y-m-d H:i:s');
-            }
 
             return response()->json($response);
         } catch (\Exception $e) {

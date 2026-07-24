@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PartnerApiController;
 use App\Http\Controllers\Api\SubmissionController;
+use App\Http\Middleware\EnsureIsAdmin;
 use Illuminate\Support\Facades\Route;
 
 // Health Check Endpoint
@@ -85,46 +86,48 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/submissions/mine', [SubmissionController::class, 'mine']);
     Route::get('/submissions/{id}', [SubmissionController::class, 'show']);
 
-    // Pengajuan (admin)
-    Route::get('/admin/submissions', [SubmissionController::class, 'adminIndex']);
-    Route::post('/admin/submissions/{id}/status', [SubmissionController::class, 'updateStatus']);
+    Route::middleware([EnsureIsAdmin::class])->group(function () {
+        // Pengajuan (admin)
+        Route::get('/admin/submissions', [SubmissionController::class, 'adminIndex']);
+        Route::post('/admin/submissions/{id}/status', [SubmissionController::class, 'updateStatus']);
 
-    // Endpoint khusus admin: data mentah
-    Route::get('/admin/experts', [ExpertController::class, 'adminIndex']);
-    Route::post('/admin/experts/{id}/verify-profile', [ExpertController::class, 'verifyProfile']);
-    Route::post('/admin/experts/{id}/reject-profile', [ExpertController::class, 'rejectProfile']);
+        // Endpoint khusus admin: data mentah
+        Route::get('/admin/experts', [ExpertController::class, 'adminIndex']);
+        Route::post('/admin/experts/{id}/verify-profile', [ExpertController::class, 'verifyProfile']);
+        Route::post('/admin/experts/{id}/reject-profile', [ExpertController::class, 'rejectProfile']);
 
-    Route::get('/admin/articles', [ArticleApiController::class, 'adminIndex']);
-    Route::get('/admin/categories', [CategoryApiController::class, 'adminIndex']);
-    Route::get('/admin/partners', [PartnerApiController::class, 'adminIndex']);
-    Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
-    Route::post('/admin/orders/{id}/verify', [OrderController::class, 'verify']);
-    Route::post('/admin/orders/{id}/reject', [OrderController::class, 'reject']);
+        Route::get('/admin/articles', [ArticleApiController::class, 'adminIndex']);
+        Route::get('/admin/categories', [CategoryApiController::class, 'adminIndex']);
+        Route::get('/admin/partners', [PartnerApiController::class, 'adminIndex']);
+        Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
+        Route::post('/admin/orders/{id}/verify', [OrderController::class, 'verify']);
+        Route::post('/admin/orders/{id}/reject', [OrderController::class, 'reject']);
 
-    Route::get('/admin/packages', [PackageController::class, 'adminIndex']);
-    Route::post('/admin/packages', [PackageController::class, 'store']);
-    Route::put('/admin/packages/{id}', [PackageController::class, 'update']);
-    Route::delete('/admin/packages/{id}', [PackageController::class, 'destroy']);
+        Route::get('/admin/packages', [PackageController::class, 'adminIndex']);
+        Route::post('/admin/packages', [PackageController::class, 'store']);
+        Route::put('/admin/packages/{id}', [PackageController::class, 'update']);
+        Route::delete('/admin/packages/{id}', [PackageController::class, 'destroy']);
 
-    // Admin - dashboard stats, deactivate, change password
-    Route::get('/admin/dashboard-stats', [ExpertController::class, 'dashboardStats']);
-    Route::post('/admin/experts/{id}/deactivate', [ExpertController::class, 'deactivateProfile']);
-    Route::put('/admin/change-password', [AuthController::class, 'changePassword']);
+        // Admin - dashboard stats, deactivate, change password
+        Route::get('/admin/dashboard-stats', [ExpertController::class, 'dashboardStats']);
+        Route::post('/admin/experts/{id}/deactivate', [ExpertController::class, 'deactivateProfile']);
+        Route::put('/admin/change-password', [AuthController::class, 'changePassword']);
 
-    // CRUD Admin - Experts (manual, oleh admin sendiri)
-    Route::post('/experts', [ExpertController::class, 'store']);
-    Route::put('/experts/{id}', [ExpertController::class, 'update']);
-    Route::delete('/experts/{id}', [ExpertController::class, 'destroy']);
+        // CRUD Admin - Experts (manual, oleh admin sendiri)
+        Route::post('/experts', [ExpertController::class, 'store']);
+        Route::put('/experts/{id}', [ExpertController::class, 'update']);
+        Route::delete('/experts/{id}', [ExpertController::class, 'destroy']);
 
-    Route::post('/articles', [ArticleApiController::class, 'store']);
-    Route::put('/articles/{id}', [ArticleApiController::class, 'update']);
-    Route::delete('/articles/{id}', [ArticleApiController::class, 'destroy']);
+        Route::post('/articles', [ArticleApiController::class, 'store']);
+        Route::put('/articles/{id}', [ArticleApiController::class, 'update']);
+        Route::delete('/articles/{id}', [ArticleApiController::class, 'destroy']);
 
-    Route::post('/categories', [CategoryApiController::class, 'store']);
-    Route::put('/categories/{id}', [CategoryApiController::class, 'update']);
-    Route::delete('/categories/{id}', [CategoryApiController::class, 'destroy']);
+        Route::post('/categories', [CategoryApiController::class, 'store']);
+        Route::put('/categories/{id}', [CategoryApiController::class, 'update']);
+        Route::delete('/categories/{id}', [CategoryApiController::class, 'destroy']);
 
-    Route::post('/partners', [PartnerApiController::class, 'store']);
-    Route::put('/partners/{id}', [PartnerApiController::class, 'update']);
-    Route::delete('/partners/{id}', [PartnerApiController::class, 'destroy']);
+        Route::post('/partners', [PartnerApiController::class, 'store']);
+        Route::put('/partners/{id}', [PartnerApiController::class, 'update']);
+        Route::delete('/partners/{id}', [PartnerApiController::class, 'destroy']);
+    });
 });

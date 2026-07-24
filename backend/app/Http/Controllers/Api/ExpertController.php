@@ -195,6 +195,16 @@ class ExpertController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
+        // Check if premium package has expired
+        if ($expert && $expert->package_expires_at && now()->greaterThan($expert->package_expires_at)) {
+            $freePackage = Package::where('price', 0)->first();
+            $expert->update([
+                'package_id' => $freePackage ? $freePackage->id : null,
+                'package_expires_at' => null
+            ]);
+            $expert->load('package');
+        }
+
         if (!$expert) {
             $expert = Expert::create([
                 'user_id' => $user->id,
@@ -424,6 +434,14 @@ class ExpertController extends Controller
         }
 
         $expert->update(['profile_status' => 'aktif', 'verified' => true, 'reject_reason' => null]);
+
+        // Auto-assign paket Free jika user belum punya paket
+        if (!$expert->package_id) {
+            $freePackage = Package::where('price', 0)->first();
+            if ($freePackage) {
+                $expert->update(['package_id' => $freePackage->id]);
+            }
+        }
 
         // Kirim email notifikasi ke user
         $recipientEmail = $expert->user?->email ?? $expert->email;

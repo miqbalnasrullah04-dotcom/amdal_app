@@ -9,28 +9,28 @@ import 'leaflet/dist/leaflet.css';
 
 /* ─── constants ──────────────────────────────────────────────────────────── */
 const TABS = [
-  { id: 'pribadi',    label: 'Data Pribadi',   icon: 'person'            },
-  { id: 'profil-bio', label: 'Profil Bio',     icon: 'description'       },
-  { id: 'pendidikan', label: 'Pendidikan',     icon: 'school'            },
-  { id: 'pengalaman', label: 'Pengalaman',     icon: 'work'              },
-  { id: 'sertifikat', label: 'Sertifikat',     icon: 'workspace_premium' },
-  { id: 'akademik',   label: 'Link Akademik',  icon: 'link'              },
-  { id: 'publikasi',  label: 'Publikasi & Riwayat', icon: 'article'      },
-  { id: 'dokumen',    label: 'Dokumen & Foto', icon: 'folder'            },
-  { id: 'pengajuan',  label: 'Pengajuan',      icon: 'send'              },
+  { id: 'pribadi', label: 'Data Pribadi', icon: 'person' },
+  { id: 'profil-bio', label: 'Profil Bio', icon: 'description' },
+  { id: 'pendidikan', label: 'Pendidikan', icon: 'school' },
+  { id: 'pengalaman', label: 'Pengalaman', icon: 'work' },
+  { id: 'sertifikat', label: 'Sertifikat', icon: 'workspace_premium' },
+  { id: 'akademik', label: 'Link Akademik', icon: 'link' },
+  { id: 'publikasi', label: 'Publikasi & Riwayat', icon: 'article' },
+  { id: 'dokumen', label: 'Dokumen & Foto', icon: 'folder' },
+  { id: 'pengajuan', label: 'Pengajuan', icon: 'send' },
 ];
 
 const STATUS_PENGAJUAN = {
   menunggu_review: { label: 'Menunggu Review', color: 'text-amber-700 bg-amber-50 border-amber-200' },
-  diproses:        { label: 'Diproses',        color: 'text-blue-700 bg-blue-50 border-blue-200'   },
-  disetujui:       { label: 'Disetujui',       color: 'text-green-700 bg-green-50 border-green-200'},
-  ditolak:         { label: 'Ditolak',         color: 'text-red-700 bg-red-50 border-red-200'      },
+  diproses: { label: 'Diproses', color: 'text-blue-700 bg-blue-50 border-blue-200' },
+  disetujui: { label: 'Disetujui', color: 'text-green-700 bg-green-50 border-green-200' },
+  ditolak: { label: 'Ditolak', color: 'text-red-700 bg-red-50 border-red-200' },
 };
 
 const INPUT = 'w-full rounded-lg border border-outline-variant/40 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2E5E3B]/20 focus:border-[#2E5E3B] transition-colors';
 const BTN_PRIMARY = 'bg-[#2E5E3B] text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-[#244B2F] transition-colors disabled:opacity-50 flex items-center gap-2';
-const BTN_GHOST   = 'text-[#2E5E3B] text-sm font-bold px-4 py-2 rounded-xl border border-[#2E5E3B]/30 hover:bg-[#2E5E3B]/5 transition-colors flex items-center gap-1.5';
-const BTN_DANGER  = 'text-[#B3261E] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#B3261E]/10 transition-colors flex items-center gap-1';
+const BTN_GHOST = 'text-[#2E5E3B] text-sm font-bold px-4 py-2 rounded-xl border border-[#2E5E3B]/30 hover:bg-[#2E5E3B]/5 transition-colors flex items-center gap-1.5';
+const BTN_DANGER = 'text-[#B3261E] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#B3261E]/10 transition-colors flex items-center gap-1';
 
 // Sama persis dengan pilihan di halaman pendaftaran (Daftar.jsx) supaya
 // data "Kriteria Profesional" yang diisi saat daftar tetap konsisten & bisa
@@ -68,20 +68,40 @@ function Alert({ type, msg, onClose }) {
   );
 }
 
+// Bar navigasi "wizard" — dipakai di bawah setiap tab supaya user tahu ada
+// langkah berikutnya, sekaligus bisa kembali ke tab sebelumnya. Warna tetap
+// mengikuti palet utama web TenagaAhli (hijau #2E5E3B).
+function WizardNav({ onBack, onNext, showBack = true, showNext = true, nextLabel = 'Lanjut', backLabel = 'Kembali' }) {
+  return (
+    <div className="flex items-center justify-between pt-2">
+      {showBack ? (
+        <button type="button" className={BTN_GHOST} onClick={onBack}>
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>{backLabel}
+        </button>
+      ) : <span />}
+      {showNext && (
+        <button type="button" className={BTN_PRIMARY} onClick={onNext}>
+          {nextLabel}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function ProfilSaya() {
-  const [tab, setTab]         = useState('pribadi');
-  const [expert, setExpert]   = useState(null);
+  const [tab, setTab] = useState('pribadi');
+  const [expert, setExpert] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
-  const [err, setErr]         = useState('');
-  const [ok, setOk]           = useState('');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+  const [ok, setOk] = useState('');
 
   /* ── data pribadi form ────────────────────────────────────────── */
   const [form, setForm] = useState({
-    name:'', institution:'', field:'', phone:'',
-    tempat_lahir:'', tanggal_lahir:'',
-    alamat_lengkap:'', alamat_kota:'', alamat_provinsi:'',
-    location:'', lat:'', lng:'',
+    name: '', institution: '', field: '', phone: '',
+    tempat_lahir: '', tanggal_lahir: '',
+    alamat_lengkap: '', alamat_kota: '', alamat_provinsi: '',
+    location: '', lat: '', lng: '',
     catatan: '',
   });
 
@@ -129,20 +149,20 @@ export default function ProfilSaya() {
   });
 
   /* ── sub-resources ────────────────────────────────────────────── */
-  const [educations,   setEducations]   = useState([]);
-  const [experiences,  setExperiences]  = useState([]);
+  const [educations, setEducations] = useState([]);
+  const [experiences, setExperiences] = useState([]);
   const [certificates, setCertificates] = useState([]);
-  const [documents,    setDocuments]    = useState([]);
-  const [publikasi,    setPublikasi]    = useState([]);
-  const [organisasi,   setOrganisasi]   = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [publikasi, setPublikasi] = useState([]);
+  const [organisasi, setOrganisasi] = useState([]);
   const [reviewerJurnal, setReviewerJurnal] = useState([]);
-  const [instruktur,   setInstruktur]   = useState([]);
-  const [narasumber,   setNarasumber]   = useState([]);
+  const [instruktur, setInstruktur] = useState([]);
+  const [narasumber, setNarasumber] = useState([]);
 
   /* ── pengajuan state ──────────────────────────────────────────── */
-  const [submissions,      setSubmissions]      = useState([]);
+  const [submissions, setSubmissions] = useState([]);
   const [addingSubmission, setAddingSubmission] = useState(false);
-  const [submitting,       setSubmitting]       = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [newSubmission, setNewSubmission] = useState({
     judul_pengajuan: '',
     jenis_pengajuan: '',
@@ -152,40 +172,40 @@ export default function ProfilSaya() {
     instansi: '',
     penanggung_jawab: '',
   });
-  const [dokumenPdf,  setDokumenPdf]  = useState(null);
+  const [dokumenPdf, setDokumenPdf] = useState(null);
   const [dokumenWord, setDokumenWord] = useState(null);
-  const [dokumenZip,  setDokumenZip]  = useState(null);
-  const dokumenPdfRef  = useRef();
+  const [dokumenZip, setDokumenZip] = useState(null);
+  const dokumenPdfRef = useRef();
   const dokumenWordRef = useRef();
-  const dokumenZipRef  = useRef();
+  const dokumenZipRef = useRef();
 
   /* ── inline edit state ────────────────────────────────────────── */
-  const [editEdu,  setEditEdu]  = useState(null); // { id, ...fields }
-  const [editExp,  setEditExp]  = useState(null);
-  const [addingEdu,  setAddingEdu]  = useState(false);
-  const [addingExp,  setAddingExp]  = useState(false);
+  const [editEdu, setEditEdu] = useState(null); // { id, ...fields }
+  const [editExp, setEditExp] = useState(null);
+  const [addingEdu, setAddingEdu] = useState(false);
+  const [addingExp, setAddingExp] = useState(false);
   const [addingCert, setAddingCert] = useState(false);
-  const [addingPub,  setAddingPub]  = useState(false);
-  const [addingOrg,  setAddingOrg]  = useState(false);
-  const [addingRev,  setAddingRev]  = useState(false);
-  const [addingIns,  setAddingIns]  = useState(false);
+  const [addingPub, setAddingPub] = useState(false);
+  const [addingOrg, setAddingOrg] = useState(false);
+  const [addingRev, setAddingRev] = useState(false);
+  const [addingIns, setAddingIns] = useState(false);
   const [addingNara, setAddingNara] = useState(false);
 
-  const [newEdu,  setNewEdu]  = useState({ jenjang:'', institusi:'', jurusan:'', tahun_lulus:'' });
-  const [newExp,  setNewExp]  = useState({ posisi:'', instansi:'', tahun_mulai:'', tahun_selesai:'', deskripsi:'' });
-  const [newCert, setNewCert] = useState({ nama_sertifikat:'', penerbit:'', tahun:'' });
-  const [newPub,  setNewPub]  = useState({ jenis:'', judul:'', penerbit:'', tahun:'', link:'' });
-  const [newOrg,  setNewOrg]  = useState({ nama:'', jabatan:'', periode:'', kontribusi:'' });
-  const [newRev,  setNewRev]  = useState({ nama:'', institusi:'', bidang:'', periode:'' });
-  const [newIns,  setNewIns]  = useState({ nama:'', materi:'', penyelenggara:'', peran:'', tahun:'' });
-  const [newNara, setNewNara] = useState({ title:'', penyelenggara:'', tempat:'', tanggal:'' });
+  const [newEdu, setNewEdu] = useState({ jenjang: '', institusi: '', jurusan: '', tahun_lulus: '' });
+  const [newExp, setNewExp] = useState({ posisi: '', instansi: '', tahun_mulai: '', tahun_selesai: '', deskripsi: '' });
+  const [newCert, setNewCert] = useState({ nama_sertifikat: '', penerbit: '', tahun: '' });
+  const [newPub, setNewPub] = useState({ jenis: '', judul: '', penerbit: '', tahun: '', link: '' });
+  const [newOrg, setNewOrg] = useState({ nama: '', jabatan: '', periode: '', kontribusi: '' });
+  const [newRev, setNewRev] = useState({ nama: '', institusi: '', bidang: '', periode: '' });
+  const [newIns, setNewIns] = useState({ nama: '', materi: '', penyelenggara: '', peran: '', tahun: '' });
+  const [newNara, setNewNara] = useState({ title: '', penyelenggara: '', tempat: '', tanggal: '' });
 
   /* ── upload refs ──────────────────────────────────────────────── */
-  const [photoFile, setPhotoFile]   = useState(null);
-  const [photoPreview, setPreview]  = useState(null);
-  const [coverFile, setCoverFile]   = useState(null);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPreview] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
-  const [cvFile, setCvFile]         = useState(null);
+  const [cvFile, setCvFile] = useState(null);
 
   /* ── photo modal (WhatsApp style) ──────────────────────────────── */
   const [photoModal, setPhotoModal] = useState(false);
@@ -194,12 +214,12 @@ export default function ProfilSaya() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState(null);
   const [cvFileName, setCvFileName] = useState('');
-  const [buktiFile, setBuktiFile]   = useState(null);
+  const [buktiFile, setBuktiFile] = useState(null);
   const [buktiFileName, setBuktiFileName] = useState('');
-  const photoRef = useRef(); 
+  const photoRef = useRef();
   const cameraRef = useRef(); // Ref untuk input kamera
   const coverRef = useRef(); // Ref untuk cover photo
-  const cvRef = useRef(); 
+  const cvRef = useRef();
   const buktiRef = useRef();
 
   /* ── map picker state ──────────────────────────────────────────── */
@@ -207,12 +227,52 @@ export default function ProfilSaya() {
   const [mapInstance, setMapInstance] = useState(null);
   const [mapMarker, setMapMarker] = useState(null);
   const mapRef = useRef();
+  // Snapshot lokasi sebelum modal peta dibuka, dipakai untuk "revert" saat
+  // user menekan Batal / menutup modal tanpa menekan "Pilih Lokasi Ini".
+  const [originalLocation, setOriginalLocation] = useState(null);
 
   const flash = (type, msg) => {
     if (type === 'ok') { setOk(msg); setErr(''); }
-    else               { setErr(msg); setOk(''); }
+    else { setErr(msg); setOk(''); }
     setTimeout(() => { setOk(''); setErr(''); }, 4000);
   };
+
+  /* ── wizard navigation ───────────────────────────────────────────
+     Memungkinkan user berpindah antar-tab secara berurutan lewat tombol
+     "Lanjut" / "Kembali" di bagian bawah setiap tab, selain lewat klik
+     langsung di tab bar. */
+  const currentTabIdx = TABS.findIndex((t) => t.id === tab);
+  const goNext = () => {
+    if (currentTabIdx < TABS.length - 1) {
+      setTab(TABS[currentTabIdx + 1].id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+  const goPrev = () => {
+    if (currentTabIdx > 0) {
+      setTab(TABS[currentTabIdx - 1].id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  /* ── kelengkapan profil ───────────────────────────────────────────
+     Dipakai sebagai syarat sebelum tombol "Kirim Pengajuan" ke admin
+     bisa ditekan. Juga dipakai untuk memberi tanda centang di tab bar. */
+  const profileCompleteness = {
+    pribadi: !!(form.name && form.phone),
+    profilBio: !!(bioForm.tentang_saya && bioForm.bidang_utama),
+    pendidikan: educations.length > 0,
+    pengalaman: experiences.length > 0,
+    fotoProfil: !!photoPreview,
+  };
+  const missingSteps = [
+    !profileCompleteness.pribadi && 'Data Pribadi (nama & no. HP wajib diisi)',
+    !profileCompleteness.profilBio && 'Profil Bio (tentang saya & bidang utama)',
+    !profileCompleteness.pendidikan && 'Pendidikan (minimal 1 data)',
+    !profileCompleteness.pengalaman && 'Pengalaman (minimal 1 data)',
+    !profileCompleteness.fotoProfil && 'Foto Profil',
+  ].filter(Boolean);
+  const isProfileComplete = missingSteps.length === 0;
 
   // Helper untuk generate URL file yang benar.
   // PENTING: pakai VITE_BACKEND_URL (tanpa suffix /api), bukan VITE_API_URL
@@ -236,7 +296,7 @@ export default function ProfilSaya() {
       if (!raw) return; // belum login / tidak ada sesi tersimpan
 
       const storedUser = JSON.parse(raw);
-      
+
       // PENTING: Simpan URL foto yang sudah resolved (dengan domain lengkap)
       // supaya Navbar bisa langsung pakai tanpa perlu resolve lagi
       const updatedUser = {
@@ -248,7 +308,7 @@ export default function ProfilSaya() {
       };
 
       localStorage.setItem('amdal_user', JSON.stringify(updatedUser));
-      
+
       // Dispatch event supaya Navbar dan komponen lain tahu ada update
       console.log('📸 Foto profil diupdate di localStorage:', resolvedPhotoUrl);
       window.dispatchEvent(new Event('amdal-user-updated'));
@@ -267,7 +327,7 @@ export default function ProfilSaya() {
         name: d.name || '', institution: d.institution || '',
         field: d.field || '', phone: d.phone || '',
         tempat_lahir: d.tempat_lahir || '',
-        tanggal_lahir: d.tanggal_lahir ? d.tanggal_lahir.toString().slice(0,10) : '',
+        tanggal_lahir: d.tanggal_lahir ? d.tanggal_lahir.toString().slice(0, 10) : '',
         alamat_lengkap: d.alamat_lengkap || '',
         alamat_kota: d.alamat_kota || '',
         alamat_provinsi: d.alamat_provinsi || '',
@@ -291,15 +351,15 @@ export default function ProfilSaya() {
       });
 
       setAkademikForm({
-        scopus_url: d.scopus_url || '', 
+        scopus_url: d.scopus_url || '',
         scopus_metrics: d.scopus_metrics || '',
-        google_scholar_url: d.google_scholar_url || '', 
+        google_scholar_url: d.google_scholar_url || '',
         google_scholar_metrics: d.google_scholar_metrics || '',
-        sinta_url: d.sinta_url || '', 
+        sinta_url: d.sinta_url || '',
         sinta_metrics: d.sinta_metrics || '',
-        orcid_url: d.orcid_url || '', 
+        orcid_url: d.orcid_url || '',
         orcid_metrics: d.orcid_metrics || '',
-        researchgate_url: d.researchgate_url || '', 
+        researchgate_url: d.researchgate_url || '',
         researchgate_metrics: d.researchgate_metrics || '',
       });
 
@@ -333,8 +393,8 @@ export default function ProfilSaya() {
       }
 
       // Populate sub-resources dari data pendaftaran
-      setEducations(d.educations   || []);
-      setExperiences(d.experiences  || []);
+      setEducations(d.educations || []);
+      setExperiences(d.experiences || []);
       setCertificates(d.certificates || []);
       setDocuments(docs);
       setPublikasi(d.publikasi || []);
@@ -347,7 +407,7 @@ export default function ProfilSaya() {
       // baca amdal_user) ikut menampilkan foto & nama terbaru.
       syncUserToLocalStorage(d, resolvedPhotoUrl);
     } catch { setErr('Gagal memuat data profil.'); }
-    finally  { setLoading(false); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { load(); loadSubmissions(); }, []);
@@ -397,7 +457,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/educations', newEdu);
       flash('ok', 'Pendidikan ditambahkan.');
-      setNewEdu({ jenjang:'', institusi:'', jurusan:'', tahun_lulus:'' });
+      setNewEdu({ jenjang: '', institusi: '', jurusan: '', tahun_lulus: '' });
       setAddingEdu(false); load();
     } catch { flash('err', 'Gagal menambah pendidikan.'); }
     finally { setSaving(false); }
@@ -425,7 +485,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/experiences', newExp);
       flash('ok', 'Pengalaman ditambahkan.');
-      setNewExp({ posisi:'', instansi:'', tahun_mulai:'', tahun_selesai:'', deskripsi:'' });
+      setNewExp({ posisi: '', instansi: '', tahun_mulai: '', tahun_selesai: '', deskripsi: '' });
       setAddingExp(false); load();
     } catch { flash('err', 'Gagal menambah pengalaman.'); }
     finally { setSaving(false); }
@@ -453,7 +513,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/certificates', newCert);
       flash('ok', 'Sertifikat ditambahkan.');
-      setNewCert({ nama_sertifikat:'', penerbit:'', tahun:'' });
+      setNewCert({ nama_sertifikat: '', penerbit: '', tahun: '' });
       setAddingCert(false); load();
     } catch { flash('err', 'Gagal menambah sertifikat.'); }
     finally { setSaving(false); }
@@ -472,7 +532,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/publikasi', newPub);
       flash('ok', 'Publikasi ditambahkan.');
-      setNewPub({ jenis:'', judul:'', penerbit:'', tahun:'', link:'' });
+      setNewPub({ jenis: '', judul: '', penerbit: '', tahun: '', link: '' });
       setAddingPub(false); load();
     } catch { flash('err', 'Gagal menambah publikasi.'); }
     finally { setSaving(false); }
@@ -490,7 +550,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/organisasi', newOrg);
       flash('ok', 'Organisasi ditambahkan.');
-      setNewOrg({ nama:'', jabatan:'', periode:'', kontribusi:'' });
+      setNewOrg({ nama: '', jabatan: '', periode: '', kontribusi: '' });
       setAddingOrg(false); load();
     } catch { flash('err', 'Gagal menambah organisasi.'); }
     finally { setSaving(false); }
@@ -508,7 +568,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/reviewer-jurnal', newRev);
       flash('ok', 'Reviewer jurnal ditambahkan.');
-      setNewRev({ nama:'', institusi:'', bidang:'', periode:'' });
+      setNewRev({ nama: '', institusi: '', bidang: '', periode: '' });
       setAddingRev(false); load();
     } catch { flash('err', 'Gagal menambah data.'); }
     finally { setSaving(false); }
@@ -526,7 +586,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/instruktur', newIns);
       flash('ok', 'Riwayat instruktur ditambahkan.');
-      setNewIns({ nama:'', materi:'', penyelenggara:'', peran:'', tahun:'' });
+      setNewIns({ nama: '', materi: '', penyelenggara: '', peran: '', tahun: '' });
       setAddingIns(false); load();
     } catch { flash('err', 'Gagal menambah data.'); }
     finally { setSaving(false); }
@@ -548,6 +608,10 @@ export default function ProfilSaya() {
   };
 
   const submitPengajuan = async () => {
+    if (!isProfileComplete) {
+      return flash('err', 'Lengkapi profil Anda terlebih dahulu sebelum mengirim pengajuan ke admin.');
+    }
+
     const { judul_pengajuan, jenis_pengajuan, provinsi, kabupaten_kota, nama_pemohon, instansi, penanggung_jawab } = newSubmission;
     if (!judul_pengajuan || !jenis_pengajuan || !provinsi || !kabupaten_kota || !nama_pemohon || !instansi || !penanggung_jawab) {
       return flash('err', 'Semua field wajib diisi.');
@@ -560,17 +624,17 @@ export default function ProfilSaya() {
       Object.entries(newSubmission).forEach(([k, v]) => fd.append(k, v));
       fd.append('dokumen_pdf', dokumenPdf);
       if (dokumenWord) fd.append('dokumen_word', dokumenWord);
-      if (dokumenZip)  fd.append('dokumen_zip',  dokumenZip);
+      if (dokumenZip) fd.append('dokumen_zip', dokumenZip);
 
       await api.post('/submissions', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       flash('ok', 'Pengajuan berhasil dikirim. Menunggu review admin.');
 
       // Reset form
-      setNewSubmission({ judul_pengajuan:'', jenis_pengajuan:'', provinsi:'', kabupaten_kota:'', nama_pemohon:'', instansi:'', penanggung_jawab:'' });
+      setNewSubmission({ judul_pengajuan: '', jenis_pengajuan: '', provinsi: '', kabupaten_kota: '', nama_pemohon: '', instansi: '', penanggung_jawab: '' });
       setDokumenPdf(null); setDokumenWord(null); setDokumenZip(null);
-      if (dokumenPdfRef.current)  dokumenPdfRef.current.value  = '';
+      if (dokumenPdfRef.current) dokumenPdfRef.current.value = '';
       if (dokumenWordRef.current) dokumenWordRef.current.value = '';
-      if (dokumenZipRef.current)  dokumenZipRef.current.value  = '';
+      if (dokumenZipRef.current) dokumenZipRef.current.value = '';
       setAddingSubmission(false);
       loadSubmissions();
     } catch (e) {
@@ -587,7 +651,7 @@ export default function ProfilSaya() {
     try {
       await api.post('/my/narasumber', newNara);
       flash('ok', 'Riwayat narasumber ditambahkan.');
-      setNewNara({ title:'', penyelenggara:'', tempat:'', tanggal:'' });
+      setNewNara({ title: '', penyelenggara: '', tempat: '', tanggal: '' });
       setAddingNara(false); load();
     } catch { flash('err', 'Gagal menambah data.'); }
     finally { setSaving(false); }
@@ -599,51 +663,112 @@ export default function ProfilSaya() {
   };
 
   /* ── handlers: map picker ──────────────────────────────────────── */
-  const openMapPicker = () => {
-    setMapPickerOpen(true);
-    // Initialize map after modal is shown
-    setTimeout(() => {
-      if (mapRef.current && !mapInstance) {
-        const defaultLat = form.lat || -6.9;
-        const defaultLng = form.lng || 107.2;
-        
-        const instance = L.map(mapRef.current, { zoomControl: true }).setView([defaultLat, defaultLng], form.lat ? 13 : 7);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-          maxZoom: 19,
-          attribution: '&copy; OpenStreetMap &copy; CARTO',
-        }).addTo(instance);
-
-        // Add marker if location exists
-        if (form.lat && form.lng) {
-          const marker = L.marker([form.lat, form.lng], { draggable: true }).addTo(instance);
-          setMapMarker(marker);
-          
-          marker.on('dragend', function() {
-            const position = marker.getLatLng();
-            updateLocationFromCoords(position.lat, position.lng);
-          });
-        }
-
-        // Click to add/move marker
-        instance.on('click', function(e) {
-          if (mapMarker) {
-            mapMarker.setLatLng(e.latlng);
-          } else {
-            const newMarker = L.marker(e.latlng, { draggable: true }).addTo(instance);
-            setMapMarker(newMarker);
-            
-            newMarker.on('dragend', function() {
-              const position = newMarker.getLatLng();
-              updateLocationFromCoords(position.lat, position.lng);
-            });
-          }
-          updateLocationFromCoords(e.latlng.lat, e.latlng.lng);
-        });
-
-        setMapInstance(instance);
-      }
-    }, 100);
+  // CATATAN PERBAIKAN (fix peta tidak muncul):
+  // Sebelumnya inisialisasi peta dilakukan lewat setTimeout tebak-tebakan
+  // (350ms) di dalam openMapPicker. Masalahnya: kalau animasi modal lebih
+  // lambat dari itu (device lemot, dsb), container masih 0x0 saat L.map()
+  // dipanggil sehingga tile Leaflet gagal ter-render walau invalidateSize()
+  // sudah dipanggil setelahnya.
+  //
+  // Solusi: pindahkan inisialisasi peta ke useEffect yang jalan begitu
+  // mapPickerOpen = true DAN mapRef.current sudah ada di DOM, lalu pasang
+  // ResizeObserver supaya invalidateSize() dipanggil persis saat container
+  // benar-benar mendapat ukuran akhirnya (bukan menebak durasi animasi).
+  //
+  // JANGAN LUPA: tambahkan juga CSS berikut di file CSS global (mis.
+  // src/index.css), karena Tailwind preflight men-set `img { max-width:
+  // 100% }` secara global yang membuat tile Leaflet (yang butuh ukuran
+  // pasti 256x256) menjadi tidak ter-render / terlihat kosong:
+  //
+  //   .leaflet-container { height: 100%; width: 100%; }
+  //   .leaflet-container img { max-width: none !important; }
+  //
+  // CATATAN PERBAIKAN #2 (tile tetap blank walau container sudah benar):
+  // Leaflet melakukan fade-in tile dari opacity 0 -> 1 lewat class
+  // `.leaflet-tile-loaded`. Kalau CSS bawaan leaflet.css belum sempat
+  // diterapkan browser (mis. karena lazy-loading/code-splitting halaman
+  // ini), transisi opacity itu bisa "macet" di 0 walau tile sudah benar2
+  // selesai di-load (network request sukses, elemen <img> ada di DOM).
+  // Kita paksa opacity tile = 1 secara eksplisit sebagai jaring pengaman,
+  // supaya kasus ini tidak membuat peta terlihat blank/putih.
+  const forceTileVisibility = () => {
+    if (!mapRef.current) return;
+    mapRef.current.querySelectorAll('.leaflet-tile').forEach((img) => {
+      img.style.opacity = '1';
+    });
   };
+
+  const openMapPicker = () => {
+    // Simpan snapshot lokasi SEBELUM modal dibuka, supaya bisa di-revert
+    // kalau user menekan Batal / menutup modal tanpa konfirmasi.
+    setOriginalLocation({ lat: form.lat, lng: form.lng, location: form.location });
+    setMapPickerOpen(true);
+  };
+
+  useEffect(() => {
+    if (!mapPickerOpen || !mapRef.current || mapInstance) return;
+
+    const defaultLat = form.lat || -6.9;
+    const defaultLng = form.lng || 107.2;
+
+    const instance = L.map(mapRef.current, { zoomControl: true }).setView([defaultLat, defaultLng], form.lat ? 13 : 7);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+    }).addTo(instance);
+
+    // Jaring pengaman: paksa tile terlihat begitu selesai load, untuk
+    // menghindari kasus fade-in opacity yang macet (lihat catatan di atas).
+    instance.on('tileload', forceTileVisibility);
+    instance.whenReady(forceTileVisibility);
+
+    let marker = null;
+    if (form.lat && form.lng) {
+      marker = L.marker([form.lat, form.lng], { draggable: true }).addTo(instance);
+      setMapMarker(marker);
+      marker.on('dragend', function () {
+        const position = marker.getLatLng();
+        updateLocationFromCoords(position.lat, position.lng);
+      });
+    }
+
+    instance.on('click', function (e) {
+      if (marker) {
+        marker.setLatLng(e.latlng);
+      } else {
+        marker = L.marker(e.latlng, { draggable: true }).addTo(instance);
+        setMapMarker(marker);
+        marker.on('dragend', function () {
+          const position = marker.getLatLng();
+          updateLocationFromCoords(position.lat, position.lng);
+        });
+      }
+      updateLocationFromCoords(e.latlng.lat, e.latlng.lng);
+    });
+
+    // PENTING: paksa Leaflet menghitung ulang ukuran tile begitu container
+    // benar-benar mendapat ukuran akhirnya. Lebih andal dibanding
+    // setTimeout tebak-tebakan karena ResizeObserver bereaksi terhadap
+    // perubahan ukuran nyata, bukan menebak durasi animasi.
+    const ro = new ResizeObserver(() => {
+      instance.invalidateSize();
+      forceTileVisibility();
+    });
+    ro.observe(mapRef.current);
+    // Panggil sekali di awal juga untuk jaga-jaga.
+    requestAnimationFrame(() => {
+      instance.invalidateSize();
+      forceTileVisibility();
+    });
+
+    setMapInstance(instance);
+
+    return () => {
+      ro.disconnect();
+      instance.off('tileload', forceTileVisibility);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapPickerOpen]);
 
   const updateLocationFromCoords = (lat, lng) => {
     setForm(prev => ({
@@ -654,6 +779,9 @@ export default function ProfilSaya() {
     }));
   };
 
+  // closeMapPicker: HANYA membersihkan/unmount instance peta. Tidak
+  // mengubah data form sama sekali. Dipanggil secara internal oleh
+  // cancelMapPicker() (revert data) dan saveMapLocation() (commit data).
   const closeMapPicker = () => {
     setMapPickerOpen(false);
     if (mapInstance) {
@@ -663,6 +791,26 @@ export default function ProfilSaya() {
     }
   };
 
+  // cancelMapPicker: dipakai oleh tombol "Batal", tombol X, dan klik di
+  // area backdrop/luar modal. Mengembalikan form.lat/lng/location ke nilai
+  // SEBELUM modal dibuka, supaya klik/drag yang sempat dilakukan user di
+  // peta tidak "nyangkut" walau dia membatalkan pemilihan lokasi.
+  const cancelMapPicker = () => {
+    if (originalLocation) {
+      setForm(prev => ({
+        ...prev,
+        lat: originalLocation.lat,
+        lng: originalLocation.lng,
+        location: originalLocation.location,
+      }));
+    }
+    closeMapPicker();
+  };
+
+  // saveMapLocation: dipakai oleh tombol "Pilih Lokasi Ini". Data di form
+  // sudah ter-update secara live lewat updateLocationFromCoords() setiap
+  // kali user klik/drag di peta, jadi di sini cukup tutup modal saja
+  // (tanpa revert).
   const saveMapLocation = () => {
     closeMapPicker();
     flash('ok', 'Lokasi berhasil dipilih. Jangan lupa klik "Simpan Data Pribadi"');
@@ -700,12 +848,12 @@ export default function ProfilSaya() {
       // Reload data - backend sudah update kolom photo di Expert jika type=foto_profil.
       // load() juga akan sinkronkan foto/nama terbaru ke localStorage & Navbar.
       await load();
-      
+
       // PENTING: Dispatch event SETELAH load() selesai
       // supaya data di localStorage sudah benar-benar terupdate
       window.dispatchEvent(new Event('amdal-user-updated'));
       console.log('✅ Event amdal-user-updated dispatched setelah upload foto');
-      
+
       // Jika foto profil, reload page setelah 500ms supaya navbar terupdate pasti
       if (type === 'foto_profil') {
         setTimeout(() => {
@@ -787,7 +935,7 @@ export default function ProfilSaya() {
         flash('err', 'Ukuran foto maksimal 2MB.');
         return;
       }
-      
+
       // Buka cropper
       const imageUrl = URL.createObjectURL(f);
       setImageToCrop(imageUrl);
@@ -806,7 +954,7 @@ export default function ProfilSaya() {
     setPhotoFile(croppedFile);
     setPreview(URL.createObjectURL(croppedBlob));
     setCropperOpen(false);
-    
+
     // Clean up
     if (imageToCrop) {
       URL.revokeObjectURL(imageToCrop);
@@ -873,7 +1021,7 @@ export default function ProfilSaya() {
         flash('err', 'Ukuran foto cover maksimal 5MB.');
         return;
       }
-      
+
       setCoverFile(f);
       setCoverPreview(URL.createObjectURL(f));
     }
@@ -885,7 +1033,7 @@ export default function ProfilSaya() {
     try {
       const fd = new FormData();
       fd.append('cover', coverFile);
-      
+
       await api.post('/my/profile', fd, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
@@ -948,22 +1096,31 @@ export default function ProfilSaya() {
       )}
 
       <Alert type="error" msg={err} onClose={() => setErr('')} />
-      <Alert type="ok"    msg={ok}  onClose={() => setOk('')} />
+      <Alert type="ok" msg={ok} onClose={() => setOk('')} />
 
       {/* ── Tab Navigation ────────────────────────────────────── */}
       <div className="flex gap-1 overflow-x-auto pb-1 mb-6 border-b border-outline-variant/20">
-        {TABS.map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-sm font-semibold whitespace-nowrap transition-colors border-b-2 ${
-              tab === t.id
-                ? 'border-[#2E5E3B] text-[#2E5E3B] bg-[#2E5E3B]/5'
-                : 'border-transparent text-[#5B6660] hover:text-[#2E5E3B] hover:bg-[#2E5E3B]/5'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
+        {TABS.map((t) => {
+          const doneKey =
+            t.id === 'profil-bio' ? 'profilBio' :
+            t.id === 'dokumen' ? 'fotoProfil' :
+            t.id;
+          const done = !!profileCompleteness[doneKey];
+          return (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-t-xl text-sm font-semibold whitespace-nowrap transition-colors border-b-2 ${tab === t.id
+                  ? 'border-[#2E5E3B] text-[#2E5E3B] bg-[#2E5E3B]/5'
+                  : 'border-transparent text-[#5B6660] hover:text-[#2E5E3B] hover:bg-[#2E5E3B]/5'
+                }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
+              {t.label}
+              {done && (
+                <span className="material-symbols-outlined text-[15px] text-[#2E5E3B]">check_circle</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ════════════════════════════════════════════════════════ */}
@@ -975,7 +1132,7 @@ export default function ProfilSaya() {
             <SectionTitle icon="badge">Identitas & Profesi</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><Label>Nama Lengkap *</Label>
-                <input className={INPUT} value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Dr. Nama Anda, S.Hut, M.Si" /></div>
+                <input className={INPUT} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Dr. Nama Anda, S.Hut, M.Si" /></div>
               <div><Label>No. HP / WhatsApp *</Label>
                 <PhoneInput
                   value={form.phone}
@@ -985,13 +1142,13 @@ export default function ProfilSaya() {
                 />
               </div>
               <div><Label>Institusi / Perusahaan</Label>
-                <input className={INPUT} value={form.institution} onChange={e=>setForm({...form,institution:e.target.value})} placeholder="PSL - IPB University" /></div>
+                <input className={INPUT} value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} placeholder="PSL - IPB University" /></div>
               <div><Label>Bidang Keahlian</Label>
-                <input className={INPUT} value={form.field} onChange={e=>setForm({...form,field:e.target.value})} placeholder="Ahli Kehutanan & Tata Ruang" /></div>
+                <input className={INPUT} value={form.field} onChange={e => setForm({ ...form, field: e.target.value })} placeholder="Ahli Kehutanan & Tata Ruang" /></div>
               <div><Label>Tempat Lahir</Label>
-                <input className={INPUT} value={form.tempat_lahir} onChange={e=>setForm({...form,tempat_lahir:e.target.value})} placeholder="Jakarta" /></div>
+                <input className={INPUT} value={form.tempat_lahir} onChange={e => setForm({ ...form, tempat_lahir: e.target.value })} placeholder="Jakarta" /></div>
               <div><Label>Tanggal Lahir</Label>
-                <input type="date" className={INPUT} value={form.tanggal_lahir} onChange={e=>setForm({...form,tanggal_lahir:e.target.value})} /></div>
+                <input type="date" className={INPUT} value={form.tanggal_lahir} onChange={e => setForm({ ...form, tanggal_lahir: e.target.value })} /></div>
             </div>
           </Card>
 
@@ -999,12 +1156,12 @@ export default function ProfilSaya() {
             <SectionTitle icon="location_on">Alamat</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2"><Label>Alamat Lengkap</Label>
-                <textarea className={INPUT+' min-h-[80px] resize-none'} value={form.alamat_lengkap} onChange={e=>setForm({...form,alamat_lengkap:e.target.value})} placeholder="Jl. Contoh No. 4, Kecamatan..." /></div>
+                <textarea className={INPUT + ' min-h-[80px] resize-none'} value={form.alamat_lengkap} onChange={e => setForm({ ...form, alamat_lengkap: e.target.value })} placeholder="Jl. Contoh No. 4, Kecamatan..." /></div>
               <div><Label>Kota / Kabupaten</Label>
-                <input className={INPUT} value={form.alamat_kota} onChange={e=>setForm({...form,alamat_kota:e.target.value})} placeholder="Kota Bogor" /></div>
+                <input className={INPUT} value={form.alamat_kota} onChange={e => setForm({ ...form, alamat_kota: e.target.value })} placeholder="Kota Bogor" /></div>
               <div><Label>Provinsi</Label>
-                <input className={INPUT} value={form.alamat_provinsi} onChange={e=>setForm({...form,alamat_provinsi:e.target.value})} placeholder="Jawa Barat" /></div>
-              
+                <input className={INPUT} value={form.alamat_provinsi} onChange={e => setForm({ ...form, alamat_provinsi: e.target.value })} placeholder="Jawa Barat" /></div>
+
               {/* Location Picker */}
               <div className="md:col-span-2 mt-4">
                 <Label>Lokasi pada Peta (untuk ditampilkan di pencarian)</Label>
@@ -1036,11 +1193,10 @@ export default function ProfilSaya() {
               {KRITERIA_OPTIONS.map((option) => (
                 <label
                   key={option}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${
-                    kriteriaList.includes(option)
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${kriteriaList.includes(option)
                       ? 'border-[#2E5E3B] bg-[#2E5E3B]/5'
                       : 'border-outline-variant/40 hover:border-[#2E5E3B]/30'
-                  }`}
+                    }`}
                 >
                   <input
                     type="checkbox"
@@ -1095,17 +1251,20 @@ export default function ProfilSaya() {
           <Card>
             <SectionTitle icon="note_alt">Catatan</SectionTitle>
             <textarea
-              className={INPUT+' min-h-[100px] resize-none'}
+              className={INPUT + ' min-h-[100px] resize-none'}
               value={form.catatan}
-              onChange={e=>setForm({...form,catatan:e.target.value})}
+              onChange={e => setForm({ ...form, catatan: e.target.value })}
               placeholder="Ceritakan secara singkat pengalaman profesional Anda sebagai tenaga ahli, konsultan, narasumber, atau peneliti..."
             />
           </Card>
 
-          <div className="flex justify-end">
+          <div className="flex items-center justify-end gap-3">
             <button className={BTN_PRIMARY} onClick={savePribadi} disabled={saving}>
               <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
               {saving ? 'Menyimpan...' : 'Simpan Data Pribadi'}
+            </button>
+            <button className={BTN_GHOST} onClick={goNext}>
+              Lanjut<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
             </button>
           </div>
         </div>
@@ -1121,28 +1280,28 @@ export default function ProfilSaya() {
             <div className="space-y-4">
               <div>
                 <Label>Tentang Saya</Label>
-                <textarea 
-                  className={INPUT+' min-h-[120px] resize-none'} 
-                  value={bioForm.tentang_saya} 
-                  onChange={e=>setBioForm({...bioForm,tentang_saya:e.target.value})} 
+                <textarea
+                  className={INPUT + ' min-h-[120px] resize-none'}
+                  value={bioForm.tentang_saya}
+                  onChange={e => setBioForm({ ...bioForm, tentang_saya: e.target.value })}
                   placeholder="Ceritakan tentang diri Anda, latar belakang profesional, dan pencapaian utama..."
                 />
               </div>
               <div>
                 <Label>Ringkasan Keahlian</Label>
-                <textarea 
-                  className={INPUT+' min-h-[80px] resize-none'} 
-                  value={bioForm.ringkasan_keahlian} 
-                  onChange={e=>setBioForm({...bioForm,ringkasan_keahlian:e.target.value})} 
+                <textarea
+                  className={INPUT + ' min-h-[80px] resize-none'}
+                  value={bioForm.ringkasan_keahlian}
+                  onChange={e => setBioForm({ ...bioForm, ringkasan_keahlian: e.target.value })}
                   placeholder="Ringkasan singkat keahlian dan spesialisasi Anda..."
                 />
               </div>
               <div>
                 <Label>Bidang Utama (pisahkan dengan koma)</Label>
-                <input 
-                  className={INPUT} 
-                  value={bioForm.bidang_utama} 
-                  onChange={e=>setBioForm({...bioForm,bidang_utama:e.target.value})} 
+                <input
+                  className={INPUT}
+                  value={bioForm.bidang_utama}
+                  onChange={e => setBioForm({ ...bioForm, bidang_utama: e.target.value })}
                   placeholder="Contoh: KLHS, Tata Ruang, Pemodelan Sistem"
                 />
                 <p className="text-xs text-gray-500 mt-1">Pisahkan setiap bidang dengan koma (,)</p>
@@ -1150,11 +1309,19 @@ export default function ProfilSaya() {
             </div>
           </Card>
 
-          <div className="flex justify-end">
-            <button className={BTN_PRIMARY} onClick={saveProfilBio} disabled={saving}>
-              <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
-              {saving ? 'Menyimpan...' : 'Simpan Profil Bio'}
+          <div className="flex items-center justify-between gap-3">
+            <button className={BTN_GHOST} onClick={goPrev}>
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>Kembali
             </button>
+            <div className="flex items-center gap-3">
+              <button className={BTN_PRIMARY} onClick={saveProfilBio} disabled={saving}>
+                <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
+                {saving ? 'Menyimpan...' : 'Simpan Profil Bio'}
+              </button>
+              <button className={BTN_GHOST} onClick={goNext}>
+                Lanjut<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1167,25 +1334,25 @@ export default function ProfilSaya() {
           <Card>
             <SectionTitle icon="link">Link Profil Akademik</SectionTitle>
             <p className="text-sm text-gray-600 mb-4">Tambahkan link ke profil akademik Anda untuk meningkatkan kredibilitas.</p>
-            
+
             <div className="space-y-5">
               {/* Scopus */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>Scopus URL</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.scopus_url} 
-                    onChange={e=>setAkademikForm({...akademikForm,scopus_url:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.scopus_url}
+                    onChange={e => setAkademikForm({ ...akademikForm, scopus_url: e.target.value })}
                     placeholder="https://www.scopus.com/authid/detail.uri?authorId=..."
                   />
                 </div>
                 <div>
                   <Label>Scopus Metrics (opsional)</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.scopus_metrics} 
-                    onChange={e=>setAkademikForm({...akademikForm,scopus_metrics:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.scopus_metrics}
+                    onChange={e => setAkademikForm({ ...akademikForm, scopus_metrics: e.target.value })}
                     placeholder="Contoh: H-index 8 · 24 dokumen"
                   />
                 </div>
@@ -1195,19 +1362,19 @@ export default function ProfilSaya() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>Google Scholar URL</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.google_scholar_url} 
-                    onChange={e=>setAkademikForm({...akademikForm,google_scholar_url:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.google_scholar_url}
+                    onChange={e => setAkademikForm({ ...akademikForm, google_scholar_url: e.target.value })}
                     placeholder="https://scholar.google.com/citations?user=..."
                   />
                 </div>
                 <div>
                   <Label>Google Scholar Metrics (opsional)</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.google_scholar_metrics} 
-                    onChange={e=>setAkademikForm({...akademikForm,google_scholar_metrics:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.google_scholar_metrics}
+                    onChange={e => setAkademikForm({ ...akademikForm, google_scholar_metrics: e.target.value })}
                     placeholder="Contoh: 312 sitasi"
                   />
                 </div>
@@ -1217,19 +1384,19 @@ export default function ProfilSaya() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>SINTA URL</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.sinta_url} 
-                    onChange={e=>setAkademikForm({...akademikForm,sinta_url:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.sinta_url}
+                    onChange={e => setAkademikForm({ ...akademikForm, sinta_url: e.target.value })}
                     placeholder="https://sinta.kemdikbud.go.id/authors/profile/..."
                   />
                 </div>
                 <div>
                   <Label>SINTA Metrics (opsional)</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.sinta_metrics} 
-                    onChange={e=>setAkademikForm({...akademikForm,sinta_metrics:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.sinta_metrics}
+                    onChange={e => setAkademikForm({ ...akademikForm, sinta_metrics: e.target.value })}
                     placeholder="Contoh: Skor SINTA 3 · S3"
                   />
                 </div>
@@ -1239,19 +1406,19 @@ export default function ProfilSaya() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>ORCID URL</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.orcid_url} 
-                    onChange={e=>setAkademikForm({...akademikForm,orcid_url:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.orcid_url}
+                    onChange={e => setAkademikForm({ ...akademikForm, orcid_url: e.target.value })}
                     placeholder="https://orcid.org/0000-0002-XXXX-XXXX"
                   />
                 </div>
                 <div>
                   <Label>ORCID Metrics (opsional)</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.orcid_metrics} 
-                    onChange={e=>setAkademikForm({...akademikForm,orcid_metrics:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.orcid_metrics}
+                    onChange={e => setAkademikForm({ ...akademikForm, orcid_metrics: e.target.value })}
                     placeholder="Contoh: 0000-0002-XXXX-XXXX"
                   />
                 </div>
@@ -1261,19 +1428,19 @@ export default function ProfilSaya() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>ResearchGate URL</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.researchgate_url} 
-                    onChange={e=>setAkademikForm({...akademikForm,researchgate_url:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.researchgate_url}
+                    onChange={e => setAkademikForm({ ...akademikForm, researchgate_url: e.target.value })}
                     placeholder="https://www.researchgate.net/profile/..."
                   />
                 </div>
                 <div>
                   <Label>ResearchGate Metrics (opsional)</Label>
-                  <input 
-                    className={INPUT} 
-                    value={akademikForm.researchgate_metrics} 
-                    onChange={e=>setAkademikForm({...akademikForm,researchgate_metrics:e.target.value})} 
+                  <input
+                    className={INPUT}
+                    value={akademikForm.researchgate_metrics}
+                    onChange={e => setAkademikForm({ ...akademikForm, researchgate_metrics: e.target.value })}
                     placeholder="Contoh: RG Score 18.4"
                   />
                 </div>
@@ -1281,11 +1448,19 @@ export default function ProfilSaya() {
             </div>
           </Card>
 
-          <div className="flex justify-end">
-            <button className={BTN_PRIMARY} onClick={saveLinkAkademik} disabled={saving}>
-              <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
-              {saving ? 'Menyimpan...' : 'Simpan Link Akademik'}
+          <div className="flex items-center justify-between gap-3">
+            <button className={BTN_GHOST} onClick={goPrev}>
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>Kembali
             </button>
+            <div className="flex items-center gap-3">
+              <button className={BTN_PRIMARY} onClick={saveLinkAkademik} disabled={saving}>
+                <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
+                {saving ? 'Menyimpan...' : 'Simpan Link Akademik'}
+              </button>
+              <button className={BTN_GHOST} onClick={goNext}>
+                Lanjut<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1305,7 +1480,7 @@ export default function ProfilSaya() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <Label>Jenjang *</Label>
-                      <select className={INPUT} value={editEdu.jenjang} onChange={v=>setEditEdu({...editEdu,jenjang:v.target.value})}>
+                      <select className={INPUT} value={editEdu.jenjang} onChange={v => setEditEdu({ ...editEdu, jenjang: v.target.value })}>
                         <option value="">Pilih Jenjang</option>
                         <option value="S1 - Sarjana">S1 - Sarjana</option>
                         <option value="S2 - Magister">S2 - Magister</option>
@@ -1314,13 +1489,13 @@ export default function ProfilSaya() {
                         <option value="Spesialis">Spesialis</option>
                       </select>
                     </div>
-                    <div><Label>Institusi *</Label><input className={INPUT} value={editEdu.institusi} onChange={v=>setEditEdu({...editEdu,institusi:v.target.value})} /></div>
-                    <div><Label>Jurusan</Label><input className={INPUT} value={editEdu.jurusan||''} onChange={v=>setEditEdu({...editEdu,jurusan:v.target.value})} /></div>
-                    <div><Label>Tahun Lulus</Label><input type="number" className={INPUT} value={editEdu.tahun_lulus||''} onChange={v=>setEditEdu({...editEdu,tahun_lulus:v.target.value})} /></div>
+                    <div><Label>Institusi *</Label><input className={INPUT} value={editEdu.institusi} onChange={v => setEditEdu({ ...editEdu, institusi: v.target.value })} /></div>
+                    <div><Label>Jurusan</Label><input className={INPUT} value={editEdu.jurusan || ''} onChange={v => setEditEdu({ ...editEdu, jurusan: v.target.value })} /></div>
+                    <div><Label>Tahun Lulus</Label><input type="number" className={INPUT} value={editEdu.tahun_lulus || ''} onChange={v => setEditEdu({ ...editEdu, tahun_lulus: v.target.value })} /></div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button className={BTN_PRIMARY} onClick={()=>updateEdu(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>Simpan</button>
-                    <button className={BTN_GHOST} onClick={()=>setEditEdu(null)}>Batal</button>
+                    <button className={BTN_PRIMARY} onClick={() => updateEdu(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>Simpan</button>
+                    <button className={BTN_GHOST} onClick={() => setEditEdu(null)}>Batal</button>
                   </div>
                 </div>
               ) : (
@@ -1331,8 +1506,8 @@ export default function ProfilSaya() {
                     {e.tahun_lulus && <p className="text-xs text-[#5B6660] mt-1">Lulus {e.tahun_lulus}</p>}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button className={BTN_GHOST} onClick={()=>setEditEdu({...e})}><span className="material-symbols-outlined text-[16px]">edit</span>Edit</button>
-                    <button className={BTN_DANGER} onClick={()=>deleteEdu(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                    <button className={BTN_GHOST} onClick={() => setEditEdu({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+                    <button className={BTN_DANGER} onClick={() => deleteEdu(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
                   </div>
                 </div>
               )}
@@ -1345,7 +1520,7 @@ export default function ProfilSaya() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 <div>
                   <Label>Jenjang *</Label>
-                  <select className={INPUT} value={newEdu.jenjang} onChange={v=>setNewEdu({...newEdu,jenjang:v.target.value})}>
+                  <select className={INPUT} value={newEdu.jenjang} onChange={v => setNewEdu({ ...newEdu, jenjang: v.target.value })}>
                     <option value="">Pilih Jenjang</option>
                     <option value="S1 - Sarjana">S1 - Sarjana</option>
                     <option value="S2 - Magister">S2 - Magister</option>
@@ -1354,20 +1529,22 @@ export default function ProfilSaya() {
                     <option value="Spesialis">Spesialis</option>
                   </select>
                 </div>
-                <div><Label>Institusi *</Label><input className={INPUT} value={newEdu.institusi} onChange={v=>setNewEdu({...newEdu,institusi:v.target.value})} placeholder="Nama Universitas" /></div>
-                <div><Label>Jurusan / Program Studi</Label><input className={INPUT} value={newEdu.jurusan} onChange={v=>setNewEdu({...newEdu,jurusan:v.target.value})} placeholder="Ilmu Lingkungan" /></div>
-                <div><Label>Tahun Lulus</Label><input type="number" className={INPUT} value={newEdu.tahun_lulus} onChange={v=>setNewEdu({...newEdu,tahun_lulus:v.target.value})} placeholder="2015" /></div>
+                <div><Label>Institusi *</Label><input className={INPUT} value={newEdu.institusi} onChange={v => setNewEdu({ ...newEdu, institusi: v.target.value })} placeholder="Nama Universitas" /></div>
+                <div><Label>Jurusan / Program Studi</Label><input className={INPUT} value={newEdu.jurusan} onChange={v => setNewEdu({ ...newEdu, jurusan: v.target.value })} placeholder="Ilmu Lingkungan" /></div>
+                <div><Label>Tahun Lulus</Label><input type="number" className={INPUT} value={newEdu.tahun_lulus} onChange={v => setNewEdu({ ...newEdu, tahun_lulus: v.target.value })} placeholder="2015" /></div>
               </div>
               <div className="flex gap-2">
-                <button className={BTN_PRIMARY} onClick={addEdu} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                <button className={BTN_GHOST} onClick={()=>setAddingEdu(false)}>Batal</button>
+                <button className={BTN_PRIMARY} onClick={addEdu} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                <button className={BTN_GHOST} onClick={() => setAddingEdu(false)}>Batal</button>
               </div>
             </Card>
           ) : (
-            <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingEdu(true)}>
+            <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingEdu(true)}>
               <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Pendidikan
             </button>
           )}
+
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
         </div>
       )}
 
@@ -1384,15 +1561,15 @@ export default function ProfilSaya() {
               {editExp?.id === e.id ? (
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div><Label>Posisi / Jabatan *</Label><input className={INPUT} value={editExp.posisi} onChange={v=>setEditExp({...editExp,posisi:v.target.value})} /></div>
-                    <div><Label>Instansi / Organisasi *</Label><input className={INPUT} value={editExp.instansi} onChange={v=>setEditExp({...editExp,instansi:v.target.value})} /></div>
-                    <div><Label>Tahun Mulai</Label><input type="number" className={INPUT} value={editExp.tahun_mulai||''} onChange={v=>setEditExp({...editExp,tahun_mulai:v.target.value})} /></div>
-                    <div><Label>Tahun Selesai</Label><input type="number" className={INPUT} value={editExp.tahun_selesai||''} onChange={v=>setEditExp({...editExp,tahun_selesai:v.target.value})} placeholder="Kosong = masih berlangsung" /></div>
-                    <div className="md:col-span-2"><Label>Deskripsi</Label><textarea className={INPUT+' resize-none min-h-[72px]'} value={editExp.deskripsi||''} onChange={v=>setEditExp({...editExp,deskripsi:v.target.value})} /></div>
+                    <div><Label>Posisi / Jabatan *</Label><input className={INPUT} value={editExp.posisi} onChange={v => setEditExp({ ...editExp, posisi: v.target.value })} /></div>
+                    <div><Label>Instansi / Organisasi *</Label><input className={INPUT} value={editExp.instansi} onChange={v => setEditExp({ ...editExp, instansi: v.target.value })} /></div>
+                    <div><Label>Tahun Mulai</Label><input type="number" className={INPUT} value={editExp.tahun_mulai || ''} onChange={v => setEditExp({ ...editExp, tahun_mulai: v.target.value })} /></div>
+                    <div><Label>Tahun Selesai</Label><input type="number" className={INPUT} value={editExp.tahun_selesai || ''} onChange={v => setEditExp({ ...editExp, tahun_selesai: v.target.value })} placeholder="Kosong = masih berlangsung" /></div>
+                    <div className="md:col-span-2"><Label>Deskripsi</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={editExp.deskripsi || ''} onChange={v => setEditExp({ ...editExp, deskripsi: v.target.value })} /></div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button className={BTN_PRIMARY} onClick={()=>updateExp(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>Simpan</button>
-                    <button className={BTN_GHOST} onClick={()=>setEditExp(null)}>Batal</button>
+                    <button className={BTN_PRIMARY} onClick={() => updateExp(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>Simpan</button>
+                    <button className={BTN_GHOST} onClick={() => setEditExp(null)}>Batal</button>
                   </div>
                 </div>
               ) : (
@@ -1406,8 +1583,8 @@ export default function ProfilSaya() {
                     {e.deskripsi && <p className="text-xs text-[#5B6660] mt-1 line-clamp-2">{e.deskripsi}</p>}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button className={BTN_GHOST} onClick={()=>setEditExp({...e})}><span className="material-symbols-outlined text-[16px]">edit</span>Edit</button>
-                    <button className={BTN_DANGER} onClick={()=>deleteExp(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                    <button className={BTN_GHOST} onClick={() => setEditExp({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+                    <button className={BTN_DANGER} onClick={() => deleteExp(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
                   </div>
                 </div>
               )}
@@ -1418,22 +1595,24 @@ export default function ProfilSaya() {
             <Card>
               <SectionTitle icon="add_circle">Tambah Pengalaman</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                <div><Label>Posisi / Jabatan *</Label><input className={INPUT} value={newExp.posisi} onChange={v=>setNewExp({...newExp,posisi:v.target.value})} placeholder="Konsultan AMDAL" /></div>
-                <div><Label>Instansi / Organisasi *</Label><input className={INPUT} value={newExp.instansi} onChange={v=>setNewExp({...newExp,instansi:v.target.value})} placeholder="PT. Contoh Jaya" /></div>
-                <div><Label>Tahun Mulai</Label><input type="number" className={INPUT} value={newExp.tahun_mulai} onChange={v=>setNewExp({...newExp,tahun_mulai:v.target.value})} placeholder="2020" /></div>
-                <div><Label>Tahun Selesai</Label><input type="number" className={INPUT} value={newExp.tahun_selesai} onChange={v=>setNewExp({...newExp,tahun_selesai:v.target.value})} placeholder="Kosong = masih berlangsung" /></div>
-                <div className="md:col-span-2"><Label>Deskripsi Singkat</Label><textarea className={INPUT+' resize-none min-h-[72px]'} value={newExp.deskripsi} onChange={v=>setNewExp({...newExp,deskripsi:v.target.value})} /></div>
+                <div><Label>Posisi / Jabatan *</Label><input className={INPUT} value={newExp.posisi} onChange={v => setNewExp({ ...newExp, posisi: v.target.value })} placeholder="Konsultan AMDAL" /></div>
+                <div><Label>Instansi / Organisasi *</Label><input className={INPUT} value={newExp.instansi} onChange={v => setNewExp({ ...newExp, instansi: v.target.value })} placeholder="PT. Contoh Jaya" /></div>
+                <div><Label>Tahun Mulai</Label><input type="number" className={INPUT} value={newExp.tahun_mulai} onChange={v => setNewExp({ ...newExp, tahun_mulai: v.target.value })} placeholder="2020" /></div>
+                <div><Label>Tahun Selesai</Label><input type="number" className={INPUT} value={newExp.tahun_selesai} onChange={v => setNewExp({ ...newExp, tahun_selesai: v.target.value })} placeholder="Kosong = masih berlangsung" /></div>
+                <div className="md:col-span-2"><Label>Deskripsi Singkat</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={newExp.deskripsi} onChange={v => setNewExp({ ...newExp, deskripsi: v.target.value })} /></div>
               </div>
               <div className="flex gap-2">
-                <button className={BTN_PRIMARY} onClick={addExp} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                <button className={BTN_GHOST} onClick={()=>setAddingExp(false)}>Batal</button>
+                <button className={BTN_PRIMARY} onClick={addExp} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                <button className={BTN_GHOST} onClick={() => setAddingExp(false)}>Batal</button>
               </div>
             </Card>
           ) : (
-            <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingExp(true)}>
+            <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingExp(true)}>
               <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Pengalaman
             </button>
           )}
+
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
         </div>
       )}
 
@@ -1453,7 +1632,7 @@ export default function ProfilSaya() {
                   <div>
                     <p className="font-bold text-[#1F2A22]">{c.nama_sertifikat}</p>
                     {c.penerbit && <p className="text-sm text-[#5B6660]">{c.penerbit}</p>}
-                    {c.tahun    && <p className="text-xs text-[#5B6660] mt-1">Tahun {c.tahun}</p>}
+                    {c.tahun && <p className="text-xs text-[#5B6660] mt-1">Tahun {c.tahun}</p>}
                     {c.file_url && (
                       <a
                         href={getFileUrl(c.file_url)}
@@ -1467,7 +1646,7 @@ export default function ProfilSaya() {
                     )}
                   </div>
                 </div>
-                <button className={BTN_DANGER} onClick={()=>deleteCert(c.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                <button className={BTN_DANGER} onClick={() => deleteCert(c.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
               </div>
             </Card>
           ))}
@@ -1476,20 +1655,22 @@ export default function ProfilSaya() {
             <Card>
               <SectionTitle icon="add_circle">Tambah Sertifikat</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                <div className="md:col-span-2"><Label>Nama Sertifikat *</Label><input className={INPUT} value={newCert.nama_sertifikat} onChange={v=>setNewCert({...newCert,nama_sertifikat:v.target.value})} placeholder="Sertifikat AMDAL A" /></div>
-                <div><Label>Tahun</Label><input type="number" className={INPUT} value={newCert.tahun} onChange={v=>setNewCert({...newCert,tahun:v.target.value})} placeholder="2022" /></div>
-                <div className="md:col-span-3"><Label>Penerbit / Lembaga</Label><input className={INPUT} value={newCert.penerbit} onChange={v=>setNewCert({...newCert,penerbit:v.target.value})} placeholder="KLHK / BPLHD / Instansi Penerbit" /></div>
+                <div className="md:col-span-2"><Label>Nama Sertifikat *</Label><input className={INPUT} value={newCert.nama_sertifikat} onChange={v => setNewCert({ ...newCert, nama_sertifikat: v.target.value })} placeholder="Sertifikat AMDAL A" /></div>
+                <div><Label>Tahun</Label><input type="number" className={INPUT} value={newCert.tahun} onChange={v => setNewCert({ ...newCert, tahun: v.target.value })} placeholder="2022" /></div>
+                <div className="md:col-span-3"><Label>Penerbit / Lembaga</Label><input className={INPUT} value={newCert.penerbit} onChange={v => setNewCert({ ...newCert, penerbit: v.target.value })} placeholder="KLHK / BPLHD / Instansi Penerbit" /></div>
               </div>
               <div className="flex gap-2">
-                <button className={BTN_PRIMARY} onClick={addCert} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                <button className={BTN_GHOST} onClick={()=>setAddingCert(false)}>Batal</button>
+                <button className={BTN_PRIMARY} onClick={addCert} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                <button className={BTN_GHOST} onClick={() => setAddingCert(false)}>Batal</button>
               </div>
             </Card>
           ) : (
-            <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingCert(true)}>
+            <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingCert(true)}>
               <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Sertifikat
             </button>
           )}
+
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
         </div>
       )}
 
@@ -1517,7 +1698,7 @@ export default function ProfilSaya() {
                       </a>
                     )}
                   </div>
-                  <button className={BTN_DANGER} onClick={()=>deletePub(p.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deletePub(p.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
                 </div>
               </Card>
             ))}
@@ -1527,7 +1708,7 @@ export default function ProfilSaya() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div>
                     <Label>Jenis</Label>
-                    <select className={INPUT} value={newPub.jenis} onChange={v=>setNewPub({...newPub,jenis:v.target.value})}>
+                    <select className={INPUT} value={newPub.jenis} onChange={v => setNewPub({ ...newPub, jenis: v.target.value })}>
                       <option value="">Pilih Jenis</option>
                       <option value="Jurnal">Jurnal</option>
                       <option value="Prosiding">Prosiding</option>
@@ -1535,18 +1716,18 @@ export default function ProfilSaya() {
                       <option value="Lainnya">Lainnya</option>
                     </select>
                   </div>
-                  <div><Label>Tahun</Label><input type="number" className={INPUT} value={newPub.tahun} onChange={v=>setNewPub({...newPub,tahun:v.target.value})} placeholder="2023" /></div>
-                  <div className="md:col-span-2"><Label>Judul *</Label><input className={INPUT} value={newPub.judul} onChange={v=>setNewPub({...newPub,judul:v.target.value})} placeholder="Judul publikasi" /></div>
-                  <div><Label>Penerbit / Media</Label><input className={INPUT} value={newPub.penerbit} onChange={v=>setNewPub({...newPub,penerbit:v.target.value})} placeholder="Nama jurnal / penerbit" /></div>
-                  <div><Label>Link (opsional)</Label><input className={INPUT} value={newPub.link} onChange={v=>setNewPub({...newPub,link:v.target.value})} placeholder="https://..." /></div>
+                  <div><Label>Tahun</Label><input type="number" className={INPUT} value={newPub.tahun} onChange={v => setNewPub({ ...newPub, tahun: v.target.value })} placeholder="2023" /></div>
+                  <div className="md:col-span-2"><Label>Judul *</Label><input className={INPUT} value={newPub.judul} onChange={v => setNewPub({ ...newPub, judul: v.target.value })} placeholder="Judul publikasi" /></div>
+                  <div><Label>Penerbit / Media</Label><input className={INPUT} value={newPub.penerbit} onChange={v => setNewPub({ ...newPub, penerbit: v.target.value })} placeholder="Nama jurnal / penerbit" /></div>
+                  <div><Label>Link (opsional)</Label><input className={INPUT} value={newPub.link} onChange={v => setNewPub({ ...newPub, link: v.target.value })} placeholder="https://..." /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addPub} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={()=>setAddingPub(false)}>Batal</button>
+                  <button className={BTN_PRIMARY} onClick={addPub} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingPub(false)}>Batal</button>
                 </div>
               </Card>
             ) : (
-              <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingPub(true)}>
+              <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingPub(true)}>
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Publikasi
               </button>
             )}
@@ -1566,7 +1747,7 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{o.jabatan}{o.periode ? ` · ${o.periode}` : ''}</p>
                     {o.kontribusi && <p className="text-xs text-[#5B6660] mt-1">{o.kontribusi}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={()=>deleteOrg(o.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteOrg(o.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
                 </div>
               </Card>
             ))}
@@ -1574,18 +1755,18 @@ export default function ProfilSaya() {
               <Card>
                 <SectionTitle icon="add_circle">Tambah Organisasi</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div><Label>Nama Organisasi *</Label><input className={INPUT} value={newOrg.nama} onChange={v=>setNewOrg({...newOrg,nama:v.target.value})} placeholder="Ikatan Ahli..." /></div>
-                  <div><Label>Jabatan</Label><input className={INPUT} value={newOrg.jabatan} onChange={v=>setNewOrg({...newOrg,jabatan:v.target.value})} placeholder="Anggota / Pengurus" /></div>
-                  <div><Label>Periode</Label><input className={INPUT} value={newOrg.periode} onChange={v=>setNewOrg({...newOrg,periode:v.target.value})} placeholder="2019 — Sekarang" /></div>
-                  <div className="md:col-span-2"><Label>Kontribusi</Label><textarea className={INPUT+' resize-none min-h-[64px]'} value={newOrg.kontribusi} onChange={v=>setNewOrg({...newOrg,kontribusi:v.target.value})} /></div>
+                  <div><Label>Nama Organisasi *</Label><input className={INPUT} value={newOrg.nama} onChange={v => setNewOrg({ ...newOrg, nama: v.target.value })} placeholder="Ikatan Ahli..." /></div>
+                  <div><Label>Jabatan</Label><input className={INPUT} value={newOrg.jabatan} onChange={v => setNewOrg({ ...newOrg, jabatan: v.target.value })} placeholder="Anggota / Pengurus" /></div>
+                  <div><Label>Periode</Label><input className={INPUT} value={newOrg.periode} onChange={v => setNewOrg({ ...newOrg, periode: v.target.value })} placeholder="2019 — Sekarang" /></div>
+                  <div className="md:col-span-2"><Label>Kontribusi</Label><textarea className={INPUT + ' resize-none min-h-[64px]'} value={newOrg.kontribusi} onChange={v => setNewOrg({ ...newOrg, kontribusi: v.target.value })} /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addOrg} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={()=>setAddingOrg(false)}>Batal</button>
+                  <button className={BTN_PRIMARY} onClick={addOrg} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingOrg(false)}>Batal</button>
                 </div>
               </Card>
             ) : (
-              <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingOrg(true)}>
+              <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingOrg(true)}>
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Organisasi
               </button>
             )}
@@ -1605,7 +1786,7 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{r.institusi}{r.periode ? ` · ${r.periode}` : ''}</p>
                     {r.bidang && <p className="text-xs text-[#5B6660] mt-1">{r.bidang}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={()=>deleteRev(r.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteRev(r.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
                 </div>
               </Card>
             ))}
@@ -1613,18 +1794,18 @@ export default function ProfilSaya() {
               <Card>
                 <SectionTitle icon="add_circle">Tambah Reviewer Jurnal</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div><Label>Nama Jurnal *</Label><input className={INPUT} value={newRev.nama} onChange={v=>setNewRev({...newRev,nama:v.target.value})} /></div>
-                  <div><Label>Institusi Penerbit</Label><input className={INPUT} value={newRev.institusi} onChange={v=>setNewRev({...newRev,institusi:v.target.value})} /></div>
-                  <div><Label>Bidang</Label><input className={INPUT} value={newRev.bidang} onChange={v=>setNewRev({...newRev,bidang:v.target.value})} /></div>
-                  <div><Label>Periode</Label><input className={INPUT} value={newRev.periode} onChange={v=>setNewRev({...newRev,periode:v.target.value})} placeholder="2020 — Sekarang" /></div>
+                  <div><Label>Nama Jurnal *</Label><input className={INPUT} value={newRev.nama} onChange={v => setNewRev({ ...newRev, nama: v.target.value })} /></div>
+                  <div><Label>Institusi Penerbit</Label><input className={INPUT} value={newRev.institusi} onChange={v => setNewRev({ ...newRev, institusi: v.target.value })} /></div>
+                  <div><Label>Bidang</Label><input className={INPUT} value={newRev.bidang} onChange={v => setNewRev({ ...newRev, bidang: v.target.value })} /></div>
+                  <div><Label>Periode</Label><input className={INPUT} value={newRev.periode} onChange={v => setNewRev({ ...newRev, periode: v.target.value })} placeholder="2020 — Sekarang" /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addRev} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={()=>setAddingRev(false)}>Batal</button>
+                  <button className={BTN_PRIMARY} onClick={addRev} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingRev(false)}>Batal</button>
                 </div>
               </Card>
             ) : (
-              <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingRev(true)}>
+              <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingRev(true)}>
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Reviewer Jurnal
               </button>
             )}
@@ -1644,7 +1825,7 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{n.penyelenggara}</p>
                     {(n.tempat || n.tanggal) && <p className="text-xs text-[#5B6660] mt-1">{n.tempat}{n.tempat && n.tanggal ? ', ' : ''}{n.tanggal}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={()=>deleteNara(n.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteNara(n.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
                 </div>
               </Card>
             ))}
@@ -1652,18 +1833,18 @@ export default function ProfilSaya() {
               <Card>
                 <SectionTitle icon="add_circle">Tambah Riwayat Narasumber</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div className="md:col-span-2"><Label>Judul Kegiatan *</Label><input className={INPUT} value={newNara.title} onChange={v=>setNewNara({...newNara,title:v.target.value})} /></div>
-                  <div><Label>Penyelenggara</Label><input className={INPUT} value={newNara.penyelenggara} onChange={v=>setNewNara({...newNara,penyelenggara:v.target.value})} /></div>
-                  <div><Label>Tempat</Label><input className={INPUT} value={newNara.tempat} onChange={v=>setNewNara({...newNara,tempat:v.target.value})} /></div>
-                  <div><Label>Tanggal</Label><input className={INPUT} value={newNara.tanggal} onChange={v=>setNewNara({...newNara,tanggal:v.target.value})} placeholder="15 Nov 2022" /></div>
+                  <div className="md:col-span-2"><Label>Judul Kegiatan *</Label><input className={INPUT} value={newNara.title} onChange={v => setNewNara({ ...newNara, title: v.target.value })} /></div>
+                  <div><Label>Penyelenggara</Label><input className={INPUT} value={newNara.penyelenggara} onChange={v => setNewNara({ ...newNara, penyelenggara: v.target.value })} /></div>
+                  <div><Label>Tempat</Label><input className={INPUT} value={newNara.tempat} onChange={v => setNewNara({ ...newNara, tempat: v.target.value })} /></div>
+                  <div><Label>Tanggal</Label><input className={INPUT} value={newNara.tanggal} onChange={v => setNewNara({ ...newNara, tanggal: v.target.value })} placeholder="15 Nov 2022" /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addNara} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={()=>setAddingNara(false)}>Batal</button>
+                  <button className={BTN_PRIMARY} onClick={addNara} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingNara(false)}>Batal</button>
                 </div>
               </Card>
             ) : (
-              <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingNara(true)}>
+              <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingNara(true)}>
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Riwayat Narasumber
               </button>
             )}
@@ -1683,7 +1864,7 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{i.materi}</p>
                     <p className="text-xs text-[#5B6660] mt-1">{i.peran}{i.peran && i.penyelenggara ? ' · ' : ''}{i.penyelenggara}{i.tahun ? ` (${i.tahun})` : ''}</p>
                   </div>
-                  <button className={BTN_DANGER} onClick={()=>deleteIns(i.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteIns(i.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
                 </div>
               </Card>
             ))}
@@ -1691,23 +1872,25 @@ export default function ProfilSaya() {
               <Card>
                 <SectionTitle icon="add_circle">Tambah Riwayat Instruktur</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div className="md:col-span-2"><Label>Nama Kegiatan *</Label><input className={INPUT} value={newIns.nama} onChange={v=>setNewIns({...newIns,nama:v.target.value})} /></div>
-                  <div><Label>Materi</Label><input className={INPUT} value={newIns.materi} onChange={v=>setNewIns({...newIns,materi:v.target.value})} /></div>
-                  <div><Label>Penyelenggara</Label><input className={INPUT} value={newIns.penyelenggara} onChange={v=>setNewIns({...newIns,penyelenggara:v.target.value})} /></div>
-                  <div><Label>Peran</Label><input className={INPUT} value={newIns.peran} onChange={v=>setNewIns({...newIns,peran:v.target.value})} placeholder="Instruktur Utama / Fasilitator" /></div>
-                  <div><Label>Tahun</Label><input type="number" className={INPUT} value={newIns.tahun} onChange={v=>setNewIns({...newIns,tahun:v.target.value})} /></div>
+                  <div className="md:col-span-2"><Label>Nama Kegiatan *</Label><input className={INPUT} value={newIns.nama} onChange={v => setNewIns({ ...newIns, nama: v.target.value })} /></div>
+                  <div><Label>Materi</Label><input className={INPUT} value={newIns.materi} onChange={v => setNewIns({ ...newIns, materi: v.target.value })} /></div>
+                  <div><Label>Penyelenggara</Label><input className={INPUT} value={newIns.penyelenggara} onChange={v => setNewIns({ ...newIns, penyelenggara: v.target.value })} /></div>
+                  <div><Label>Peran</Label><input className={INPUT} value={newIns.peran} onChange={v => setNewIns({ ...newIns, peran: v.target.value })} placeholder="Instruktur Utama / Fasilitator" /></div>
+                  <div><Label>Tahun</Label><input type="number" className={INPUT} value={newIns.tahun} onChange={v => setNewIns({ ...newIns, tahun: v.target.value })} /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addIns} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving?'Menyimpan...':'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={()=>setAddingIns(false)}>Batal</button>
+                  <button className={BTN_PRIMARY} onClick={addIns} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingIns(false)}>Batal</button>
                 </div>
               </Card>
             ) : (
-              <button className={BTN_GHOST+' self-start'} onClick={()=>setAddingIns(true)}>
+              <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingIns(true)}>
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Riwayat Instruktur
               </button>
             )}
           </div>
+
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
         </div>
       )}
 
@@ -1822,7 +2005,7 @@ export default function ProfilSaya() {
               {/* File Input */}
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap gap-2 items-center">
-                  <label className={BTN_GHOST+' cursor-pointer'}>
+                  <label className={BTN_GHOST + ' cursor-pointer'}>
                     <span className="material-symbols-outlined text-[16px]">upload_file</span>
                     {coverPreview ? 'Ganti Foto Cover' : 'Pilih Foto Cover'}
                     <input
@@ -1876,7 +2059,7 @@ export default function ProfilSaya() {
             <p className="text-xs text-[#5B6660] mb-3">Format PDF, maksimal 5MB. Pastikan CV Anda terbaru dan lengkap.</p>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2 items-center">
-                <label className={BTN_GHOST+' cursor-pointer'}>
+                <label className={BTN_GHOST + ' cursor-pointer'}>
                   <span className="material-symbols-outlined text-[16px]">upload_file</span>Pilih File CV
                   <input
                     type="file"
@@ -1935,7 +2118,7 @@ export default function ProfilSaya() {
             <p className="text-xs text-[#5B6660] mb-3">Sertifikat, ijazah, atau dokumen pendukung lainnya (PDF/JPG/PNG, maksimal 5MB).</p>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2 items-center">
-                <label className={BTN_GHOST+' cursor-pointer'}>
+                <label className={BTN_GHOST + ' cursor-pointer'}>
                   <span className="material-symbols-outlined text-[16px]">upload_file</span>Pilih Bukti Kompetensi
                   <input
                     type="file"
@@ -2063,6 +2246,8 @@ export default function ProfilSaya() {
               </div>
             </Card>
           )}
+
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
         </div>
       )}
 
@@ -2071,6 +2256,10 @@ export default function ProfilSaya() {
       {/* ════════════════════════════════════════════════════════ */}
       {tab === 'pengajuan' && (
         <div className="space-y-6 animate-fadeIn">
+
+          <button className={BTN_GHOST + ' self-start'} onClick={goPrev}>
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span>Kembali ke {TABS[currentTabIdx - 1]?.label}
+          </button>
 
           {/* ── Info paket aktif ──────────────────────────────── */}
           <div className="bg-[#E3F2E7] border border-[#A7D7B0] rounded-xl p-4 flex items-start gap-3">
@@ -2081,14 +2270,30 @@ export default function ProfilSaya() {
             </div>
           </div>
 
+          {/* ── Kelengkapan profil ────────────────────────────── */}
+          {!isProfileComplete && (
+            <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
+              <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">warning</span>
+              <div className="text-sm text-[#5C3D00]">
+                <p className="font-semibold mb-1">Lengkapi profil Anda terlebih dahulu</p>
+                <p className="text-xs leading-relaxed mb-2">Pengajuan baru bisa dikirim ke admin setelah data berikut lengkap:</p>
+                <ul className="text-xs list-disc list-inside space-y-0.5">
+                  {missingSteps.map((s) => <li key={s}>{s}</li>)}
+                </ul>
+              </div>
+            </div>
+          )}
+
           {/* ── Riwayat pengajuan ─────────────────────────────── */}
           <Card>
             <div className="flex items-center justify-between mb-4">
               <SectionTitle icon="history">Riwayat Pengajuan</SectionTitle>
               {!addingSubmission && (
                 <button
-                  className={BTN_PRIMARY}
+                  className={BTN_PRIMARY + ' disabled:opacity-40 disabled:cursor-not-allowed'}
                   onClick={() => setAddingSubmission(true)}
+                  disabled={!isProfileComplete}
+                  title={!isProfileComplete ? 'Lengkapi profil Anda terlebih dahulu' : undefined}
                 >
                   <span className="material-symbols-outlined text-[18px]">add</span>
                   Buat Pengajuan
@@ -2149,7 +2354,7 @@ export default function ProfilSaya() {
                           </div>
                         </div>
                         <p className="text-xs text-[#5B6660] shrink-0 whitespace-nowrap">
-                          {new Date(s.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' })}
+                          {new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                       </div>
                     </li>
@@ -2243,8 +2448,8 @@ export default function ProfilSaya() {
                         <span className="flex items-center gap-1.5 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-1.5 rounded-lg">
                           <span className="material-symbols-outlined text-[14px] text-red-500">picture_as_pdf</span>
                           <span className="truncate max-w-[160px]">{dokumenPdf.name}</span>
-                          <span className="font-semibold">· {(dokumenPdf.size/1024/1024).toFixed(1)} MB</span>
-                          <button onClick={() => { setDokumenPdf(null); if (dokumenPdfRef.current) dokumenPdfRef.current.value=''; }}
+                          <span className="font-semibold">· {(dokumenPdf.size / 1024 / 1024).toFixed(1)} MB</span>
+                          <button onClick={() => { setDokumenPdf(null); if (dokumenPdfRef.current) dokumenPdfRef.current.value = ''; }}
                             className="ml-1 text-red-400 hover:text-red-600">
                             <span className="material-symbols-outlined text-[14px]">close</span>
                           </button>
@@ -2265,7 +2470,7 @@ export default function ProfilSaya() {
                         <span className="flex items-center gap-1.5 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-1.5 rounded-lg">
                           <span className="material-symbols-outlined text-[14px] text-blue-500">description</span>
                           <span className="truncate max-w-[160px]">{dokumenWord.name}</span>
-                          <button onClick={() => { setDokumenWord(null); if (dokumenWordRef.current) dokumenWordRef.current.value=''; }}
+                          <button onClick={() => { setDokumenWord(null); if (dokumenWordRef.current) dokumenWordRef.current.value = ''; }}
                             className="ml-1 text-red-400 hover:text-red-600">
                             <span className="material-symbols-outlined text-[14px]">close</span>
                           </button>
@@ -2286,7 +2491,7 @@ export default function ProfilSaya() {
                         <span className="flex items-center gap-1.5 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-1.5 rounded-lg">
                           <span className="material-symbols-outlined text-[14px] text-amber-500">folder_zip</span>
                           <span className="truncate max-w-[160px]">{dokumenZip.name}</span>
-                          <button onClick={() => { setDokumenZip(null); if (dokumenZipRef.current) dokumenZipRef.current.value=''; }}
+                          <button onClick={() => { setDokumenZip(null); if (dokumenZipRef.current) dokumenZipRef.current.value = ''; }}
                             className="ml-1 text-red-400 hover:text-red-600">
                             <span className="material-symbols-outlined text-[14px]">close</span>
                           </button>
@@ -2300,13 +2505,18 @@ export default function ProfilSaya() {
 
                 {/* Aksi */}
                 <div className="flex gap-3 pt-2 border-t border-outline-variant/20">
-                  <button className={BTN_PRIMARY} onClick={submitPengajuan} disabled={submitting}>
+                  <button
+                    className={BTN_PRIMARY + ' disabled:opacity-40 disabled:cursor-not-allowed'}
+                    onClick={submitPengajuan}
+                    disabled={submitting || !isProfileComplete}
+                    title={!isProfileComplete ? 'Lengkapi profil Anda terlebih dahulu' : undefined}
+                  >
                     <span className="material-symbols-outlined text-[18px]">{submitting ? 'sync' : 'send'}</span>
                     {submitting ? 'Mengirim...' : 'Kirim Pengajuan'}
                   </button>
                   <button className={BTN_GHOST} onClick={() => {
                     setAddingSubmission(false);
-                    setNewSubmission({ judul_pengajuan:'', jenis_pengajuan:'', provinsi:'', kabupaten_kota:'', nama_pemohon:'', instansi:'', penanggung_jawab:'' });
+                    setNewSubmission({ judul_pengajuan: '', jenis_pengajuan: '', provinsi: '', kabupaten_kota: '', nama_pemohon: '', instansi: '', penanggung_jawab: '' });
                     setDokumenPdf(null); setDokumenWord(null); setDokumenZip(null);
                   }}>
                     Batal
@@ -2343,11 +2553,11 @@ export default function ProfilSaya() {
       {/* MODAL: FOTO PROFIL (WhatsApp Style)                    */}
       {/* ════════════════════════════════════════════════════════ */}
       {photoModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-4 animate-fadeIn"
           onClick={() => setPhotoModal(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-sm shadow-2xl animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
@@ -2371,7 +2581,7 @@ export default function ProfilSaya() {
                   <span className="text-[15px] font-medium text-[#1F2A22]">Lihat Foto</span>
                 </button>
               )}
-              
+
               <button
                 onClick={triggerCamera}
                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
@@ -2379,7 +2589,7 @@ export default function ProfilSaya() {
                 <span className="material-symbols-outlined text-[24px] text-[#5B6660]">photo_camera</span>
                 <span className="text-[15px] font-medium text-[#1F2A22]">Ambil Foto</span>
               </button>
-              
+
               <button
                 onClick={triggerPhotoInput}
                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
@@ -2418,7 +2628,7 @@ export default function ProfilSaya() {
       {/* MODAL: LIHAT FOTO FULLSCREEN                            */}
       {/* ════════════════════════════════════════════════════════ */}
       {fullPhotoView && photoPreview && (
-        <div 
+        <div
           className="fixed inset-0 bg-black z-[110] flex items-center justify-center p-4 animate-fadeIn"
           onClick={() => setFullPhotoView(false)}
         >
@@ -2428,9 +2638,9 @@ export default function ProfilSaya() {
           >
             <span className="material-symbols-outlined text-white">close</span>
           </button>
-          <img 
-            src={photoPreview} 
-            alt="Foto profil" 
+          <img
+            src={photoPreview}
+            alt="Foto profil"
             className="max-w-full max-h-full object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
@@ -2441,12 +2651,12 @@ export default function ProfilSaya() {
       {/* MODAL: MAP PICKER                                        */}
       {/* ════════════════════════════════════════════════════════ */}
       {mapPickerOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fadeIn"
-          onClick={closeMapPicker}
+          onClick={cancelMapPicker}
         >
-          <div 
-            className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl flex flex-col animate-slideUp"
+          <div
+            className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] h-[90vh] shadow-2xl flex flex-col animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -2456,7 +2666,7 @@ export default function ProfilSaya() {
                 <p className="text-xs text-[#5B6660] mt-0.5">Klik pada peta atau geser marker untuk menandai lokasi</p>
               </div>
               <button
-                onClick={closeMapPicker}
+                onClick={cancelMapPicker}
                 className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
               >
                 <span className="material-symbols-outlined text-[20px] text-[#5B6660]">close</span>
@@ -2465,12 +2675,12 @@ export default function ProfilSaya() {
 
             {/* Map Container */}
             <div className="flex-1 relative min-h-[400px] overflow-hidden">
-              <div 
-                ref={mapRef} 
-                id="location-picker-map" 
+              <div
+                ref={mapRef}
+                id="location-picker-map"
                 className="w-full h-full"
               />
-              
+
               {/* Info Card */}
               <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-outline-variant/20">
                 {form.lat && form.lng ? (
@@ -2504,13 +2714,13 @@ export default function ProfilSaya() {
                       (pos) => {
                         const { latitude, longitude } = pos.coords;
                         mapInstance.setView([latitude, longitude], 15);
-                        
+
                         if (mapMarker) {
                           mapMarker.setLatLng([latitude, longitude]);
                         } else {
                           const newMarker = L.marker([latitude, longitude], { draggable: true }).addTo(mapInstance);
                           setMapMarker(newMarker);
-                          newMarker.on('dragend', function() {
+                          newMarker.on('dragend', function () {
                             const position = newMarker.getLatLng();
                             updateLocationFromCoords(position.lat, position.lng);
                           });
@@ -2528,10 +2738,10 @@ export default function ProfilSaya() {
                 <span className="material-symbols-outlined text-[18px]">my_location</span>
                 Gunakan Lokasi Saya
               </button>
-              
+
               <div className="flex gap-2">
                 <button
-                  onClick={closeMapPicker}
+                  onClick={cancelMapPicker}
                   className={BTN_GHOST}
                 >
                   Batal

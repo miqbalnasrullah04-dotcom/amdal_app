@@ -34,7 +34,10 @@ const NO_FOOTER_ROUTES = [
 
 export default function Layout({ children }) {
   const location = useLocation();
-  const isFullPage = FULL_PAGE_ROUTES.includes(location.pathname);
+  const isFullPage = FULL_PAGE_ROUTES.includes(location.pathname) || 
+                     location.pathname.startsWith('/invoice/') || 
+                     location.pathname.startsWith('/profil/');
+
   const hideFooter = NO_FOOTER_ROUTES.includes(location.pathname);
 
   if (isFullPage) {

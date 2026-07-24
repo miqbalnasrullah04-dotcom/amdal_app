@@ -6,7 +6,6 @@ export default function VerifikasiEmail() {
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
-  const [devOtpCode, setDevOtpCode] = useState(''); // Untuk development
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -16,15 +15,11 @@ export default function VerifikasiEmail() {
 
   useEffect(() => {
     const emailFromState = location.state?.email;
-    const otpFromState = location.state?.otpCode;
     if (!emailFromState) {
       navigate('/daftar');
       return;
     }
     setEmail(emailFromState);
-    if (otpFromState) {
-      setDevOtpCode(otpFromState); // Simpan untuk ditampilkan
-    }
   }, [location.state, navigate]);
 
   const handleOtpChange = (index, value) => {
@@ -132,19 +127,6 @@ export default function VerifikasiEmail() {
           </p>
 
           {/* Alert messages */}
-          {devOtpCode && (
-            <div className="bg-yellow-50 border-2 border-yellow-400 text-yellow-800 text-sm rounded-lg px-4 py-3 mb-5">
-              <div className="flex items-start gap-2 mb-2">
-                <span className="material-symbols-outlined text-[18px] mt-0.5 shrink-0">code</span>
-                <strong>MODE DEVELOPMENT</strong>
-              </div>
-              <p className="text-xs mb-1">Kode OTP Anda (untuk testing):</p>
-              <p className="text-2xl font-bold tracking-wider text-center py-2 bg-yellow-100 rounded">{devOtpCode}</p>
-              <p className="text-xs mt-2 text-yellow-700">
-                ⚠️ Pesan ini hanya muncul di mode development. Di production, OTP akan dikirim via email.
-              </p>
-            </div>
-          )}
 
           {error && (
             <div className="bg-error-container text-on-error-container text-sm rounded-lg px-4 py-3 mb-5 flex items-start gap-2">

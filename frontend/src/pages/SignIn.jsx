@@ -48,6 +48,12 @@ export default function SignIn() {
         const errors = err.response?.data?.errors;
         const firstError = errors ? Object.values(errors)[0]?.[0] : null;
         setError(firstError || message || 'Data tidak valid.');
+      } else if (status === 403 && !err.response?.data?.email_verified) {
+        navigate('/verifikasi-email', { 
+          state: { 
+            email: err.response?.data?.email || form.email 
+          } 
+        });
       } else if (status === 401) {
         setError('Email atau kata sandi salah.');
       } else if (status === 502 || status === 504) {

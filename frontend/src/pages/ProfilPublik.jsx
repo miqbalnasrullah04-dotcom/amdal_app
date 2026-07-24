@@ -30,8 +30,8 @@ export default function ProfilPublik() {
   const profileStatus = expert?.profile_status || 'draft';
   const isAccountActive = profileStatus === 'aktif';
   
-  // Tayang if account is active AND package is chosen
-  const isProfileLive = isAccountActive && !!expert?.package_id;
+  // Tayang if account is active (approved users auto-get Free package)
+  const isProfileLive = isAccountActive;
 
   return (
     <DashboardLayout
