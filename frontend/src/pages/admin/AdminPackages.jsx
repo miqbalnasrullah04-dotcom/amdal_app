@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../../api/client.js';
 import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
 
 export default function AdminPackages() {
+  const [searchParams] = useSearchParams();
+  const typeParam = searchParams.get('type') || 'all';
+
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -12,12 +15,20 @@ export default function AdminPackages() {
   const loadData = () => {
     setLoading(true);
     api.get('/admin/packages')
-      .then((res) => setPackages(res.data))
+      .then((res) => {
+        let data = res.data || [];
+        if (typeParam === 'premium') {
+          data = data.filter(pkg => pkg.price > 0);
+        } else if (typeParam === 'free') {
+          data = data.filter(pkg => !pkg.price || pkg.price == 0);
+        }
+        setPackages(data);
+      })
       .catch(() => setError('Gagal memuat data paket.'))
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); }, [typeParam]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;

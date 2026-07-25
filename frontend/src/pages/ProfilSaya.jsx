@@ -16,8 +16,8 @@ const TABS = [
   { id: 'sertifikat', label: 'Sertifikat', icon: 'workspace_premium' },
   { id: 'akademik', label: 'Link Akademik', icon: 'link' },
   { id: 'publikasi', label: 'Publikasi & Riwayat', icon: 'article' },
-  { id: 'dokumen', label: 'Dokumen & Foto', icon: 'folder' },
-  { id: 'pengajuan', label: 'Pengajuan', icon: 'send' },
+  { id: 'dokumen', label: 'Upload Dokumen', icon: 'folder' },
+  { id: 'verifikasi', label: 'Kirim Verifikasi', icon: 'verified' },
 ];
 
 const STATUS_PENGAJUAN = {
@@ -410,7 +410,7 @@ export default function ProfilSaya() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); loadSubmissions(); }, []);
+  useEffect(() => { load(); }, []);
 
   /* ── handlers: data pribadi ──────────────────────────────────── */
   const savePribadi = async () => {
@@ -597,48 +597,19 @@ export default function ProfilSaya() {
     catch { flash('err', 'Gagal menghapus.'); }
   };
 
-  /* ── handlers: pengajuan ─────────────────────────────────────── */
-  const loadSubmissions = async () => {
-    try {
-      const res = await api.get('/submissions/mine');
-      setSubmissions(res.data || []);
-    } catch {
-      // Jika endpoint belum ada paket aktif, tidak perlu error fatal
-    }
-  };
-
-  const submitPengajuan = async () => {
+  /* ── handlers: kirim verifikasi ──────────────────────────────── */
+  const submitVerification = async () => {
     if (!isProfileComplete) {
-      return flash('err', 'Lengkapi profil Anda terlebih dahulu sebelum mengirim pengajuan ke admin.');
+      return flash('err', 'Lengkapi profil Anda terlebih dahulu (semua langkah harus centang hijau) sebelum mengirim verifikasi.');
     }
-
-    const { judul_pengajuan, jenis_pengajuan, provinsi, kabupaten_kota, nama_pemohon, instansi, penanggung_jawab } = newSubmission;
-    if (!judul_pengajuan || !jenis_pengajuan || !provinsi || !kabupaten_kota || !nama_pemohon || !instansi || !penanggung_jawab) {
-      return flash('err', 'Semua field wajib diisi.');
-    }
-    if (!dokumenPdf) return flash('err', 'Dokumen PDF wajib diupload.');
 
     setSubmitting(true);
     try {
-      const fd = new FormData();
-      Object.entries(newSubmission).forEach(([k, v]) => fd.append(k, v));
-      fd.append('dokumen_pdf', dokumenPdf);
-      if (dokumenWord) fd.append('dokumen_word', dokumenWord);
-      if (dokumenZip) fd.append('dokumen_zip', dokumenZip);
-
-      await api.post('/submissions', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      flash('ok', 'Pengajuan berhasil dikirim. Menunggu review admin.');
-
-      // Reset form
-      setNewSubmission({ judul_pengajuan: '', jenis_pengajuan: '', provinsi: '', kabupaten_kota: '', nama_pemohon: '', instansi: '', penanggung_jawab: '' });
-      setDokumenPdf(null); setDokumenWord(null); setDokumenZip(null);
-      if (dokumenPdfRef.current) dokumenPdfRef.current.value = '';
-      if (dokumenWordRef.current) dokumenWordRef.current.value = '';
-      if (dokumenZipRef.current) dokumenZipRef.current.value = '';
-      setAddingSubmission(false);
-      loadSubmissions();
+      await api.post('/my/profile/submit');
+      flash('ok', 'Profil berhasil dikirim. Menunggu review admin.');
+      load(); // Refresh data to update status
     } catch (e) {
-      flash('err', e.response?.data?.message || 'Gagal mengirim pengajuan.');
+      flash('err', e.response?.data?.message || 'Gagal mengirim verifikasi.');
     } finally {
       setSubmitting(false);
     }
@@ -2171,6 +2142,26 @@ export default function ProfilSaya() {
                 </div>
               )}
             </div>
+            <div className="mt-8 pt-6 border-t border-outline-variant/20">
+              <button
+                className={BTN_PRIMARY + ' w-full sm:w-auto'}
+                disabled={!isProfileComplete || submitting}
+                onClick={async () => {
+                  setSubmitting(true);
+                  try {
+                    await fetch('/my/profile/submit', { method: 'POST' });
+                    window.location.reload();
+                  } catch (err) {
+                    console.error(err);
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+              >
+                <span className="material-symbols-outlined text-[18px]">send</span>
+                {submitting ? 'Mengirim...' : 'Kirim Verifikasi Profil'}
+              </button>
+            </div>
           </Card>
 
           {/* ── Daftar Dokumen Tersimpan ─────────────────────── */}
@@ -2252,279 +2243,79 @@ export default function ProfilSaya() {
       )}
 
       {/* ════════════════════════════════════════════════════════ */}
-      {/* TAB: PENGAJUAN                                          */}
+      {/* TAB: VERIFIKASI                                          */}
       {/* ════════════════════════════════════════════════════════ */}
-      {tab === 'pengajuan' && (
+      {tab === 'verifikasi' && (
         <div className="space-y-6 animate-fadeIn">
-
           <button className={BTN_GHOST + ' self-start'} onClick={goPrev}>
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>Kembali ke {TABS[currentTabIdx - 1]?.label}
           </button>
 
-          {/* ── Info paket aktif ──────────────────────────────── */}
-          <div className="bg-[#E3F2E7] border border-[#A7D7B0] rounded-xl p-4 flex items-start gap-3">
-            <span className="material-symbols-outlined text-[#2E5E3B] text-[20px] shrink-0 mt-0.5">info</span>
-            <div className="text-sm text-[#1C3822]">
-              <p className="font-semibold mb-0.5">Syarat Pengajuan</p>
-              <p className="text-xs leading-relaxed">Pengajuan hanya bisa dikirim jika Anda memiliki <strong>paket aktif</strong> yang sudah terverifikasi. Pastikan paket Anda aktif sebelum mengirim pengajuan.</p>
-            </div>
-          </div>
-
-          {/* ── Kelengkapan profil ────────────────────────────── */}
-          {!isProfileComplete && (
-            <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
-              <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">warning</span>
-              <div className="text-sm text-[#5C3D00]">
-                <p className="font-semibold mb-1">Lengkapi profil Anda terlebih dahulu</p>
-                <p className="text-xs leading-relaxed mb-2">Pengajuan baru bisa dikirim ke admin setelah data berikut lengkap:</p>
-                <ul className="text-xs list-disc list-inside space-y-0.5">
-                  {missingSteps.map((s) => <li key={s}>{s}</li>)}
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* ── Riwayat pengajuan ─────────────────────────────── */}
+          {/* ── Status Saat Ini ──────────────────────────────── */}
           <Card>
-            <div className="flex items-center justify-between mb-4">
-              <SectionTitle icon="history">Riwayat Pengajuan</SectionTitle>
-              {!addingSubmission && (
-                <button
-                  className={BTN_PRIMARY + ' disabled:opacity-40 disabled:cursor-not-allowed'}
-                  onClick={() => setAddingSubmission(true)}
-                  disabled={!isProfileComplete}
-                  title={!isProfileComplete ? 'Lengkapi profil Anda terlebih dahulu' : undefined}
-                >
-                  <span className="material-symbols-outlined text-[18px]">add</span>
-                  Buat Pengajuan
-                </button>
-              )}
+            <SectionTitle icon="verified_user">Kirim Profil untuk Verifikasi</SectionTitle>
+            <div className="text-sm text-[#414844] leading-relaxed mb-6">
+              <p>Setelah Anda melengkapi seluruh data profil, memilih paket keanggotaan, dan mengunggah dokumen pendukung, Anda dapat mengirimkan profil ini untuk ditinjau oleh admin.</p>
+              <p className="mt-2">Pastikan semua data sudah benar karena profil tidak dapat diubah selama proses verifikasi berlangsung.</p>
             </div>
 
-            {submissions.length === 0 ? (
-              <div className="text-center py-10">
-                <div className="w-16 h-16 rounded-full bg-[#F5F4F0] flex items-center justify-center mx-auto mb-3">
-                  <span className="material-symbols-outlined text-3xl text-[#5B6660]/40">inbox</span>
+            {expert?.profile_status === 'aktif' ? (
+              <div className="bg-[#E3F2E7] border border-[#A7D7B0] rounded-xl p-4 flex items-start gap-3">
+                <span className="material-symbols-outlined text-[#2E5E3B] text-[20px] shrink-0 mt-0.5">check_circle</span>
+                <div className="text-sm text-[#1C3822]">
+                  <p className="font-semibold mb-0.5">Profil Telah Disetujui</p>
+                  <p className="text-xs">Profil Anda sudah aktif dan tayang di direktori publik.</p>
                 </div>
-                <p className="text-sm text-[#5B6660] mb-1">Belum ada pengajuan</p>
-                <p className="text-xs text-[#5B6660]/70">Klik "Buat Pengajuan" untuk mengirim pengajuan baru</p>
+              </div>
+            ) : expert?.profile_status === 'menunggu_verifikasi' ? (
+              <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
+                <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">schedule</span>
+                <div className="text-sm text-[#5C3D00]">
+                  <p className="font-semibold mb-0.5">Menunggu Verifikasi Admin</p>
+                  <p className="text-xs">Profil Anda sedang ditinjau. Kami akan memberi tahu Anda melalui email setelah proses selesai.</p>
+                </div>
               </div>
             ) : (
-              <ul className="divide-y divide-outline-variant/20">
-                {submissions.map((s) => {
-                  const st = STATUS_PENGAJUAN[s.status] || { label: s.status, color: 'text-gray-600 bg-gray-50 border-gray-200' };
-                  return (
-                    <li key={s.id} className="py-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className={`text-[11px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full border ${st.color}`}>
-                              {st.label}
-                            </span>
-                            <span className="text-xs text-[#5B6660]">#{s.id}</span>
-                          </div>
-                          <p className="font-semibold text-[#1F2A22] text-sm truncate">{s.judul_pengajuan}</p>
-                          <p className="text-xs text-[#5B6660] mt-0.5">{s.jenis_pengajuan} · {s.kabupaten_kota}, {s.provinsi}</p>
-                          <p className="text-xs text-[#5B6660]">Pemohon: {s.nama_pemohon} · {s.instansi}</p>
-                          {s.catatan_admin && (
-                            <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                              <p className="text-xs font-semibold text-amber-800 mb-0.5">Catatan Admin:</p>
-                              <p className="text-xs text-amber-700">{s.catatan_admin}</p>
-                            </div>
-                          )}
-                          <div className="flex gap-3 mt-2">
-                            {s.dokumen_pdf_url && (
-                              <a href={s.dokumen_pdf_url} target="_blank" rel="noreferrer"
-                                className="text-xs text-[#0284C7] hover:underline inline-flex items-center gap-1">
-                                <span className="material-symbols-outlined text-[14px]">picture_as_pdf</span>PDF
-                              </a>
-                            )}
-                            {s.dokumen_word_url && (
-                              <a href={s.dokumen_word_url} target="_blank" rel="noreferrer"
-                                className="text-xs text-[#0284C7] hover:underline inline-flex items-center gap-1">
-                                <span className="material-symbols-outlined text-[14px]">description</span>Word
-                              </a>
-                            )}
-                            {s.dokumen_zip_url && (
-                              <a href={s.dokumen_zip_url} target="_blank" rel="noreferrer"
-                                className="text-xs text-[#0284C7] hover:underline inline-flex items-center gap-1">
-                                <span className="material-symbols-outlined text-[14px]">folder_zip</span>ZIP
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-xs text-[#5B6660] shrink-0 whitespace-nowrap">
-                          {new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </p>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </Card>
+              <div className="space-y-4">
+                {/* ── Kelengkapan profil ────────────────────────────── */}
+                {!isProfileComplete && (
+                  <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">warning</span>
+                    <div className="text-sm text-[#5C3D00]">
+                      <p className="font-semibold mb-1">Lengkapi profil Anda terlebih dahulu</p>
+                      <p className="text-xs leading-relaxed mb-2">Profil baru bisa dikirim ke admin setelah bagian berikut lengkap:</p>
+                      <ul className="text-xs list-disc list-inside space-y-0.5">
+                        {missingSteps.map((s) => <li key={s}>{s}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                )}
 
-          {/* ── Form pengajuan baru ───────────────────────────── */}
-          {addingSubmission && (
-            <Card>
-              <SectionTitle icon="send">Buat Pengajuan Baru</SectionTitle>
-
-              <div className="space-y-5">
-                {/* Info pengajuan */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <Label>Judul Pengajuan *</Label>
-                    <input className={INPUT} value={newSubmission.judul_pengajuan}
-                      onChange={e => setNewSubmission({ ...newSubmission, judul_pengajuan: e.target.value })}
-                      placeholder="Contoh: Pengajuan Izin Lingkungan Kawasan Industri" />
-                  </div>
-                  <div>
-                    <Label>Jenis Pengajuan *</Label>
-                    <select className={INPUT} value={newSubmission.jenis_pengajuan}
-                      onChange={e => setNewSubmission({ ...newSubmission, jenis_pengajuan: e.target.value })}>
-                      <option value="">Pilih Jenis</option>
-                      <option value="AMDAL">AMDAL</option>
-                      <option value="UKL-UPL">UKL-UPL</option>
-                      <option value="SPPL">SPPL</option>
-                      <option value="KLHS">KLHS</option>
-                      <option value="Izin Lingkungan">Izin Lingkungan</option>
-                      <option value="Lainnya">Lainnya</option>
-                    </select>
-                  </div>
-                  <div>
-                    <Label>Provinsi *</Label>
-                    <input className={INPUT} value={newSubmission.provinsi}
-                      onChange={e => setNewSubmission({ ...newSubmission, provinsi: e.target.value })}
-                      placeholder="Jawa Barat" />
-                  </div>
-                  <div>
-                    <Label>Kabupaten / Kota *</Label>
-                    <input className={INPUT} value={newSubmission.kabupaten_kota}
-                      onChange={e => setNewSubmission({ ...newSubmission, kabupaten_kota: e.target.value })}
-                      placeholder="Kota Bandung" />
+                {/* Info paket & pembayaran (opsional, divalidasi backend) */}
+                <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl p-4 flex items-start gap-3 mb-6">
+                  <span className="material-symbols-outlined text-[#0284C7] text-[20px] shrink-0 mt-0.5">workspace_premium</span>
+                  <div className="text-sm text-[#0369A1]">
+                    <p className="font-semibold mb-0.5">Syarat Verifikasi</p>
+                    <p className="text-xs">Anda harus memiliki <strong>Paket Aktif</strong> (telah memilih paket dan melunasi pembayaran) sebelum admin memproses verifikasi profil ini.</p>
                   </div>
                 </div>
 
-                {/* Data pemohon */}
-                <div className="border-t border-outline-variant/20 pt-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#2E5E3B] mb-3">Data Pemohon</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Nama Pemohon *</Label>
-                      <input className={INPUT} value={newSubmission.nama_pemohon}
-                        onChange={e => setNewSubmission({ ...newSubmission, nama_pemohon: e.target.value })}
-                        placeholder="Nama lengkap pemohon" />
-                    </div>
-                    <div>
-                      <Label>Instansi / Perusahaan *</Label>
-                      <input className={INPUT} value={newSubmission.instansi}
-                        onChange={e => setNewSubmission({ ...newSubmission, instansi: e.target.value })}
-                        placeholder="PT. Nama Perusahaan" />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label>Penanggung Jawab *</Label>
-                      <input className={INPUT} value={newSubmission.penanggung_jawab}
-                        onChange={e => setNewSubmission({ ...newSubmission, penanggung_jawab: e.target.value })}
-                        placeholder="Nama penanggung jawab kegiatan" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Upload dokumen */}
-                <div className="border-t border-outline-variant/20 pt-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#2E5E3B] mb-3">Dokumen Pendukung</p>
-                  <div className="space-y-3">
-
-                    {/* PDF - wajib */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <label className={BTN_PRIMARY + ' cursor-pointer'}>
-                        <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-                        {dokumenPdf ? 'Ganti PDF' : 'Upload PDF *'}
-                        <input type="file" accept=".pdf,application/pdf" className="hidden"
-                          ref={dokumenPdfRef}
-                          onChange={e => setDokumenPdf(e.target.files?.[0] || null)} />
-                      </label>
-                      {dokumenPdf && (
-                        <span className="flex items-center gap-1.5 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-1.5 rounded-lg">
-                          <span className="material-symbols-outlined text-[14px] text-red-500">picture_as_pdf</span>
-                          <span className="truncate max-w-[160px]">{dokumenPdf.name}</span>
-                          <span className="font-semibold">· {(dokumenPdf.size / 1024 / 1024).toFixed(1)} MB</span>
-                          <button onClick={() => { setDokumenPdf(null); if (dokumenPdfRef.current) dokumenPdfRef.current.value = ''; }}
-                            className="ml-1 text-red-400 hover:text-red-600">
-                            <span className="material-symbols-outlined text-[14px]">close</span>
-                          </button>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Word - opsional */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <label className={BTN_GHOST + ' cursor-pointer'}>
-                        <span className="material-symbols-outlined text-[16px]">description</span>
-                        {dokumenWord ? 'Ganti Word' : 'Upload Word (opsional)'}
-                        <input type="file" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                          className="hidden" ref={dokumenWordRef}
-                          onChange={e => setDokumenWord(e.target.files?.[0] || null)} />
-                      </label>
-                      {dokumenWord && (
-                        <span className="flex items-center gap-1.5 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-1.5 rounded-lg">
-                          <span className="material-symbols-outlined text-[14px] text-blue-500">description</span>
-                          <span className="truncate max-w-[160px]">{dokumenWord.name}</span>
-                          <button onClick={() => { setDokumenWord(null); if (dokumenWordRef.current) dokumenWordRef.current.value = ''; }}
-                            className="ml-1 text-red-400 hover:text-red-600">
-                            <span className="material-symbols-outlined text-[14px]">close</span>
-                          </button>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* ZIP - opsional */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <label className={BTN_GHOST + ' cursor-pointer'}>
-                        <span className="material-symbols-outlined text-[16px]">folder_zip</span>
-                        {dokumenZip ? 'Ganti ZIP' : 'Upload ZIP (opsional)'}
-                        <input type="file" accept=".zip,application/zip,application/x-zip-compressed"
-                          className="hidden" ref={dokumenZipRef}
-                          onChange={e => setDokumenZip(e.target.files?.[0] || null)} />
-                      </label>
-                      {dokumenZip && (
-                        <span className="flex items-center gap-1.5 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-1.5 rounded-lg">
-                          <span className="material-symbols-outlined text-[14px] text-amber-500">folder_zip</span>
-                          <span className="truncate max-w-[160px]">{dokumenZip.name}</span>
-                          <button onClick={() => { setDokumenZip(null); if (dokumenZipRef.current) dokumenZipRef.current.value = ''; }}
-                            className="ml-1 text-red-400 hover:text-red-600">
-                            <span className="material-symbols-outlined text-[14px]">close</span>
-                          </button>
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-[#5B6660]">PDF maks 10MB · Word maks 10MB · ZIP maks 20MB</p>
-                  </div>
-                </div>
-
-                {/* Aksi */}
-                <div className="flex gap-3 pt-2 border-t border-outline-variant/20">
+                <div className="border-t border-black/5 pt-4">
                   <button
-                    className={BTN_PRIMARY + ' disabled:opacity-40 disabled:cursor-not-allowed'}
-                    onClick={submitPengajuan}
-                    disabled={submitting || !isProfileComplete}
-                    title={!isProfileComplete ? 'Lengkapi profil Anda terlebih dahulu' : undefined}
+                    onClick={submitVerification}
+                    disabled={!isProfileComplete || submitting}
+                    className="w-full sm:w-auto bg-[#0284C7] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#0369A1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                   >
-                    <span className="material-symbols-outlined text-[18px]">{submitting ? 'sync' : 'send'}</span>
-                    {submitting ? 'Mengirim...' : 'Kirim Pengajuan'}
-                  </button>
-                  <button className={BTN_GHOST} onClick={() => {
-                    setAddingSubmission(false);
-                    setNewSubmission({ judul_pengajuan: '', jenis_pengajuan: '', provinsi: '', kabupaten_kota: '', nama_pemohon: '', instansi: '', penanggung_jawab: '' });
-                    setDokumenPdf(null); setDokumenWord(null); setDokumenZip(null);
-                  }}>
-                    Batal
+                    {submitting ? (
+                      <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Mengirim...</>
+                    ) : (
+                      <><span className="material-symbols-outlined text-[20px]">send</span> Kirim Profil Sekarang</>
+                    )}
                   </button>
                 </div>
               </div>
-            </Card>
-          )}
+            )}
+          </Card>
         </div>
       )}
 
@@ -2759,7 +2550,7 @@ export default function ProfilSaya() {
           </div>
         </div>
       )}
-
+      
     </DashboardLayout>
   );
 }

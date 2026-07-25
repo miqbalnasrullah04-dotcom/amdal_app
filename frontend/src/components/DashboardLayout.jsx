@@ -1,81 +1,103 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import logo from "../assets/logo-tenaga-ahli.png";
+import logo from "../assets/tenaga ahli 2.png";
 import api from '../api/client.js';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: 'space_dashboard' },
   { to: '/profil-saya', label: 'Profil Saya', icon: 'person' },
+  { to: '/pekerjaan', label: 'Pekerjaan', icon: 'work' },
+  { to: '/pesan', label: 'Pesan', icon: 'chat' },
   { to: '/paket', label: 'Paket', icon: 'workspace_premium' },
+  { to: '/invoice', label: 'Invoice', icon: 'receipt_long' },
   { to: '/pembayaran', label: 'Pembayaran', icon: 'payments' },
+  { to: '/tiket', label: 'Tiket', icon: 'support_agent' },
+  { to: '/ulasan', label: 'Ulasan', icon: 'star' },
+  { to: '/statistik', label: 'Statistik', icon: 'bar_chart' },
   { to: '/profil-publik', label: 'Profil Publik', icon: 'language' },
   { to: '/pengaturan', label: 'Pengaturan', icon: 'settings' },
 ];
 
-function SidebarContent({ user, onNavigate, onLogout }) {
+function SidebarContent({ user, onNavigate, onLogout, isExpanded, onToggle }) {
   return (
-    <>
+    <div className="flex flex-col h-full">
       {/* Header Sidebar */}
-      <div className="p-6 flex items-center gap-3 border-b border-white/10">
-        <img src={logo} alt="TenagaAhli.com" className="h-10 w-auto bg-white rounded-lg p-1 shrink-0" />
-        <div className="min-w-0">
-          <p className="font-bold leading-tight tracking-tight truncate">TenagaAhli.com</p>
-          <p className="text-[11px] text-white/55 uppercase tracking-wider">Member Area</p>
-        </div>
+      <div className="p-4 flex items-center justify-between border-b border-white/10 h-16 shrink-0 bg-[#0ea5e9]">
+        {isExpanded ? (
+          <>
+            <div className="flex flex-col items-start gap-1 overflow-hidden transition-all duration-200">
+              <img src={logo} alt="TenagaAhli.com" className="h-10 w-auto shrink-0" />
+              <span className="font-extrabold text-[10px] tracking-widest uppercase text-white/60 ml-0.5">Member</span>
+            </div>
+            <button onClick={onToggle} className="text-white/85 hover:text-white p-1 hover:bg-white/10 rounded transition-colors">
+              <span className="material-symbols-outlined text-[22px]">menu</span>
+            </button>
+          </>
+        ) : (
+          <button onClick={onToggle} className="text-white/85 hover:text-white p-1 hover:bg-white/10 rounded transition-colors mx-auto">
+            <span className="material-symbols-outlined text-[22px]">menu</span>
+          </button>
+        )}
       </div>
 
       {/* Navigasi Utama */}
-      <nav className="flex-1 px-4 py-6 flex flex-col gap-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-6 flex flex-col gap-1.5 overflow-y-auto overflow-x-hidden no-scrollbar">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             onClick={onNavigate}
+            title={!isExpanded ? item.label : undefined}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                isActive ? 'bg-white text-[#0369A1] shadow-sm' : 'text-white/75 hover:bg-white/10 hover:text-white'
-              }`
+              `flex items-center gap-4 px-3.5 py-3 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-200 ${
+                isActive 
+                  ? 'bg-black/10 text-white border-l-4 border-white' 
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+              } ${!isExpanded ? 'justify-center px-0 border-l-0' : ''}`
             }
           >
             <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-            {item.label}
+            {isExpanded && <span className="truncate">{item.label}</span>}
           </NavLink>
         ))}
       </nav>
 
       {/* Bagian Bawah User & Aksi Keluar */}
-      <div className="p-4 border-t border-white/10 flex flex-col gap-1">
-        {/* Identitas Pendek User */}
-        <div className="flex items-center gap-3 px-3 py-2 mb-2">
-          <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-sm font-bold shrink-0">
-            {(user?.name || 'U').charAt(0).toUpperCase()}
+      <div className="p-3 border-t border-white/10 flex flex-col gap-1.5 shrink-0">
+        {isExpanded && (
+          <div className="flex items-center gap-3 px-3 py-2 mb-2 overflow-hidden bg-white/5 rounded-lg">
+            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-xs font-bold shrink-0">
+              {(user?.name || 'U').charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold truncate">{user?.name || 'Pengguna'}</p>
+              <p className="text-[10px] text-white/55 truncate">{user?.email || ''}</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">{user?.name || 'Pengguna'}</p>
-            <p className="text-xs text-white/55 truncate">{user?.email || ''}</p>
-          </div>
-        </div>
+        )}
 
         {/* Tombol Menuju Web Utama Publik */}
         <Link
           to="/"
           onClick={onNavigate}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-colors"
+          title="Lihat Web Utama"
+          className={`flex items-center gap-4 px-3.5 py-2.5 rounded-lg text-xs font-bold tracking-wider uppercase text-white/70 hover:bg-white/10 hover:text-white transition-colors ${!isExpanded ? 'justify-center px-0' : ''}`}
         >
           <span className="material-symbols-outlined text-[20px]">language</span>
-          Lihat Web Utama
+          {isExpanded && <span>Web Utama</span>}
         </Link>
 
         {/* Tombol Aksi Logout */}
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[#FFB4AB] hover:bg-[#FFB4AB]/10 transition-colors"
+          title="Logout"
+          className={`flex items-center gap-4 px-3.5 py-2.5 rounded-lg text-xs font-bold tracking-wider uppercase text-[#FFB4AB] hover:bg-[#FFB4AB]/10 transition-colors ${!isExpanded ? 'justify-center px-0' : ''}`}
         >
           <span className="material-symbols-outlined text-[20px]">logout</span>
-          Logout
+          {isExpanded && <span>Logout</span>}
         </button>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -83,6 +105,7 @@ export default function DashboardLayout({ title, subtitle, headerRight, children
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   useEffect(() => {
     try {
@@ -107,9 +130,23 @@ export default function DashboardLayout({ title, subtitle, headerRight, children
 
   return (
     <div className="min-h-screen bg-[#F5F4EF] flex">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none !important;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+      `}</style>
       {/* Sidebar — desktop */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen bg-gradient-to-b from-[#0EA5E9] to-[#0284C7] text-white">
-        <SidebarContent user={user} onLogout={handleLogout} />
+      <aside className={`hidden lg:flex lg:flex-col lg:shrink-0 lg:sticky lg:top-0 lg:h-screen bg-gradient-to-b from-[#0EA5E9] to-[#1E3A8A] text-white transition-all duration-300 no-scrollbar ${isExpanded ? 'lg:w-64' : 'lg:w-20'}`}>
+        <SidebarContent 
+          user={user} 
+          onLogout={handleLogout} 
+          isExpanded={isExpanded} 
+          onToggle={() => setIsExpanded(!isExpanded)} 
+        />
       </aside>
 
       {/* Topbar — mobile */}
@@ -127,7 +164,7 @@ export default function DashboardLayout({ title, subtitle, headerRight, children
       {drawerOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setDrawerOpen(false)}>
           <aside
-            className="w-72 h-full bg-gradient-to-b from-[#0EA5E9] to-[#0284C7] text-white flex flex-col"
+            className="w-64 h-full bg-gradient-to-b from-[#0EA5E9] to-[#1E3A8A] text-white flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-end p-3">
@@ -136,7 +173,12 @@ export default function DashboardLayout({ title, subtitle, headerRight, children
               </button>
             </div>
             <div className="flex-1 flex flex-col -mt-3">
-              <SidebarContent user={user} onNavigate={() => setDrawerOpen(false)} onLogout={handleLogout} />
+              <SidebarContent 
+                user={user} 
+                onNavigate={() => setDrawerOpen(false)} 
+                onLogout={handleLogout} 
+                isExpanded={true} 
+              />
             </div>
           </aside>
         </div>

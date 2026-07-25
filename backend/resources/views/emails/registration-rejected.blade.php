@@ -65,32 +65,31 @@
 
             <div class="info-box">
                 <p>
-                    Jangan khawatir — Anda dapat mendaftar ulang dengan melengkapi dan memperbaiki
-                    data sesuai catatan di atas. Proses pendaftaran bisa diulang kapan saja melalui halaman pendaftaran.
+                    Jangan khawatir — Anda dapat memperbaiki data atau dokumen sesuai catatan di atas dengan masuk ke akun Anda. Setelah diperbaiki, Anda dapat mengajukan verifikasi kembali melalui dashboard profil Anda.
                 </p>
             </div>
 
-            <p class="text" style="font-weight:600; margin-bottom:12px;">Cara mendaftar ulang:</p>
+            <p class="text" style="font-weight:600; margin-bottom:12px;">Cara memperbaiki data:</p>
             <div class="steps">
                 <div class="step">
                     <div class="step-num">1</div>
-                    <div class="step-text">Buka halaman pendaftaran melalui tombol di bawah.</div>
+                    <div class="step-text">Masuk ke akun Anda melalui tombol di bawah.</div>
                 </div>
                 <div class="step">
                     <div class="step-num">2</div>
-                    <div class="step-text">Isi formulir dengan data yang sudah diperbaiki sesuai catatan admin.</div>
+                    <div class="step-text">Buka halaman Profil dan perbarui data yang perlu diperbaiki sesuai catatan admin.</div>
                 </div>
                 <div class="step">
                     <div class="step-num">3</div>
-                    <div class="step-text">Unggah ulang dokumen (CV, pas foto, bukti kompetensi) yang valid.</div>
+                    <div class="step-text">Unggah dokumen baru jika diperlukan (seperti CV, pas foto, atau sertifikat).</div>
                 </div>
                 <div class="step">
                     <div class="step-num">4</div>
-                    <div class="step-text">Kirim pendaftaran dan tunggu verifikasi kembali dari tim kami.</div>
+                    <div class="step-text">Simpan perubahan dan klik tombol "Kirim untuk Verifikasi".</div>
                 </div>
             </div>
 
-            <a href="{{ $registerUrl }}" class="cta-btn">Daftar Ulang Sekarang</a>
+            <a href="{{ $loginUrl }}" class="cta-btn">Masuk & Perbaiki Data</a>
 
             <div class="divider"></div>
 

@@ -23,6 +23,12 @@ const SKIP_LOADER_ROUTES = [
   '/lengkapi-profil',
   '/pilih-paket',
   '/riwayat-pembayaran',
+  '/pekerjaan',
+  '/pesan',
+  '/tiket',
+  '/ulasan',
+  '/statistik',
+  '/invoice',
 ];
 
 export default function RouteLoader({ children }) {
@@ -31,7 +37,7 @@ export default function RouteLoader({ children }) {
   const [visible, setVisible] = useState(true);
   const startedAtRef = useRef(Date.now());
 
-  const shouldSkip = SKIP_LOADER_ROUTES.includes(location.pathname);
+  const shouldSkip = SKIP_LOADER_ROUTES.includes(location.pathname) || location.pathname.startsWith('/invoice/');
 
   // Setiap kali rute berubah: nyalakan lagi loader, reset status "data siap",
   // dan pasang jaring pengaman durasi maksimum.

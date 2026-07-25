@@ -24,6 +24,12 @@ const FULL_PAGE_ROUTES = [
   '/lengkapi-profil',
   '/pilih-paket',
   '/riwayat-pembayaran',
+  '/pekerjaan',
+  '/pesan',
+  '/tiket',
+  '/ulasan',
+  '/statistik',
+  '/invoice',
 ];
 
 // Halaman yang tetap pakai Navbar dari Layout, tapi tidak butuh Footer

@@ -1,14 +1,86 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
+import logo from '../assets/tenaga ahli 2.png';
 
 const menuItems = [
-  { to: '/admin', icon: 'home', label: 'Dashboard', end: true },
-  { to: '/admin/verifikasi', icon: 'how_to_reg', label: 'Verifikasi Data' },
-  { to: '/admin/tenaga-ahli', icon: 'groups', label: 'Data Tenaga Ahli' },
-  { to: '/admin/paket', icon: 'credit_card', label: 'Paket' },
-  { to: '/admin/pembayaran', icon: 'payments', label: 'Pembayaran' },
-  { to: '/admin/laporan', icon: 'bar_chart', label: 'Laporan' },
+  { 
+    icon: 'home', 
+    label: 'Dashboard', 
+    children: [
+      { to: '/admin', label: 'Statistik', end: true },
+      { to: '/admin?tab=invoice-pending', label: 'Invoice Pending' },
+      { to: '/admin?tab=invoice-paid', label: 'Invoice Paid' },
+      { to: '/admin?tab=menunggu-verifikasi', label: 'Menunggu Verifikasi' },
+      { to: '/admin?tab=pendapatan', label: 'Pendapatan' },
+    ]
+  },
+  { 
+    icon: 'groups', 
+    label: 'Data Tenaga Ahli', 
+    children: [
+      { to: '/admin/tenaga-ahli?status=menunggu_verifikasi', label: 'Menunggu Verifikasi' },
+      { to: '/admin/tenaga-ahli?status=disetujui', label: 'Disetujui' },
+      { to: '/admin/tenaga-ahli?status=ditolak', label: 'Ditolak' },
+      { to: '/admin/tenaga-ahli', label: 'Semua Tenaga Ahli', end: true },
+    ]
+  },
+  {
+    icon: 'receipt_long',
+    label: 'Invoice',
+    children: [
+      { to: '/admin/invoice?status=pending', label: 'Pending' },
+      { to: '/admin/invoice?status=paid', label: 'Paid' },
+      { to: '/admin/invoice?status=failed', label: 'Failed' },
+      { to: '/admin/invoice?status=expired', label: 'Expired' },
+      { to: '/admin/invoice', label: 'Semua Invoice', end: true },
+    ]
+  },
+  {
+    icon: 'payments',
+    label: 'Pembayaran',
+    children: [
+      { to: '/admin/pembayaran', label: 'Semua Transaksi', end: true },
+      { to: '/admin/pembayaran?status=berhasil', label: 'Berhasil' },
+      { to: '/admin/pembayaran?status=pending', label: 'Pending' },
+      { to: '/admin/pembayaran?status=gagal', label: 'Gagal' },
+      { to: '/admin/pembayaran?status=refund', label: 'Refund' },
+    ]
+  },
+  {
+    icon: 'credit_card',
+    label: 'Paket',
+    children: [
+      { to: '/admin/paket?type=free', label: 'Paket Free' },
+      { to: '/admin/paket?type=premium', label: 'Paket Premium' },
+      { to: '/admin/paket/harga', label: 'Harga Paket' },
+    ]
+  },
+  {
+    icon: 'public',
+    label: 'Profil Publik',
+    children: [
+      { to: '/admin/profil-publik?status=dipublikasikan', label: 'Dipublikasikan' },
+      { to: '/admin/profil-publik?status=tidak_dipublikasikan', label: 'Tidak Dipublikasikan' },
+    ]
+  },
+  {
+    icon: 'person',
+    label: 'Pengguna',
+    children: [
+      { to: '/admin/pengguna?role=admin', label: 'Admin' },
+      { to: '/admin/pengguna?role=user', label: 'User' },
+    ]
+  },
+  {
+    icon: 'bar_chart',
+    label: 'Laporan',
+    children: [
+      { to: '/admin/laporan?type=pendapatan', label: 'Laporan Pendapatan' },
+      { to: '/admin/laporan?type=pembayaran', label: 'Laporan Pembayaran' },
+      { to: '/admin/laporan?type=tenaga_ahli', label: 'Laporan Tenaga Ahli' },
+    ]
+  },
   { to: '/admin/pengaturan', icon: 'settings', label: 'Pengaturan' },
 ];
 
@@ -19,6 +91,7 @@ export default function AdminLayout() {
   const [searchResults, setSearchResults] = useState({ experts: [], articles: [], partners: [] });
   const [searchLoading, setSearchLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState({});
 
   useEffect(() => {
     const raw = localStorage.getItem('amdal_user');
@@ -101,6 +174,12 @@ export default function AdminLayout() {
     }
   };
 
+  const toggleMenu = (label) => {
+    setExpandedMenus(prev => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const initials = (user?.name || 'A')
     .split(' ')
     .map((s) => s[0])
@@ -110,44 +189,123 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-[#F5F4F0] text-[#1B1C1A]">
-      <aside className="h-screen w-64 fixed left-0 top-0 bg-white border-r border-[#0284C7]/15 flex flex-col py-6 px-4 z-50 overflow-y-auto">
-        <div className="mb-8 px-3">
-          <h1 className="text-xl font-bold text-[#0284C7]">TenagaAhli.com</h1>
-          <p className="text-xs text-[#414844]/70 tracking-wide">Admin Console</p>
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none !important;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+      `}</style>
+      <aside className={`h-screen fixed left-0 top-0 bg-gradient-to-b from-[#0EA5E9] to-[#1E3A8A] text-white border-r border-[#0284C7]/15 flex flex-col py-6 px-4 z-50 overflow-y-auto no-scrollbar transition-all duration-300 ${isExpanded ? 'w-64' : 'w-20'}`}>
+        {/* Header Sidebar */}
+        <div className="mb-8 flex items-center justify-between px-2 h-14 shrink-0">
+          {isExpanded ? (
+            <>
+              <div className="flex flex-col items-start gap-1 overflow-hidden transition-all duration-200">
+                <img src={logo} alt="TenagaAhli.com" className="h-8 w-auto object-contain shrink-0" />
+                <span className="font-extrabold text-[10px] tracking-widest uppercase text-white/60 ml-0.5">Admin</span>
+              </div>
+              <button onClick={() => setIsExpanded(false)} className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded transition-colors">
+                <span className="material-symbols-outlined text-[20px]">menu</span>
+              </button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-1 mx-auto shrink-0">
+              <button onClick={() => setIsExpanded(true)} className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded transition-colors">
+                <span className="material-symbols-outlined text-[22px]">menu</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        <nav className="flex-1 space-y-1">
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                `flex items-center gap-3 py-3 px-4 rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? 'bg-[#0284C7]/10 text-[#0284C7] font-bold border-r-4 border-[#0284C7]'
-                    : 'text-[#414844] hover:bg-[#0284C7]/5 hover:text-[#0284C7]'
-                }`
-              }
-            >
-              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
+        <nav className="flex-1 space-y-1.5 overflow-x-hidden no-scrollbar">
+          {menuItems.map((item) => {
+            if (item.children) {
+              const isExpandedGroup = expandedMenus[item.label];
+              const isActiveGroup = item.children.some(child => window.location.pathname.startsWith(child.to.split('?')[0]) && child.to !== '/admin/pembayaran');
+              
+              return (
+                <div key={item.label} className="mb-1">
+                  <button
+                    onClick={() => toggleMenu(item.label)}
+                    title={!isExpanded ? item.label : undefined}
+                    className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-lg text-xs font-bold tracking-wider uppercase transition-colors ${
+                      isActiveGroup
+                        ? 'bg-black/10 text-white font-bold'
+                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    } ${!isExpanded ? 'justify-center px-0' : ''}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                      {isExpanded && <span>{item.label}</span>}
+                    </div>
+                    {isExpanded && (
+                      <span className="material-symbols-outlined text-[18px] transition-transform duration-200" style={{ transform: isExpandedGroup ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                        expand_more
+                      </span>
+                    )}
+                  </button>
+                  
+                  {isExpanded && isExpandedGroup && (
+                    <div className="mt-1 ml-4 border-l-2 border-white/20 pl-2 space-y-1">
+                      {item.children.map((child) => (
+                        <NavLink
+                          key={child.label}
+                          to={child.to}
+                          end={child.end}
+                          className={({ isActive }) =>
+                            `block py-2 px-4 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-colors ${
+                              isActive
+                                ? 'bg-white/15 text-white font-extrabold border-l-2 border-white'
+                                : 'text-white/60 hover:bg-white/5 hover:text-white'
+                            }`
+                          }
+                        >
+                          {child.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <NavLink
+                key={item.label}
+                to={item.to}
+                end={item.end}
+                title={!isExpanded ? item.label : undefined}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 py-2.5 px-3.5 rounded-lg text-xs font-bold tracking-wider uppercase transition-colors mb-1 ${
+                    isActive
+                      ? 'bg-black/10 text-white font-extrabold border-l-4 border-white'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  } ${!isExpanded ? 'justify-center px-0 border-l-0' : ''}`
+                }
+              >
+                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                {isExpanded && <span>{item.label}</span>}
+              </NavLink>
+            );
+          })}
         </nav>
 
-        <div className="mt-auto pt-4 border-t border-[#0284C7]/15">
+        <div className="mt-auto pt-4 border-t border-white/10">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-bold text-[#B3261E] hover:bg-[#B3261E]/10 transition-colors"
+            title="Sign Out"
+            className={`w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-lg text-xs font-bold tracking-wider uppercase text-[#FFB4AB] hover:bg-[#FFB4AB]/10 transition-colors ${!isExpanded ? 'justify-center px-0' : ''}`}
           >
             <span className="material-symbols-outlined text-[20px]">logout</span>
-            Sign Out
+            {isExpanded && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
 
-      <header className="h-16 ml-64 flex items-center justify-between px-8 bg-white border-b border-[#0284C7]/15 sticky top-0 z-40">
+      <header className={`h-16 flex items-center justify-between px-8 bg-white border-b border-[#0284C7]/15 sticky top-0 z-40 transition-all duration-300 ${isExpanded ? 'ml-64' : 'ml-20'}`}>
         <div className="relative w-full max-w-md">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#414844]/50 text-[20px]">
             search
@@ -276,7 +434,7 @@ export default function AdminLayout() {
         </div>
       </header>
 
-      <main className="ml-64 p-8 min-h-[calc(100vh-64px)]">
+      <main className={`p-8 min-h-[calc(100vh-64px)] transition-all duration-300 ${isExpanded ? 'ml-64' : 'ml-20'}`}>
         <Outlet />
       </main>
     </div>

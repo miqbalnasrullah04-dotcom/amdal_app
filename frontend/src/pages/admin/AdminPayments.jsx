@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../../api/client.js';
 
 const statusLabel = {
@@ -19,11 +20,13 @@ const paymentTypeLabel = {
 };
 
 export default function AdminPayments() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusParam = searchParams.get('status') || 'all';
+
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('menunggu_verifikasi'); // Default filter matches the first tab
   const [searchQuery, setSearchQuery] = useState('');
   const [previewImage, setPreviewImage] = useState(null);
   const [rejectTarget, setRejectTarget] = useState(null);
@@ -32,10 +35,9 @@ export default function AdminPayments() {
   const loadData = () => {
     setLoading(true);
     api
-      .get('/admin/orders', { params: filter ? { status: filter } : {} })
+      .get('/admin/orders')
       .then((res) => {
         setOrders(res.data);
-        setFilteredOrders(res.data);
       })
       .catch(() => setError('Gagal memuat data order.'))
       .finally(() => setLoading(false));
@@ -44,27 +46,36 @@ export default function AdminPayments() {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, []);
 
-  // Filter orders berdasarkan search query
+  // Filter orders berdasarkan statusParam dan searchQuery
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredOrders(orders);
-      return;
+    let result = [...orders];
+
+    if (statusParam === 'berhasil') {
+      result = result.filter(o => o.status === 'verified' || o.status === 'settlement');
+    } else if (statusParam === 'pending') {
+      result = result.filter(o => o.status === 'menunggu_pembayaran' || o.status === 'menunggu_verifikasi' || o.status === 'pending');
+    } else if (statusParam === 'gagal') {
+      result = result.filter(o => o.status === 'rejected' || o.status === 'expire' || o.status === 'cancel' || o.status === 'deny');
+    } else if (statusParam === 'refund') {
+      result = result.filter(o => o.status === 'refund');
     }
 
-    const query = searchQuery.toLowerCase();
-    const filtered = orders.filter((order) => {
-      return (
-        order.expert?.name?.toLowerCase().includes(query) ||
-        order.expert?.email?.toLowerCase().includes(query) ||
-        order.reference_code?.toLowerCase().includes(query) ||
-        order.package?.name?.toLowerCase().includes(query)
-      );
-    });
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((order) => {
+        return (
+          order.expert?.name?.toLowerCase().includes(query) ||
+          order.expert?.email?.toLowerCase().includes(query) ||
+          order.reference_code?.toLowerCase().includes(query) ||
+          order.package?.name?.toLowerCase().includes(query)
+        );
+      });
+    }
 
-    setFilteredOrders(filtered);
-  }, [searchQuery, orders]);
+    setFilteredOrders(result);
+  }, [searchQuery, orders, statusParam]);
 
   const handleVerify = async (order) => {
     try {
@@ -88,10 +99,11 @@ export default function AdminPayments() {
   };
 
   const tabs = [
-    { id: 'menunggu_verifikasi', label: 'Menunggu Konfirmasi' },
-    { id: 'verified', label: 'Berhasil' },
-    { id: 'rejected', label: 'Ditolak' },
-    { id: '', label: 'Riwayat Pembayaran' },
+    { id: 'all', label: 'Semua Transaksi' },
+    { id: 'berhasil', label: 'Berhasil' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'gagal', label: 'Gagal' },
+    { id: 'refund', label: 'Refund' },
   ];
 
   return (
@@ -138,9 +150,9 @@ export default function AdminPayments() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setFilter(tab.id)}
+              onClick={() => setSearchParams({ status: tab.id })}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-colors whitespace-nowrap ${
-                filter === tab.id
+                statusParam === tab.id
                   ? 'bg-[#0284C7] text-white shadow-sm'
                   : 'bg-[#0284C7]/5 text-[#414844] hover:bg-[#0284C7]/10'
               }`}

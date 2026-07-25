@@ -1,20 +1,27 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../../api/client.js';
 import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
 
 export default function AdminExperts() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusParam = searchParams.get('status') || 'all';
   const [experts, setExperts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [keyword, setKeyword] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // all, aktif, nonaktif
   const [detailTarget, setDetailTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [rejecting, setRejecting] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   const loadData = () => {
     setLoading(true);
-    api.get('/admin/experts')
+    let apiStatus = statusParam;
+    if (statusParam === 'disetujui') apiStatus = 'aktif';
+    const params = apiStatus && apiStatus !== 'all' ? { status: apiStatus } : {};
+    
+    api.get('/admin/experts', { params })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
         setExperts(data);
@@ -23,7 +30,35 @@ export default function AdminExperts() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { loadData(); }, []);
+  const handleVerifyExpert = async (id) => {
+    try {
+      await api.post(`/admin/experts/${id}/verify-profile`);
+      setDetailTarget(null);
+      loadData();
+      alert('Profil berhasil disetujui.');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal menyetujui profil.');
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectReason.trim()) {
+      alert('Tulis alasan penolakan/perbaikan terlebih dahulu.');
+      return;
+    }
+    try {
+      await api.post(`/admin/experts/${detailTarget.id}/reject-profile`, { reject_reason: rejectReason });
+      setDetailTarget(null);
+      setRejecting(false);
+      setRejectReason('');
+      loadData();
+      alert('Permintaan perbaikan telah dikirim ke user.');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal menolak profil.');
+    }
+  };
+
+  useEffect(() => { loadData(); }, [statusParam]);
 
   const handleToggleDeactivate = async (expert) => {
     try {
@@ -53,14 +88,9 @@ export default function AdminExperts() {
 
   const filtered = experts.filter((e) => {
     const q = keyword.toLowerCase();
-    const matchesKeyword = (e.name || '').toLowerCase().includes(q) || (e.institution || '').toLowerCase().includes(q) || (e.email || '').toLowerCase().includes(q);
-    
-    if (statusFilter === 'aktif') {
-      return matchesKeyword && e.profile_status === 'aktif';
-    } else if (statusFilter === 'nonaktif') {
-      return matchesKeyword && e.profile_status === 'nonaktif';
-    }
-    return matchesKeyword;
+    return (e.name || '').toLowerCase().includes(q) || 
+           (e.institution || '').toLowerCase().includes(q) || 
+           (e.email || '').toLowerCase().includes(q);
   });
 
   return (
@@ -93,14 +123,15 @@ export default function AdminExperts() {
           <div className="flex gap-2">
             {[
               { id: 'all', label: 'Semua Status' },
-              { id: 'aktif', label: 'Aktif' },
-              { id: 'nonaktif', label: 'Nonaktif' },
+              { id: 'menunggu_verifikasi', label: 'Menunggu Verifikasi' },
+              { id: 'disetujui', label: 'Disetujui' },
+              { id: 'ditolak', label: 'Ditolak' },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setStatusFilter(tab.id)}
+                onClick={() => setSearchParams({ status: tab.id })}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-colors whitespace-nowrap ${
-                  statusFilter === tab.id
+                  statusParam === tab.id
                     ? 'bg-[#0284C7] text-white shadow-sm'
                     : 'bg-[#0284C7]/5 text-[#414844] hover:bg-[#0284C7]/10'
                 }`}
@@ -440,26 +471,76 @@ export default function AdminExperts() {
                 </div>
               </div>
 
-              {/* Status Section */}
-              <div className="bg-[#F5F4EF] rounded-xl p-4 border border-outline-variant/30 flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-[#414844]/60 block font-medium">Status Akun Saat Ini</span>
-                  <span className={`font-bold text-sm ${detailTarget.profile_status === 'nonaktif' ? 'text-[#B3261E]' : 'text-[#0284C7]'}`}>
-                    {detailTarget.profile_status === 'nonaktif' ? 'Nonaktif' : 'Aktif'}
-                  </span>
+              {/* Verification & Status Section */}
+              {detailTarget.profile_status === 'menunggu_verifikasi' ? (
+                <div className="bg-[#FFF4D6] rounded-xl p-4 border border-[#FCD34D] space-y-3">
+                  <div>
+                    <span className="text-[#7A5900] block font-bold text-xs">Verifikasi Profil Tenaga Ahli</span>
+                    <span className="text-[11px] text-[#414844]/70">Tinjau kelengkapan berkas di atas lalu pilih tindakan persetujuan.</span>
+                  </div>
+                  
+                  {rejecting ? (
+                    <div className="space-y-2">
+                      <textarea
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="Tulis alasan penolakan / instruksi perbaikan..."
+                        className="w-full p-2 border border-red-300 rounded-lg text-xs bg-white focus:ring-1 focus:ring-[#B3261E] focus:outline-none"
+                        rows={3}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleReject}
+                          className="bg-[#B3261E] text-white font-bold px-3 py-1.5 rounded-lg text-xs hover:bg-[#93000A] transition-colors"
+                        >
+                          Kirim Catatan Perbaikan
+                        </button>
+                        <button
+                          onClick={() => { setRejecting(false); setRejectReason(''); }}
+                          className="bg-gray-100 text-gray-700 font-bold px-3 py-1.5 rounded-lg text-xs hover:bg-gray-200 transition-colors"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleVerifyExpert(detailTarget.id)}
+                        className="bg-[#0284C7] text-white font-bold px-4 py-2 rounded-lg text-xs hover:bg-[#0369A1] transition-colors shadow-sm"
+                      >
+                        Setujui & Publikasikan
+                      </button>
+                      <button
+                        onClick={() => setRejecting(true)}
+                        className="bg-[#B3261E]/10 text-[#B3261E] font-bold px-4 py-2 rounded-lg text-xs hover:bg-[#B3261E]/20 transition-colors"
+                      >
+                        Tolak (Perlu Perbaikan)
+                      </button>
+                    </div>
+                  )}
                 </div>
-                
-                <button
-                  onClick={() => handleToggleDeactivate(detailTarget)}
-                  className={`px-4 py-2.5 rounded-xl font-bold transition-all text-xs text-white ${
-                    detailTarget.profile_status === 'nonaktif'
-                      ? 'bg-[#0284C7] hover:bg-[#0369A1]'
-                      : 'bg-[#B3261E] hover:bg-[#93000A]'
-                  }`}
-                >
-                  {detailTarget.profile_status === 'nonaktif' ? 'Aktifkan Akun' : 'Nonaktifkan Akun'}
-                </button>
-              </div>
+              ) : (
+                <div className="bg-[#F5F4EF] rounded-xl p-4 border border-outline-variant/30 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="text-[#414844]/60 block font-medium">Status Akun Saat Ini</span>
+                    <span className={`font-bold text-sm ${detailTarget.profile_status === 'nonaktif' ? 'text-[#B3261E]' : 'text-[#0284C7]'}`}>
+                      {detailTarget.profile_status === 'nonaktif' ? 'Nonaktif' : 'Aktif'}
+                    </span>
+                  </div>
+                  
+                  <button
+                    onClick={() => handleToggleDeactivate(detailTarget)}
+                    className={`px-4 py-2.5 rounded-xl font-bold transition-all text-xs text-white ${
+                      detailTarget.profile_status === 'nonaktif'
+                        ? 'bg-[#0284C7] hover:bg-[#0369A1]'
+                        : 'bg-[#B3261E] hover:bg-[#93000A]'
+                    }`}
+                  >
+                    {detailTarget.profile_status === 'nonaktif' ? 'Aktifkan Akun' : 'Nonaktifkan Akun'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

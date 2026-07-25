@@ -1,9 +1,20 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../../api/client.js';
 
 export default function AdminReports() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const typeParam = searchParams.get('type') || 'tenaga_ahli';
+
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('pendaftaran'); // pendaftaran, pembayaran
+  
+  // map url type param to local tab
+  const activeTab = typeParam === 'tenaga_ahli' ? 'pendaftaran' : 'pembayaran';
+  
+  const setActiveTab = (tab) => {
+    setSearchParams({ type: tab === 'pendaftaran' ? 'tenaga_ahli' : 'pembayaran' });
+  };
+
   const [experts, setExperts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState({

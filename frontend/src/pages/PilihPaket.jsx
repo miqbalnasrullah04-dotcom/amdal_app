@@ -94,63 +94,16 @@ export default function PilihPaket() {
 
       if (selected.price === 0) {
         // Paket Free langsung aktif
-        navigate('/dashboard');
+        navigate('/dashboard', { state: { message: 'Paket Free berhasil diaktifkan!' } });
       } else {
-        // Paket Premium - buka Midtrans Snap
-        if (res.data?.snap_token) {
-          // Load Midtrans Snap script jika belum ada
-          if (!window.snap) {
-            const script = document.createElement('script');
-            script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-            script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 'your-client-key');
-            document.head.appendChild(script);
-            
-            script.onload = () => {
-              window.snap.pay(res.data.snap_token, {
-                onSuccess: function(result) {
-                  console.log('Payment success:', result);
-                  navigate('/dashboard', { state: { message: 'Pembayaran berhasil! Paket Premium Anda akan segera diaktifkan.' } });
-                },
-                onPending: function(result) {
-                  console.log('Payment pending:', result);
-                  navigate('/pembayaran', { state: { order: res.data.order } });
-                },
-                onError: function(result) {
-                  console.log('Payment error:', result);
-                  setError('Pembayaran gagal. Silakan coba lagi.');
-                  setSubmitting(false);
-                },
-                onClose: function() {
-                  console.log('Payment popup closed');
-                  setSubmitting(false);
-                }
-              });
-            };
-          } else {
-            // Snap sudah loaded, langsung panggil
-            window.snap.pay(res.data.snap_token, {
-              onSuccess: function(result) {
-                console.log('Payment success:', result);
-                navigate('/dashboard', { state: { message: 'Pembayaran berhasil! Paket Premium Anda akan segera diaktifkan.' } });
-              },
-              onPending: function(result) {
-                console.log('Payment pending:', result);
-                navigate('/pembayaran', { state: { order: res.data.order } });
-              },
-              onError: function(result) {
-                console.log('Payment error:', result);
-                setError('Pembayaran gagal. Silakan coba lagi.');
-                setSubmitting(false);
-              },
-              onClose: function() {
-                console.log('Payment popup closed');
-                setSubmitting(false);
-              }
-            });
-          }
+        // Paket Premium - arahkan ke halaman Invoice untuk pembayaran
+        if (res.data?.order?.id) {
+          navigate(`/invoice/${res.data.order.id}`);
+        } else if (res.data?.order?.reference_code) {
+          navigate(`/invoice/${res.data.order.reference_code}`);
         } else {
-          // Fallback ke halaman pembayaran manual
-          navigate('/pembayaran', { state: { order: res.data.order } });
+          // Fallback ke daftar pembayaran/invoice
+          navigate('/pembayaran');
         }
       }
     } catch (err) {

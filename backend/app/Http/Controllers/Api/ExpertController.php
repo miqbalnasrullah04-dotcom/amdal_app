@@ -480,9 +480,9 @@ class ExpertController extends Controller
         // Kirim email notifikasi ke user
         $recipientEmail = $expert->user?->email ?? $expert->email;
         if ($recipientEmail) {
-            $registerUrl = rtrim(config('app.frontend_url', config('app.url')), '/') . '/daftar';
+            $loginUrl = rtrim(config('app.frontend_url', config('app.url')), '/') . '/sign-in';
             try {
-                Mail::to($recipientEmail)->send(new RegistrationRejected($expert, $reason, $registerUrl));
+                Mail::to($recipientEmail)->send(new RegistrationRejected($expert, $reason, $loginUrl));
             } catch (\Throwable $e) {
                 \Log::warning('Gagal kirim email RegistrationRejected: ' . $e->getMessage());
             }

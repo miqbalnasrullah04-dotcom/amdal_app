@@ -13,7 +13,7 @@ const statusLabel = {
   draft: { text: 'Draft', color: '#414844', bg: '#F5F4F0' },
   menunggu_verifikasi: { text: 'Menunggu Verifikasi', color: '#7A5900', bg: '#FFF4D6' },
   aktif: { text: 'Disetujui', color: '#0284C7', bg: '#E0F2FE' },
-  ditolak: { text: 'Ditolak', color: '#B3261E', bg: '#FFDAD6' },
+  ditolak: { text: 'Perlu Perbaikan', color: '#B3261E', bg: '#FFDAD6' },
 };
 
 export default function AdminUserVerification() {
@@ -92,7 +92,7 @@ export default function AdminUserVerification() {
       setDetailTarget(null);
       loadData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Gagal menolak.');
+      alert(err.response?.data?.message || 'Gagal mengirim permintaan perbaikan.');
     }
   };
 
@@ -459,7 +459,7 @@ export default function AdminUserVerification() {
                 </div>
                 {detailTarget.reject_reason && (
                   <div className="text-right max-w-xs">
-                    <span className="text-[#414844]/60 block font-medium">Alasan Penolakan</span>
+                    <span className="text-[#414844]/60 block font-medium">Catatan Perbaikan</span>
                     <span className="font-bold text-[#B3261E]">{detailTarget.reject_reason}</span>
                   </div>
                 )}
@@ -479,8 +479,8 @@ export default function AdminUserVerification() {
                     onClick={() => setRejectTarget(detailTarget)}
                     className="flex-1 bg-[#B3261E] text-white py-3 rounded-xl text-sm font-bold hover:bg-[#93000A] active:scale-[0.99] transition-all shadow-md shadow-[#B3261E]/10 flex items-center justify-center gap-1.5"
                   >
-                    <span className="material-symbols-outlined text-base">cancel</span>
-                    Tolak / Butuh Perbaikan
+                    <span className="material-symbols-outlined text-base">edit_note</span>
+                    Minta Perbaikan Data
                   </button>
                 </div>
               )}
@@ -494,11 +494,11 @@ export default function AdminUserVerification() {
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-fadeIn">
             <h3 className="font-bold text-lg text-[#0284C7] mb-2 flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-red-500">cancel</span>
-              Tolak & Minta Perbaikan
+              <span className="material-symbols-outlined text-red-500">edit_note</span>
+              Minta Perbaikan Data
             </h3>
             <p className="text-xs text-[#414844]/70 mb-4 leading-relaxed">
-              Berikan alasan penolakan atau petunjuk perbaikan dokumen agar user tahu bagian mana yang harus diperbaiki.
+              Berikan catatan atau petunjuk perbaikan dokumen agar user tahu bagian mana yang harus diperbaiki.
             </p>
             <textarea
               rows={4}
@@ -521,7 +521,7 @@ export default function AdminUserVerification() {
                 onClick={handleReject}
                 className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#B3261E] text-white hover:bg-[#93000A] shadow-md shadow-[#B3261E]/10 transition-colors"
               >
-                Kirim Penolakan
+                Kirim Permintaan Perbaikan
               </button>
             </div>
           </div>

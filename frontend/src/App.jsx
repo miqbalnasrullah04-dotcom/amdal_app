@@ -26,6 +26,12 @@ import ProfilSaya from './pages/ProfilSaya.jsx';
 import PilihPaket from './pages/PilihPaket.jsx';
 import Pembayaran from './pages/Pembayaran.jsx';
 import Invoice from './pages/Invoice.jsx';
+import DaftarInvoice from './pages/DaftarInvoice.jsx';
+import Pekerjaan from './pages/Pekerjaan.jsx';
+import Pesan from './pages/Pesan.jsx';
+import Tiket from './pages/Tiket.jsx';
+import Ulasan from './pages/Ulasan.jsx';
+import Statistik from './pages/Statistik.jsx';
 import ProfilPublik from './pages/ProfilPublik.jsx';
 import Pengaturan from './pages/Pengaturan.jsx';
 
@@ -40,6 +46,9 @@ import AdminReports from './pages/admin/AdminReports.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 import AdminExpertForm from './pages/admin/AdminExpertForm.jsx';
 import AdminPackageForm from './pages/admin/AdminPackageForm.jsx';
+import AdminInvoices from './pages/admin/AdminInvoices.jsx';
+import AdminPublicProfile from './pages/admin/AdminPublicProfile.jsx';
+import AdminUsers from './pages/admin/AdminUsers.jsx';
 
 export default function App() {
   return (
@@ -57,11 +66,15 @@ export default function App() {
         <Route path="verifikasi" element={<AdminUserVerification />} />
         <Route path="pembayaran" element={<AdminPayments />} />
         <Route path="paket" element={<AdminPackages />} />
+        <Route path="paket/harga" element={<AdminPackages />} />
         <Route path="paket/tambah" element={<AdminPackageForm />} />
         <Route path="paket/:id/edit" element={<AdminPackageForm />} />
         <Route path="tenaga-ahli" element={<AdminExperts />} />
         <Route path="tenaga-ahli/tambah" element={<AdminExpertForm />} />
         <Route path="tenaga-ahli/:id/edit" element={<AdminExpertForm />} />
+        <Route path="invoice" element={<AdminInvoices />} />
+        <Route path="profil-publik" element={<AdminPublicProfile />} />
+        <Route path="pengguna" element={<AdminUsers />} />
         <Route path="laporan" element={<AdminReports />} />
         <Route path="pengaturan" element={<AdminSettings />} />
       </Route>
@@ -94,7 +107,13 @@ export default function App() {
                 <Route path="/profil-saya" element={<ProtectedRoute requiredRole="user"><ProfilSaya /></ProtectedRoute>} />
                 <Route path="/paket" element={<ProtectedRoute requiredRole="user"><PilihPaket /></ProtectedRoute>} />
                 <Route path="/pembayaran" element={<ProtectedRoute requiredRole="user"><Pembayaran /></ProtectedRoute>} />
+                <Route path="/invoice" element={<ProtectedRoute requiredRole="user"><DaftarInvoice /></ProtectedRoute>} />
                 <Route path="/invoice/:id" element={<ProtectedRoute requiredRole="user"><Invoice /></ProtectedRoute>} />
+                <Route path="/pekerjaan" element={<ProtectedRoute requiredRole="user"><Pekerjaan /></ProtectedRoute>} />
+                <Route path="/pesan" element={<ProtectedRoute requiredRole="user"><Pesan /></ProtectedRoute>} />
+                <Route path="/tiket" element={<ProtectedRoute requiredRole="user"><Tiket /></ProtectedRoute>} />
+                <Route path="/ulasan" element={<ProtectedRoute requiredRole="user"><Ulasan /></ProtectedRoute>} />
+                <Route path="/statistik" element={<ProtectedRoute requiredRole="user"><Statistik /></ProtectedRoute>} />
                 <Route path="/profil-publik" element={<ProtectedRoute requiredRole="user"><ProfilPublik /></ProtectedRoute>} />
                 <Route path="/pengaturan" element={<ProtectedRoute requiredRole="user"><Pengaturan /></ProtectedRoute>} />
 

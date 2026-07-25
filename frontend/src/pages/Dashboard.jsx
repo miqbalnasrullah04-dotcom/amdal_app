@@ -9,10 +9,21 @@ export default function Dashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api
-      .get('/my/profile')
-      .then((res) => setExpert(res.data))
-      .catch(() => setError('Gagal memuat data profil.'));
+    Promise.all([
+      api.get('/my/profile').catch(() => ({ data: null })),
+      api.get('/orders/history').catch(() => ({ data: [] }))
+    ])
+      .then(([profileRes, ordersRes]) => {
+        if (profileRes.data) {
+          setExpert(profileRes.data);
+        } else {
+          setError('Gagal memuat data profil.');
+        }
+        
+        const ordersData = Array.isArray(ordersRes.data) ? ordersRes.data : (ordersRes.data?.data || []);
+        setOrders(ordersData);
+      })
+      .catch(() => setError('Gagal memuat data dashboard.'));
   }, []);
 
   const name = expert?.name || 'Pengguna';
@@ -32,10 +43,23 @@ export default function Dashboard() {
   const profileCompleteness = [hasBasicInfo, hasEducation, hasPhoto].filter(Boolean).length;
   const isProfileComplete = profileCompleteness >= 2; // Minimum: basic info + at least one more
   
-  // Package & publication status — approved users always have at least Free
+  // Fetch orders for payment status
+  const [orders, setOrders] = useState([]);
+  
+  const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'menunggu_pembayaran');
+  const hasPendingPayment = pendingOrders.length > 0;
+  
+  // Package & publication status
   const hasPackage = !!expert?.package_id || isApproved;
   const packageName = expert?.package?.name || (isApproved ? 'Free' : 'Belum Dipilih');
   const isFreePackage = !expert?.package_id || (expert?.package?.price === 0) || (packageName === 'Free');
+  
+  // Dokumen check (is submission sent?)
+  // For now, we assume if they are pending or approved, documents have been sent.
+  // If they have a paid package but are still 'draft', they need to upload documents.
+  const hasPaidPackage = hasPackage && !hasPendingPayment;
+  const needsDocumentUpload = hasPaidPackage && isDraft;
+  
   const isPublished = isApproved && hasPackage;
 
   return (
@@ -87,6 +111,8 @@ export default function Dashboard() {
                 {isApproved ? 'Akun telah diverifikasi admin' : 
                  isRejected ? 'Perlu perbaikan data' :
                  isPending ? 'Sedang ditinjau admin' :
+                 needsDocumentUpload ? 'Perlu upload dokumen' :
+                 hasPendingPayment ? 'Menunggu pembayaran' :
                  'Lengkapi profil Anda'}
               </p>
             </div>
@@ -203,7 +229,7 @@ export default function Dashboard() {
         )}
 
         {/* DRAFT — Lengkapi Profil */}
-        {isDraft && !isProfileComplete && (
+        {!isProfileComplete && !hasPendingPayment && !needsDocumentUpload && (
           <div className="bg-[#E0F2FE] rounded-2xl p-6 border border-[#BAE6FD] animate-fadeIn">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-start gap-4 flex-1">
@@ -229,6 +255,84 @@ export default function Dashboard() {
               >
                 <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                 Lengkapi Sekarang
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* PROFILE LENGKAP TAPI BELUM PILIH PAKET */}
+        {isProfileComplete && !hasPackage && !hasPendingPayment && (
+          <div className="bg-gradient-to-br from-[#E0F2FE] to-[#DBEAFE] rounded-2xl p-6 border border-[#0EA5E9]/30 animate-fadeIn">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="p-2.5 rounded-xl bg-white/80 shrink-0">
+                  <span className="material-symbols-outlined text-[32px] text-[#0EA5E9]">workspace_premium</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#075985] text-lg mb-2">Pilih Paket Keanggotaan</h3>
+                  <p className="text-sm text-[#0369A1] leading-relaxed">
+                    Profil Anda sudah lengkap! Langkah selanjutnya adalah memilih paket keanggotaan (Free atau Premium) agar Anda dapat mengunggah dokumen dan diverifikasi oleh admin.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/paket')}
+                className="bg-[#0EA5E9] text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-[#0284C7] shadow-lg shadow-[#0EA5E9]/20 transition-all hover:shadow-xl shrink-0 flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                Pilih Paket
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ADA INVOICE PENDING */}
+        {hasPendingPayment && (
+          <div className="bg-[#FFF4D6] rounded-2xl p-6 border border-[#FCD34D] animate-fadeIn">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="p-2.5 rounded-xl bg-[#F59E0B]/10 shrink-0">
+                  <span className="material-symbols-outlined text-[28px] text-[#D97706]">receipt_long</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#92400E] text-base mb-2">Segera Lunasi Pembayaran Anda</h3>
+                  <p className="text-sm text-[#92400E] leading-relaxed mb-1">
+                    Anda memiliki tagihan paket yang belum dibayar. Selesaikan pembayaran sekarang agar Anda dapat melanjutkan ke tahap verifikasi.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate(`/invoice/${pendingOrders[0].id || pendingOrders[0].reference_code}`)}
+                className="bg-[#D97706] text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-[#B45309] shadow-md transition-colors shrink-0 flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">payment</span>
+                Bayar Sekarang
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SUDAH LUNAS TAPI BELUM UPLOAD DOKUMEN */}
+        {needsDocumentUpload && (
+          <div className="bg-[#E0F2FE] rounded-2xl p-6 border border-[#BAE6FD] animate-fadeIn">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="p-2.5 rounded-xl bg-[#0EA5E9]/10 shrink-0">
+                  <span className="material-symbols-outlined text-[28px] text-[#0284C7]">upload_file</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#075985] text-base mb-2">Upload Dokumen Pendukung</h3>
+                  <p className="text-sm text-[#0369A1] leading-relaxed mb-1">
+                    Paket Anda sudah aktif! Silakan unggah dokumen pendukung seperti KTP dan sertifikat agar tim kami dapat segera melakukan verifikasi akun Anda.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/profil-saya')}
+                className="bg-[#0EA5E9] text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-[#0284C7] shadow-md transition-colors shrink-0 flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+                Upload Dokumen
               </button>
             </div>
           </div>

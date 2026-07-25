@@ -16,7 +16,7 @@ class RegistrationRejected extends Mailable
     public function __construct(
         public readonly Expert $expert,
         public readonly string $rejectReason,
-        public readonly string $registerUrl,
+        public readonly string $loginUrl,
     ) {}
 
     public function envelope(): Envelope

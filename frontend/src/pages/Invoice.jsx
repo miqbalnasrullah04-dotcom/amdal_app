@@ -199,128 +199,209 @@ export default function Invoice() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         * { box-sizing: border-box; }
         body { background-color: #F8FAFC !important; margin: 0; }
+        .invoice-wrapper {
+          font-family: 'Inter', sans-serif;
+          color: #111827;
+        }
+        .invoice-paper {
+          background: white;
+          border-radius: 8px;
+          border: 1px solid #E5E7EB;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          width: 100%;
+          max-width: 800px;
+          margin: 40px auto;
+          padding: 48px;
+          position: relative;
+        }
         @media print {
           .no-print { display: none !important; }
           body { background: white !important; }
-          .print-page { box-shadow: none !important; border: none !important; margin: 0 !important; }
+          .invoice-paper { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; }
         }
       `}</style>
 
-      <div className="min-h-screen py-10 px-4" style={{ fontFamily: "'Inter', sans-serif", color: '#1F2937' }}>
+      <div className="invoice-wrapper min-h-screen py-6 px-4">
         
-        {/* Action bar (no print) */}
-        <div className="no-print max-w-4xl mx-auto mb-6 flex justify-between items-center">
+        {/* Action bar */}
+        <div className="no-print max-w-[800px] mx-auto mb-6 flex justify-between items-center">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 font-semibold text-sm">
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
             Kembali
           </button>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors border border-gray-300">
-            <span className="material-symbols-outlined text-[18px]">print</span>
-            Cetak
-          </button>
+          <div className="flex gap-2">
+            {!isPaid && (
+              <button onClick={handlePay} className="bg-[#0284C7] text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors shadow-sm">
+                Bayar Sekarang
+              </button>
+            )}
+            <button onClick={() => window.print()} className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors border border-gray-300 shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">print</span>
+              Cetak
+            </button>
+          </div>
         </div>
 
         {/* Invoice Paper */}
-        <div ref={printRef} className="print-page max-w-4xl mx-auto bg-white rounded-[24px] p-10 sm:p-14 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+        <div ref={printRef} className="invoice-paper">
           
           {/* Header */}
-          <div className="flex justify-between items-start mb-10">
-            <img src={logo} alt="TenagaAhli.com" className="h-10 w-auto" />
+          <div className="flex justify-between items-start mb-8">
+            <img src={logo} alt="TenagaAhli.com" className="h-10 w-auto" style={{ filter: 'grayscale(0%)' }} />
             <div className="text-right">
-              <h1 className="text-xl font-bold text-gray-900 tracking-wide uppercase">Invoice Pembayaran</h1>
-              <p className="text-sm text-gray-500 mt-1">{invoiceNumber}</p>
-              <p className="text-sm text-gray-500">Invoice date: {invoiceDateShort}</p>
+              <h1 className="text-3xl font-extrabold text-[#374151] tracking-tight uppercase">INVOICE</h1>
+              <p className="text-[#4B5563] text-sm font-semibold mt-1">{invoiceNumber}</p>
             </div>
           </div>
 
           {/* Due Date Pill */}
           <div className="mb-8">
-            <span className="inline-block bg-[#FFF7ED] text-[#9A3412] px-4 py-1.5 rounded-full text-[15px] font-bold">
+            <span className="inline-block bg-[#FEF3C7] text-[#92400E] px-4 py-1.5 rounded-full text-sm font-bold">
               Due date: {dueDateLong}
             </span>
           </div>
 
           {/* 3 Columns Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-[13px]">
             {/* From */}
-            <div>
-              <p className="font-bold text-sm text-gray-900 mb-1">From:</p>
-              <div className="text-sm text-gray-600 leading-relaxed">
-                <p>+62 858 83658814</p>
-                <p>support@tenagaahli.com</p>
-                <p>NPWP: 100000000000001</p>
-              </div>
+            <div className="pr-4">
+              <p className="font-bold text-gray-900 mb-1">From:</p>
+              <p className="text-gray-700 leading-relaxed">
+                TenagaAhli.com<br />
+                Jl. Contoh Alamat No.123<br />
+                Jakarta Selatan, 12345<br />
+                +62 858 83658814<br />
+                www.tenagaahli.com<br />
+                support@tenagaahli.com<br />
+                NPWP: 10 000 000 0 000 000
+              </p>
             </div>
 
             {/* Bill to */}
-            <div>
-              <p className="font-bold text-sm text-gray-900 mb-1">Bill to:</p>
-              <div className="text-sm text-gray-600 leading-relaxed">
-                <p>{customerName}</p>
-              </div>
+            <div className="pr-4">
+              <p className="font-bold text-gray-900 mb-1">Bill to:</p>
+              <p className="text-gray-700 leading-relaxed">
+                {customerName}<br />
+                {order.user?.email || user?.email || '-'}<br />
+                {order.user?.phone || '-'}
+              </p>
             </div>
 
             {/* Pay via */}
             <div>
-              <div className="bg-gray-100 rounded-2xl p-5 w-full h-full">
-                <p className="font-bold text-sm text-gray-900 mb-2">Pay via:</p>
+              <div className="bg-[#F3F4F6] rounded-xl p-4 w-full h-full">
+                <p className="font-bold text-gray-900 mb-1">Pay via:</p>
                 {isPaid ? (
-                  <p className="text-sm font-semibold text-green-600 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                    LUNAS
-                  </p>
+                  <p className="text-gray-700 font-medium">LUNAS (Midtrans)</p>
                 ) : (
-                  <button onClick={handlePay} className="no-print bg-[#0EA5E9] text-white hover:bg-[#0284C7] font-bold text-sm py-2 px-4 rounded-xl w-full text-center transition-colors shadow-sm">
-                    Bayar Sekarang (Midtrans)
-                  </button>
+                  <p className="text-gray-700 font-medium">Midtrans Payment Link / Snap</p>
                 )}
-                {isPending && <p className="text-xs text-gray-500 mt-2 block print:hidden text-center">Klik untuk bayar</p>}
+                {isPaid && (
+                  <div className="mt-2 text-green-600 font-bold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                    PAID
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Amount Due & Order ID */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+          {/* Reference */}
+          <div className="mb-8 text-[13px]">
+            <span className="font-bold text-gray-900 mr-2">Reference:</span>
+            <span className="text-gray-700">Invoice for TenagaAhli {order.package_name || 'Premium'} Subscription</span>
+          </div>
+
+          {/* Amount Due Header */}
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
               Total amount due: {formatRupiah(amount)}
             </h2>
-            <p className="text-sm font-bold text-gray-700">
-              Order ID: <span className="font-mono font-normal text-gray-600 ml-2">{invoiceNumber}</span>
+            <p className="text-sm font-bold text-gray-900">
+              Order ID: <span className="font-semibold">{invoiceNumber}</span>
             </p>
           </div>
 
           {/* Table */}
-          <div className="w-full text-sm border-t-2 border-gray-800">
+          <div className="w-full text-[13px]">
             {/* Thead */}
             <div className="flex font-bold text-gray-900 py-3 border-b border-gray-200">
               <div className="flex-[4]">Description</div>
               <div className="flex-1 text-center">Qty</div>
-              <div className="flex-[1.5] text-center">Price (Rp)</div>
-              <div className="flex-1 text-center">Disc</div>
+              <div className="flex-[1.5] text-right">Price (Rp)</div>
               <div className="flex-[1.5] text-right">Total (Rp)</div>
             </div>
             
             {/* Row */}
-            <div className="flex text-gray-700 py-4 border-b border-gray-200">
-              <div className="flex-[4] pr-4">Langganan Paket {order.package_name || 'Premium'} (1 Tahun)</div>
+            <div className="flex text-gray-700 py-3 border-b border-gray-100">
+              <div className="flex-[4] pr-4">
+                <p className="mb-1">{order.package_name || 'Premium'} Package Subscription</p>
+                <p className="text-gray-500 text-[12px]">Langganan 1 Tahun TenagaAhli</p>
+              </div>
               <div className="flex-1 text-center">1</div>
-              <div className="flex-[1.5] text-center">{formatRupiah(amount).replace('Rp', '').trim()}</div>
-              <div className="flex-1 text-center">-</div>
+              <div className="flex-[1.5] text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
               <div className="flex-[1.5] text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
             </div>
 
             {/* Footer rows */}
-            <div className="flex justify-end py-3 border-b border-gray-200">
-              <div className="font-bold text-gray-900 w-48 text-right pr-12">Subtotal</div>
-              <div className="text-gray-700 w-32 text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
+            <div className="flex justify-end py-2">
+              <div className="font-bold text-gray-900 w-32 text-right pr-6">Subtotal</div>
+              <div className="text-gray-700 w-24 text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
             </div>
-            <div className="flex justify-end py-3 border-b border-gray-300">
-              <div className="font-bold text-gray-900 w-48 text-right pr-12">Total amount due</div>
-              <div className="font-bold text-gray-900 w-32 text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
+            <div className="flex justify-end py-2">
+              <div className="text-gray-600 w-32 text-right pr-6">Discount</div>
+              <div className="text-gray-700 w-24 text-right">0</div>
             </div>
+            <div className="flex justify-end py-2">
+              <div className="text-gray-600 w-32 text-right pr-6">Tax</div>
+              <div className="text-gray-700 w-24 text-right">0</div>
+            </div>
+            <div className="flex justify-end py-2 border-b border-gray-200">
+              <div className="text-gray-600 w-32 text-right pr-6">Shipping</div>
+              <div className="text-gray-700 w-24 text-right">0</div>
+            </div>
+            <div className="flex justify-end py-3">
+              <div className="font-bold text-gray-900 w-48 text-right pr-6">Total amount due</div>
+              <div className="font-bold text-gray-900 w-24 text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
+            </div>
+          </div>
+
+          {/* Signature area */}
+          <div className="flex justify-end mt-12 mb-16 mr-10">
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="font-bold text-[13px] text-gray-900">Admin TenagaAhli,</p>
+                <p className="font-bold text-[13px] text-gray-900">Director</p>
+              </div>
+              {/* Dummy signature drawn with SVG to mimic the blue signature */}
+              <svg width="80" height="50" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80">
+                <path d="M10,40 Q20,10 30,30 T50,20 T70,35 T90,25" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <path d="M25,25 Q35,5 45,35 T65,15" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
+            </div>
+          </div>
+
+          {/* Footer Notes */}
+          <div className="grid grid-cols-[100px_1fr] gap-4 text-[12px] text-gray-700 mb-6">
+            <div className="font-bold text-gray-900">Notes</div>
+            <div>
+              Please pay via payment link or VA number provided. Be sure to pay before the due date mentioned above.
+            </div>
+            <div className="font-bold text-gray-900">Terms &<br/>Conditions</div>
+            <div>
+              Access to premium features will be granted immediately upon successful payment verification. Contact support for any billing issues.
+            </div>
+          </div>
+
+          {/* Bottom Branding */}
+          <div className="flex justify-between items-center text-[11px] pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-1 text-gray-400">
+              Powered by <span className="font-bold text-[#0EA5E9] ml-1 tracking-tighter text-sm">midtrans</span>
+            </div>
+            <div className="font-bold text-gray-900">Page 1 of 1</div>
           </div>
 
         </div>
