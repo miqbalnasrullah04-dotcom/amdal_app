@@ -6,7 +6,6 @@ import api from '../api/client.js';
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: 'space_dashboard' },
   { to: '/profil-saya', label: 'Profil Saya', icon: 'person' },
-  { to: '/pekerjaan', label: 'Pekerjaan', icon: 'work' },
   { to: '/pesan', label: 'Pesan', icon: 'chat' },
   { to: '/paket', label: 'Paket', icon: 'workspace_premium' },
   { to: '/invoice', label: 'Invoice', icon: 'receipt_long' },

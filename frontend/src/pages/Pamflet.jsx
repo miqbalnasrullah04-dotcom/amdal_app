@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import NavbarBackground from '../components/NavbarBackground.jsx';
 
@@ -21,6 +22,7 @@ const dummyItems = [
 ];
 
 export default function Pamflet() {
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [selectedImg, setSelectedImg] = useState(null);
 
@@ -55,12 +57,11 @@ export default function Pamflet() {
       <section className="pt-36 pb-20 bg-gradient-to-b from-[#0369A1] via-[#0284C7] to-[#0EA5E9]">
         <div className="max-w-7xl mx-auto px-6">
           <span className="inline-block px-4 py-1 rounded-full bg-white/20 text-white border border-white/40 text-sm font-semibold mb-5">
-            Informasi Terbaru
+            {t('pamphlets.badge', 'Informasi Terbaru')}
           </span>
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Pamflet</h1>
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">{t('pamphlets.title', 'Pamflet')}</h1>
           <p className="text-sky-100 text-lg leading-8 max-w-3xl">
-            Berbagai informasi mengenai sosialisasi, pelatihan, seminar, workshop, pengumuman, dan kegiatan terbaru
-            seputar AMDAL.
+            {t('pamphlets.subtitle', 'Berbagai informasi mengenai sosialisasi, pelatihan, seminar, workshop, pengumuman, dan kegiatan terbaru seputar AMDAL.')}
           </p>
         </div>
       </section>
@@ -69,7 +70,7 @@ export default function Pamflet() {
       <section className="max-w-7xl mx-auto px-6 py-16">
         {safeItems.length === 0 ? (
           <div className="text-center py-16 text-slate-500">
-            Belum ada data pamflet.
+            {t('pamphlets.no_data', 'Belum ada data pamflet.')}
           </div>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -106,7 +107,7 @@ export default function Pamflet() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition duration-500 flex flex-col justify-end p-6">
                   <div className="w-full">
                     <span className="inline-block bg-[#0EA5E9] text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                      PAMFLET
+                      {t('pamphlets.label', 'PAMFLET')}
                     </span>
                     <h2 className="text-2xl font-bold text-white leading-snug drop-shadow-lg">
                       {item.title}

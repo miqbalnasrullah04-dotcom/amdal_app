@@ -2,16 +2,25 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
+import LevelBadge from '../components/LevelBadge.jsx';
 
 export default function ProfilPublik() {
   const [expert, setExpert] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [pointsData, setPointsData] = useState(null);
 
   useEffect(() => {
-    api
-      .get('/my/profile')
-      .then((res) => setExpert(res.data))
+    Promise.all([
+      api.get('/my/profile'),
+      api.get('/my/points').catch(() => ({ data: null }))
+    ])
+      .then(([profileRes, pointsRes]) => {
+        setExpert(profileRes.data);
+        if (pointsRes.data) {
+          setPointsData(pointsRes.data);
+        }
+      })
       .catch(() => setError('Gagal memuat data profil.'))
       .finally(() => setLoading(false));
   }, []);
@@ -101,7 +110,12 @@ export default function ProfilPublik() {
                 )}
               </div>
               <div>
-                <h4 className="font-bold text-on-background text-base">{expert?.name}</h4>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="font-bold text-on-background text-base">{expert?.name}</h4>
+                  {pointsData?.level && (
+                    <LevelBadge level={pointsData.level} size="sm" />
+                  )}
+                </div>
                 <p className="text-xs text-[#2E5E3B] font-semibold">{expert?.field || 'Bidang Keahlian Belum Diisi'}</p>
                 <p className="text-[11px] text-on-surface-variant mt-0.5">{expert?.institution || '-'}</p>
               </div>

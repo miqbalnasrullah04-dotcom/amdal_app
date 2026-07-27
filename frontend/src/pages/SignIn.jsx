@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 
 export default function SignIn() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
@@ -189,8 +191,8 @@ export default function SignIn() {
             </Link>
           </div>
 
-          <h2 className="font-headline-md text-2xl font-bold text-on-background mb-1">Selamat datang kembali</h2>
-          <p className="text-sm text-on-surface-variant mb-8">Masuk untuk mengelola profil tenaga ahli Anda.</p>
+          <h2 className="font-headline-md text-2xl font-bold text-on-background mb-1">{t('auth.login_title')}</h2>
+          <p className="text-sm text-on-surface-variant mb-8">{t('auth.login_subtitle', 'Masuk untuk mengelola profil tenaga ahli Anda.')}</p>
 
           {(justRegistered || successMessage) && !error && (
             <p className="bg-[#E0F2FE] text-[#0369A1] text-sm rounded-lg px-4 py-3 mb-5 flex items-start gap-2">
@@ -205,7 +207,7 @@ export default function SignIn() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Email</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{t('auth.email')}</label>
               <input
                 type="email"
                 required
@@ -219,7 +221,7 @@ export default function SignIn() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Kata Sandi</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{t('auth.password')}</label>
               </div>
               <div className="relative">
                 <input
@@ -248,7 +250,7 @@ export default function SignIn() {
               disabled={loading}
               className="mt-2 bg-[#0EA5E9] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0284C7] active:scale-[0.99] transition-all disabled:opacity-60 disabled:active:scale-100"
             >
-              {loading ? 'Memproses...' : 'Masuk'}
+              {loading ? t('common.loading') : t('auth.login_button')}
             </button>
 
             <Link
@@ -256,14 +258,14 @@ export default function SignIn() {
               className="flex items-center justify-center gap-1.5 border border-outline-variant/50 text-on-surface-variant py-3 rounded-lg text-sm font-semibold hover:bg-surface-container-low hover:text-on-background transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Kembali
+              {t('common.back')}
             </Link>
           </form>
 
           <p className="text-center text-sm text-on-surface-variant mt-8">
-            Belum punya akun?{' '}
+            {t('auth.no_account')}{' '}
             <Link to="/daftar" className="text-[#0284C7] font-bold hover:underline">
-              Daftar sekarang
+              {t('auth.register_here')}
             </Link>
           </p>
         </div>

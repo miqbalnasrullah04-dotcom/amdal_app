@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
 import NavbarBackground from '../components/NavbarBackground.jsx';
@@ -22,10 +23,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
-const ORDER_OPTIONS = [
-  { value: 'latest', label: 'Latest' },
-  { value: 'top_rated', label: 'Top rated' },
-  { value: 'random', label: 'Random' },
+const getOrderOptions = (t) => [
+  { value: 'latest', label: t('search.order.latest', 'Latest') },
+  { value: 'top_rated', label: t('search.order.top_rated', 'Top rated') },
+  { value: 'random', label: t('search.order.random', 'Random') },
 ];
 
 const KRITERIA_SUGGESTIONS = [
@@ -133,6 +134,8 @@ function useClickOutside(ref, onOutside) {
 }
 
 export default function Search() {
+  const { t } = useTranslation();
+  const ORDER_OPTIONS = getOrderOptions(t);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
@@ -365,7 +368,7 @@ export default function Search() {
     if (!map || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
-      () => alert('Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.')
+      () => alert(t('search.location_error', 'Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.'))
     );
   };
 
@@ -378,19 +381,19 @@ export default function Search() {
       {/* ---------- FILTERS ---------- */}
       <aside className="border-r border-outline-variant/30 bg-white p-6 overflow-y-auto">
         <h2 className="font-label-md uppercase tracking-widest text-on-surface-variant mb-5">
-          Cari Tenaga Ahli
+          {t('search.title', 'Cari Tenaga Ahli')}
         </h2>
 
         <form onSubmit={handleSearch} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              Masukan Kata Kunci
+              {t('search.search_keyword', 'Masukan Kata Kunci')}
             </label>
             <div className="flex items-center gap-2 border-b-2 border-outline-variant/40 focus-within:border-[#0EA5E9] px-1 py-2 transition-colors">
               <MagnifyingGlassIcon className="w-[18px] h-[18px] text-[#0EA5E9]" />
               <input
                 className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-surface-dim outline-none"
-                placeholder="Ahli Kehutanan, Tata Ruang"
+                placeholder={t('search.search_keyword_placeholder', 'Ahli Kehutanan, Tata Ruang')}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
@@ -399,13 +402,13 @@ export default function Search() {
 
           <div className="flex flex-col gap-1 relative" ref={locationBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              Kota/Kabupaten/Provinsi
+              {t('search.search_location', 'Kota/Kabupaten/Provinsi')}
             </label>
             <div className="flex items-center gap-2 border-b-2 border-outline-variant/40 focus-within:border-[#0EA5E9] px-1 py-2 transition-colors">
               <MapPinIcon className="w-[18px] h-[18px] text-[#0EA5E9]" />
               <input
                 className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-surface-dim outline-none"
-                placeholder="Ketik untuk memilih lokasi..."
+                placeholder={t('search.search_location_placeholder', 'Ketik untuk memilih lokasi...')}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 onFocus={() => setLocationOpen(true)}
@@ -432,12 +435,12 @@ export default function Search() {
 
           <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              Kriteria Keanggotaan
+              {t('search.membership_criteria', 'Kriteria Keanggotaan')}
             </label>
             <input
               type="text"
               className="border-b-2 border-outline-variant/40 focus:border-[#0EA5E9] px-1 py-2 text-sm text-on-surface bg-transparent outline-none transition-colors"
-              placeholder="Ketik untuk mencari kriteria..."
+              placeholder={t('search.criteria_placeholder', 'Ketik untuk mencari kriteria...')}
               value={kriteria}
               onChange={(e) => setKriteria(e.target.value)}
               onFocus={() => setKriteriaOpen(true)}
@@ -460,7 +463,7 @@ export default function Search() {
                   ))
                 ) : (
                   <div className="px-4 py-3 text-xs text-on-surface-variant/60 text-center">
-                    Tidak ada saran, tekan Search untuk mencari "{kriteria}"
+                    {t('search.no_suggestions_for', 'Tidak ada saran, tekan Search untuk mencari')} "{kriteria}"
                   </div>
                 )}
               </div>
@@ -469,7 +472,7 @@ export default function Search() {
 
           <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              Order by
+              {t('search.order_by', 'Order by')}
             </label>
             <button
               type="button"
@@ -507,7 +510,7 @@ export default function Search() {
             className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors active:scale-95"
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
-            Search
+            {t('search.search_btn', 'Search')}
           </button>
           <button
             type="button"
@@ -515,7 +518,7 @@ export default function Search() {
             className="text-on-surface-variant text-sm underline flex items-center gap-1 justify-center"
           >
             <ArrowPathIcon className="w-4 h-4" />
-            Reset Filters
+            {t('search.reset_filters', 'Reset Filters')}
           </button>
         </form>
       </aside>
@@ -527,7 +530,7 @@ export default function Search() {
             <ChevronLeftIcon className="w-5 h-5" />
           </button>
           <span className="text-sm text-on-background">
-            Showing <b className="text-[#0EA5E9]">{sortedExperts.length}</b> result
+            {t('search.showing', 'Showing')} <b className="text-[#0EA5E9]">{sortedExperts.length}</b> {t('search.result', 'result')}
           </span>
           <button onClick={goNext} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
             <ChevronRightIcon className="w-5 h-5" />
@@ -536,9 +539,9 @@ export default function Search() {
 
         {!loading && sortedExperts.length === 0 && (
           <div className="text-center text-on-surface-variant text-sm py-16 px-6">
-            Tidak ada tenaga ahli yang cocok.
+            {t('search.no_results', 'Tidak ada tenaga ahli yang cocok.')}
             <br />
-            Coba ubah kata kunci atau filter lokasi.
+            {t('search.try_change_keywords', 'Coba ubah kata kunci atau filter lokasi.')}
           </div>
         )}
 
@@ -565,7 +568,7 @@ export default function Search() {
                     onClick={(e) => e.stopPropagation()}
                     className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-[#0284C7] rounded-full px-3 py-1.5 shadow"
                   >
-                    Lihat Profil
+                    {t('search.view_profile', 'Lihat Profil')}
                   </Link>
                 )}
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
@@ -605,7 +608,7 @@ export default function Search() {
             checked={searchAsMove}
             onChange={(e) => setSearchAsMove(e.target.checked)}
           />
-          Search as I move the map
+          {t('search.search_as_move', 'Search as I move the map')}
         </label>
 
         <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">

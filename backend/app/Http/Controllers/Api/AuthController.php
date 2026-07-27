@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Expert;
 use App\Models\Document;
 use App\Models\Education;
+use App\Services\PointService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -108,6 +109,10 @@ class AuthController extends Controller
         // Token hanya untuk tracking, bukan untuk auth
         $token = $user->createToken('registration_token')->plainTextToken;
 
+        // Award 20 poin untuk registrasi
+        $pointService = new PointService();
+        $pointService->awardPoints($user, 'register', 'Registrasi akun baru');
+
         $response = [
             'message' => 'Registrasi berhasil. Silakan cek email Anda untuk kode verifikasi.',
             'user'   => [
@@ -181,6 +186,10 @@ class AuthController extends Controller
             'profile_status'  => 'draft', // Draft sampai user lengkapi profil & submit
             'package_id'      => $freePackage ? $freePackage->id : null,
         ]);
+
+        // Award 10 poin untuk verifikasi email
+        $pointService = new PointService();
+        $pointService->awardPoints($user, 'verify_email', 'Verifikasi email berhasil');
 
         return response()->json([
             'message' => 'Email berhasil diverifikasi! Silakan login.',

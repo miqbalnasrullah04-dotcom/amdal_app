@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import NavbarBackground from '../components/NavbarBackground.jsx';
 import { usePageLoading } from '../context/LoadingContext.jsx';
@@ -22,6 +23,7 @@ const dummyMembers = [
 ];
 
 export default function Member() {
+  const { t } = useTranslation();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { reportReady } = usePageLoading();
@@ -97,9 +99,9 @@ export default function Member() {
   const showingTo = Math.min(startIndex + entriesPerPage, totalEntries);
 
   const columns = [
-    { key: 'nama', label: 'Nama' },
-    { key: 'instansi', label: 'Instansi' },
-    { key: 'nomor', label: 'Nomor Member' },
+    { key: 'nama', label: t('member.name', 'Nama') },
+    { key: 'instansi', label: t('member.institution', 'Instansi') },
+    { key: 'nomor', label: t('member.member_number', 'Nomor Member') },
   ];
 
   const SortIcon = ({ columnKey }) => {
@@ -129,16 +131,16 @@ export default function Member() {
       <NavbarBackground />
 
 
-      <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">Member</h1>
+      <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('member.title', 'Member')}</h1>
       <p className="text-on-surface-variant mb-8">
-        Daftar tenaga ahli AMDAL yang telah tersertifikasi dan terdaftar di AMDAL.ID.
+        {t('member.subtitle', 'Daftar tenaga ahli AMDAL yang telah tersertifikasi dan terdaftar di AMDAL.ID.')}
       </p>
 
       <div className="bg-white rounded-xl border border-[#0EA5E9]/25 shadow-sm overflow-hidden">
         {/* Toolbar: entries + search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-[#0EA5E9]/20">
           <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-            <span>Show</span>
+            <span>{t('member.show', 'Show')}</span>
             <select
               value={entriesPerPage}
               onChange={(e) => {
@@ -153,7 +155,7 @@ export default function Member() {
                 </option>
               ))}
             </select>
-            <span>entries</span>
+            <span>{t('member.entries', 'entries')}</span>
           </div>
 
           <div className="relative w-full md:w-72">
@@ -166,7 +168,7 @@ export default function Member() {
                 setKeyword(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Cari nama, instansi, atau nomor member"
+              placeholder={t('member.search_placeholder', 'Cari nama, instansi, atau nomor member')}
               className="w-full pl-9 pr-4 py-2 text-sm border border-[#0EA5E9]/30 rounded-lg focus:ring-[#0EA5E9] focus:border-[#0EA5E9] outline-none"
             />
           </div>
@@ -195,7 +197,7 @@ export default function Member() {
               {loading ? null : paginatedMembers.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} className="px-6 py-8 text-center text-on-surface-variant">
-                    Tidak ada data yang cocok.
+                    {t('member.no_data', 'Tidak ada data yang cocok.')}
                   </td>
                 </tr>
               ) : (
@@ -219,7 +221,7 @@ export default function Member() {
         {/* Footer: info + pagination */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#0EA5E9]/20 text-sm text-on-surface-variant">
           <span>
-            Showing {showingFrom} to {showingTo} of {totalEntries} entries
+            {t('member.showing', 'Showing')} {showingFrom} {t('member.to', 'to')} {showingTo} {t('member.of', 'of')} {totalEntries} {t('member.entries', 'entries')}
           </span>
 
           <div className="flex items-center gap-1">
@@ -228,7 +230,7 @@ export default function Member() {
               disabled={currentPage === 1}
               className="px-3 py-1.5 rounded-lg border border-[#0EA5E9]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0EA5E9]/10 transition-colors"
             >
-              Previous
+              {t('member.previous', 'Previous')}
             </button>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -263,7 +265,7 @@ export default function Member() {
               disabled={currentPage === totalPages}
               className="px-3 py-1.5 rounded-lg border border-[#0EA5E9]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0EA5E9]/10 transition-colors"
             >
-              Next
+              {t('member.next', 'Next')}
             </button>
           </div>
         </div>

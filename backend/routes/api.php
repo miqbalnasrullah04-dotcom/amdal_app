@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PartnerApiController;
+use App\Http\Controllers\Api\PointController;
 use App\Http\Controllers\Api\SubmissionController;
 use App\Http\Middleware\EnsureIsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +82,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/{id}/upload-proof', [OrderController::class, 'uploadProof']);
     Route::get('/orders/history', [OrderController::class, 'myOrders']);
 
+    // Points & Level (user)
+    Route::get('/my/points', [PointController::class, 'myHistory']);
+    Route::get('/leaderboard', [PointController::class, 'leaderboard']);
+
     // Pengajuan (user)
     Route::post('/submissions', [SubmissionController::class, 'store']);
     Route::get('/submissions/mine', [SubmissionController::class, 'mine']);
@@ -107,6 +112,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/packages', [PackageController::class, 'store']);
         Route::put('/admin/packages/{id}', [PackageController::class, 'update']);
         Route::delete('/admin/packages/{id}', [PackageController::class, 'destroy']);
+
+        // Points stats (admin)
+        Route::get('/admin/points/stats', [PointController::class, 'stats']);
 
         // Admin - dashboard stats, deactivate, change password
         Route::get('/admin/dashboard-stats', [ExpertController::class, 'dashboardStats']);

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 import PhoneInput from '../components/PhoneInput.jsx';
@@ -8,24 +9,24 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 /* ─── constants ──────────────────────────────────────────────────────────── */
-const TABS = [
-  { id: 'pribadi', label: 'Data Pribadi', icon: 'person' },
-  { id: 'profil-bio', label: 'Profil Bio', icon: 'description' },
-  { id: 'pendidikan', label: 'Pendidikan', icon: 'school' },
-  { id: 'pengalaman', label: 'Pengalaman', icon: 'work' },
-  { id: 'sertifikat', label: 'Sertifikat', icon: 'workspace_premium' },
-  { id: 'akademik', label: 'Link Akademik', icon: 'link' },
-  { id: 'publikasi', label: 'Publikasi & Riwayat', icon: 'article' },
-  { id: 'dokumen', label: 'Upload Dokumen', icon: 'folder' },
-  { id: 'verifikasi', label: 'Kirim Verifikasi', icon: 'verified' },
+const getTabs = (t) => [
+  { id: 'pribadi', label: t('profile.tabs.personal_data', 'Data Pribadi'), icon: 'person' },
+  { id: 'profil-bio', label: t('profile.tabs.profile_bio', 'Profil Bio'), icon: 'description' },
+  { id: 'pendidikan', label: t('profile.tabs.education', 'Pendidikan'), icon: 'school' },
+  { id: 'pengalaman', label: t('profile.tabs.experience', 'Pengalaman'), icon: 'work' },
+  { id: 'sertifikat', label: t('profile.tabs.certificates', 'Sertifikat'), icon: 'workspace_premium' },
+  { id: 'akademik', label: t('profile.tabs.academic_links', 'Link Akademik'), icon: 'link' },
+  { id: 'publikasi', label: t('profile.tabs.publication', 'Publikasi & Riwayat'), icon: 'article' },
+  { id: 'dokumen', label: t('profile.tabs.documents', 'Upload Dokumen'), icon: 'folder' },
+  { id: 'verifikasi', label: t('profile.tabs.verification', 'Kirim Verifikasi'), icon: 'verified' },
 ];
 
-const STATUS_PENGAJUAN = {
-  menunggu_review: { label: 'Menunggu Review', color: 'text-amber-700 bg-amber-50 border-amber-200' },
-  diproses: { label: 'Diproses', color: 'text-blue-700 bg-blue-50 border-blue-200' },
-  disetujui: { label: 'Disetujui', color: 'text-green-700 bg-green-50 border-green-200' },
-  ditolak: { label: 'Ditolak', color: 'text-red-700 bg-red-50 border-red-200' },
-};
+const getStatusPengajuan = (t) => ({
+  menunggu_review: { label: t('profile.status.waiting_review', 'Menunggu Review'), color: 'text-amber-700 bg-amber-50 border-amber-200' },
+  diproses: { label: t('profile.status.processing', 'Diproses'), color: 'text-blue-700 bg-blue-50 border-blue-200' },
+  disetujui: { label: t('profile.status.approved', 'Disetujui'), color: 'text-green-700 bg-green-50 border-green-200' },
+  ditolak: { label: t('profile.status.rejected', 'Ditolak'), color: 'text-red-700 bg-red-50 border-red-200' },
+});
 
 const INPUT = 'w-full rounded-lg border border-outline-variant/40 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2E5E3B]/20 focus:border-[#2E5E3B] transition-colors';
 const BTN_PRIMARY = 'bg-[#2E5E3B] text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-[#244B2F] transition-colors disabled:opacity-50 flex items-center gap-2';
@@ -89,6 +90,10 @@ function WizardNav({ onBack, onNext, showBack = true, showNext = true, nextLabel
 }
 
 export default function ProfilSaya() {
+  const { t } = useTranslation();
+  const TABS = getTabs(t);
+  const STATUS_PENGAJUAN_OPTS = getStatusPengajuan(t);
+
   const [tab, setTab] = useState('pribadi');
   const [expert, setExpert] = useState(null);
   const [loading, setLoading] = useState(true);

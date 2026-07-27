@@ -23,7 +23,6 @@ const SKIP_LOADER_ROUTES = [
   '/lengkapi-profil',
   '/pilih-paket',
   '/riwayat-pembayaran',
-  '/pekerjaan',
   '/pesan',
   '/tiket',
   '/ulasan',

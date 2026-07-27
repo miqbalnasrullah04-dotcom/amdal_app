@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\Expert;
+use App\Services\PointService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -68,6 +69,10 @@ class DocumentController extends Controller
             $expert->update(['photo' => $path]);
         } elseif ($request->label === 'CV / Curriculum Vitae') {
             $expert->update(['cv_path' => $path]);
+
+            // Award 20 poin untuk upload CV
+            $pointService = new PointService();
+            $pointService->awardPoints($expert->user_id, 'upload_cv', 'Mengunggah CV/Resume');
         } elseif ($request->label === 'Bukti Kompetensi') {
             $expert->update(['bukti_kompetensi_path' => $path]);
         }

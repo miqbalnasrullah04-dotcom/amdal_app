@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Experience;
 use App\Models\Expert;
+use App\Services\PointService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -36,6 +37,10 @@ class ExperienceController extends Controller
         $data['expert_id'] = $expert->id;
 
         $experience = Experience::create($data);
+
+        // Award 10 poin untuk setiap pengalaman kerja
+        $pointService = new PointService();
+        $pointService->awardPoints($expert->user_id, 'add_experience', 'Menambahkan pengalaman: ' . $data['posisi'] . ' di ' . $data['instansi']);
 
         return response()->json($experience, 201);
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\Expert;
+use App\Services\PointService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -39,6 +40,10 @@ class CertificateController extends Controller
         }
 
         $certificate = Certificate::create($data);
+
+        // Award 15 poin untuk setiap sertifikat
+        $pointService = new PointService();
+        $pointService->awardPoints($expert->user_id, 'upload_certificate', 'Mengunggah sertifikat: ' . $data['nama_sertifikat']);
 
         return response()->json($certificate, 201);
     }

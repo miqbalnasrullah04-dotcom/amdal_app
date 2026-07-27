@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 
 export default function VerifikasiEmail() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
@@ -119,10 +121,10 @@ export default function VerifikasiEmail() {
 
           {/* Header */}
           <h1 className="text-2xl font-bold text-on-background text-center mb-2">
-            Verifikasi Email
+            {t('auth.verify_email')}
           </h1>
           <p className="text-sm text-on-surface-variant text-center mb-6">
-            Kami telah mengirim kode verifikasi 6 digit ke<br />
+            {t('auth.verify_email_desc', 'Kami telah mengirim kode verifikasi 6 digit ke')}<br />
             <strong className="text-[#0284C7]">{email}</strong>
           </p>
 
@@ -167,13 +169,13 @@ export default function VerifikasiEmail() {
               disabled={loading || otp.join('').length !== 6}
               className="w-full bg-[#0EA5E9] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0284C7] active:scale-[0.99] transition-all disabled:opacity-60 disabled:active:scale-100 mb-4"
             >
-              {loading ? 'Memverifikasi...' : 'Verifikasi Email'}
+              {loading ? t('common.loading') : t('auth.verify_button')}
             </button>
 
             {/* Resend OTP */}
             <div className="text-center">
               <p className="text-sm text-on-surface-variant mb-2">
-                Tidak menerima kode?
+                {t('auth.resend_otp_question', 'Tidak menerima kode?')}
               </p>
               <button
                 type="button"
@@ -181,7 +183,7 @@ export default function VerifikasiEmail() {
                 disabled={resending}
                 className="text-sm font-bold text-[#0284C7] hover:underline disabled:opacity-50"
               >
-                {resending ? 'Mengirim ulang...' : 'Kirim Ulang Kode'}
+                {resending ? t('common.loading') : t('auth.resend_otp')}
               </button>
             </div>
           </form>

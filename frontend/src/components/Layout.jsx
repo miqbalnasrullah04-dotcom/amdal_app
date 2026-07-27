@@ -24,7 +24,6 @@ const FULL_PAGE_ROUTES = [
   '/lengkapi-profil',
   '/pilih-paket',
   '/riwayat-pembayaran',
-  '/pekerjaan',
   '/pesan',
   '/tiket',
   '/ulasan',

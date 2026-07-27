@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/client.js';
+import LevelBadge from '../components/LevelBadge.jsx';
 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -300,15 +301,19 @@ function Card({ children, className = '' }) {
   return <div className={`bg-white border border-gray-200 rounded-xl p-5 shadow-sm ${className}`}>{children}</div>;
 }
 
-const NAV_SECTIONS = [
-  { id: 'profil', label: 'Profil' },
-  { id: 'pengalaman', label: 'Pengalaman' },
-  { id: 'kredensial', label: 'Sertifikasi & Pendidikan' },
-  { id: 'akademik', label: 'Akademik' },
-  { id: 'portofolio', label: 'Portofolio' },
+import { useTranslation } from 'react-i18next';
+
+const getNavSections = (t) => [
+  { id: 'profil', label: t('expert_profile.nav.profile', 'Profil') },
+  { id: 'pengalaman', label: t('expert_profile.nav.experience', 'Pengalaman') },
+  { id: 'kredensial', label: t('expert_profile.nav.credentials', 'Sertifikasi & Pendidikan') },
+  { id: 'akademik', label: t('expert_profile.nav.academic', 'Akademik') },
+  { id: 'portofolio', label: t('expert_profile.nav.portfolio', 'Portofolio') },
 ];
 
 export default function ProfilAhli() {
+  const { t } = useTranslation();
+  const NAV_SECTIONS = getNavSections(t);
   const { slug } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -483,6 +488,13 @@ export default function ProfilAhli() {
                   <h1 className="font-headline-lg text-2xl md:text-3xl font-bold text-white break-words drop-shadow-md">
                     {profile.name}
                   </h1>
+                  {profile.level && (
+                    <LevelBadge 
+                      level={profile.level} 
+                      size="md" 
+                      className="bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-sm"
+                    />
+                  )}
                   {profile.verified && (
                     <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full border border-white/30 shadow-sm">
                       <span className="material-symbols-outlined text-[14px] text-green-400">check_circle</span>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import NavbarBackground from '../components/NavbarBackground.jsx';
 
@@ -24,6 +25,7 @@ const dummyRegulations = [
 ];
 
 export default function PeraturanAMDAL() {
+  const { t } = useTranslation();
   const [regulations, setRegulations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
@@ -62,11 +64,11 @@ export default function PeraturanAMDAL() {
       <div className="mb-10 max-w-2xl">
         <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-[#0EA5E9] bg-[#0EA5E9]/10 px-3 py-1 rounded-full mb-4">
           <span className="material-symbols-outlined text-[16px]">balance</span>
-          Dasar Hukum
+          {t('regulations.badge', 'Dasar Hukum')}
         </span>
-        <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">Peraturan AMDAL</h1>
+        <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('regulations.title', 'Peraturan AMDAL')}</h1>
         <p className="text-on-surface-variant">
-          Kumpulan dasar hukum dan peraturan terkait Kajian Lingkungan Hidup Strategis yang berlaku di Indonesia.
+          {t('regulations.subtitle', 'Kumpulan dasar hukum dan peraturan terkait Kajian Lingkungan Hidup Strategis yang berlaku di Indonesia.')}
         </p>
       </div>
 
@@ -81,7 +83,7 @@ export default function PeraturanAMDAL() {
           ))
         ) : safeRegulations.length === 0 ? (
           <div className="text-center py-16 text-on-surface-variant border border-dashed border-[#0EA5E9]/30 rounded-2xl">
-            Belum ada data peraturan.
+            {t('regulations.no_data', 'Belum ada data peraturan.')}
           </div>
         ) : (
           safeRegulations.map((reg, idx) => {
@@ -143,9 +145,9 @@ export default function PeraturanAMDAL() {
                 }`}>
                   <div className="overflow-hidden">
                     <div className="bg-[#0EA5E9]/5 p-4 rounded-xl border border-[#0EA5E9]/10">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-on-background mb-2">Keterangan Detail:</h4>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-on-background mb-2">{t('regulations.detail_label', 'Keterangan Detail:')}</h4>
                       <p className="text-sm text-on-surface-variant leading-relaxed">
-                        {reg.detail || 'Tidak ada informasi detail tambahan untuk peraturan ini.'}
+                        {reg.detail || t('regulations.no_detail', 'Tidak ada informasi detail tambahan untuk peraturan ini.')}
                       </p>
                     </div>
                   </div>

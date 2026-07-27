@@ -8,6 +8,7 @@ use App\Mail\RegistrationRejected;
 use App\Models\Expert;
 use App\Models\Order;
 use App\Models\Package;
+use App\Services\PointService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -296,6 +297,12 @@ class ExpertController extends Controller
 
         if ($expert->profile_status === 'ditolak') {
             $expert->update(['profile_status' => 'draft', 'reject_reason' => null]);
+        }
+
+        // Check apakah profil sudah lengkap 100% dan award poin
+        $pointService = new PointService();
+        if (PointService::isProfileComplete($expert)) {
+            $pointService->awardPoints($expert->user_id, 'complete_profile', 'Melengkapi profil 100%');
         }
 
         return response()->json($expert);

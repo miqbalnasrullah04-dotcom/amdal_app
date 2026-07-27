@@ -1,90 +1,21 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import logo from '../assets/tenaga ahli 2.png';
 
 const menuItems = [
-  { 
-    icon: 'home', 
-    label: 'Dashboard', 
-    children: [
-      { to: '/admin', label: 'Statistik', end: true },
-      { to: '/admin?tab=invoice-pending', label: 'Invoice Pending' },
-      { to: '/admin?tab=invoice-paid', label: 'Invoice Paid' },
-      { to: '/admin?tab=menunggu-verifikasi', label: 'Menunggu Verifikasi' },
-      { to: '/admin?tab=pendapatan', label: 'Pendapatan' },
-    ]
-  },
-  { 
-    icon: 'groups', 
-    label: 'Data Tenaga Ahli', 
-    children: [
-      { to: '/admin/tenaga-ahli?status=menunggu_verifikasi', label: 'Menunggu Verifikasi' },
-      { to: '/admin/tenaga-ahli?status=disetujui', label: 'Disetujui' },
-      { to: '/admin/tenaga-ahli?status=ditolak', label: 'Ditolak' },
-      { to: '/admin/tenaga-ahli', label: 'Semua Tenaga Ahli', end: true },
-    ]
-  },
-  {
-    icon: 'receipt_long',
-    label: 'Invoice',
-    children: [
-      { to: '/admin/invoice?status=pending', label: 'Pending' },
-      { to: '/admin/invoice?status=paid', label: 'Paid' },
-      { to: '/admin/invoice?status=failed', label: 'Failed' },
-      { to: '/admin/invoice?status=expired', label: 'Expired' },
-      { to: '/admin/invoice', label: 'Semua Invoice', end: true },
-    ]
-  },
-  {
-    icon: 'payments',
-    label: 'Pembayaran',
-    children: [
-      { to: '/admin/pembayaran', label: 'Semua Transaksi', end: true },
-      { to: '/admin/pembayaran?status=berhasil', label: 'Berhasil' },
-      { to: '/admin/pembayaran?status=pending', label: 'Pending' },
-      { to: '/admin/pembayaran?status=gagal', label: 'Gagal' },
-      { to: '/admin/pembayaran?status=refund', label: 'Refund' },
-    ]
-  },
-  {
-    icon: 'credit_card',
-    label: 'Paket',
-    children: [
-      { to: '/admin/paket?type=free', label: 'Paket Free' },
-      { to: '/admin/paket?type=premium', label: 'Paket Premium' },
-      { to: '/admin/paket/harga', label: 'Harga Paket' },
-    ]
-  },
-  {
-    icon: 'public',
-    label: 'Profil Publik',
-    children: [
-      { to: '/admin/profil-publik?status=dipublikasikan', label: 'Dipublikasikan' },
-      { to: '/admin/profil-publik?status=tidak_dipublikasikan', label: 'Tidak Dipublikasikan' },
-    ]
-  },
-  {
-    icon: 'person',
-    label: 'Pengguna',
-    children: [
-      { to: '/admin/pengguna?role=admin', label: 'Admin' },
-      { to: '/admin/pengguna?role=user', label: 'User' },
-    ]
-  },
-  {
-    icon: 'bar_chart',
-    label: 'Laporan',
-    children: [
-      { to: '/admin/laporan?type=pendapatan', label: 'Laporan Pendapatan' },
-      { to: '/admin/laporan?type=pembayaran', label: 'Laporan Pembayaran' },
-      { to: '/admin/laporan?type=tenaga_ahli', label: 'Laporan Tenaga Ahli' },
-    ]
-  },
-  { to: '/admin/pengaturan', icon: 'settings', label: 'Pengaturan' },
+  { to: '/admin', label: 'admin.dashboard', icon: 'dashboard', end: true },
+  { to: '/admin/verifikasi', label: 'admin.verification', icon: 'verified_user' },
+  { to: '/admin/pembayaran', label: 'admin.payments', icon: 'payments' },
+  { to: '/admin/tenaga-ahli', label: 'admin.experts', icon: 'people' },
+  { to: '/admin/paket', label: 'admin.packages', icon: 'workspace_premium' },
+  { to: '/admin/laporan', label: 'admin.reports', icon: 'bar_chart' },
+  { to: '/admin/pengaturan', label: 'admin.settings', icon: 'settings' },
 ];
 
 export default function AdminLayout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -239,7 +170,7 @@ export default function AdminLayout() {
                   >
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                      {isExpanded && <span>{item.label}</span>}
+                      {isExpanded && <span>{t(item.label)}</span>}
                     </div>
                     {isExpanded && (
                       <span className="material-symbols-outlined text-[18px] transition-transform duration-200" style={{ transform: isExpandedGroup ? 'rotate(180deg)' : 'rotate(0deg)' }}>
@@ -263,7 +194,7 @@ export default function AdminLayout() {
                             }`
                           }
                         >
-                          {child.label}
+                          {t(child.label)}
                         </NavLink>
                       ))}
                     </div>
@@ -287,7 +218,7 @@ export default function AdminLayout() {
                 }
               >
                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                {isExpanded && <span>{item.label}</span>}
+                {isExpanded && <span>{t(item.label)}</span>}
               </NavLink>
             );
           })}

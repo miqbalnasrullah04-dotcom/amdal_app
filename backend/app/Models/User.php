@@ -26,6 +26,7 @@ class User extends Authenticatable
         'otp_code',
         'otp_expires_at',
         'email_verified_at',
+        'total_points',
     ];
 
     /**
@@ -55,5 +56,13 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Relasi ke PointHistory
+     */
+    public function pointsHistory()
+    {
+        return $this->hasMany(PointHistory::class);
     }
 }

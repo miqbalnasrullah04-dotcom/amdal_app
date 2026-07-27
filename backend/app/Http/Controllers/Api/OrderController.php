@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Expert;
 use App\Models\Order;
 use App\Models\Package;
+use App\Services\PointService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -179,6 +180,10 @@ class OrderController extends Controller
                         'package_expires_at' => now()->addYear(),
                         'package_id' => $order->package_id
                     ]);
+
+                    // Award 100 poin untuk upgrade premium via Midtrans
+                    $pointService = new PointService();
+                    $pointService->awardPoints($order->user_id, 'upgrade_premium', 'Upgrade ke paket Premium via Midtrans');
                 }
             } elseif ($transactionStatus == 'pending') {
                 $order->update(['status' => 'menunggu_pembayaran']);
@@ -248,6 +253,10 @@ class OrderController extends Controller
                 'package_expires_at' => now()->addYear(),
                 'package_id' => $order->package_id
             ]);
+
+            // Award 100 poin untuk upgrade premium
+            $pointService = new PointService();
+            $pointService->awardPoints($order->user_id, 'upgrade_premium', 'Upgrade ke paket Premium');
         }
 
         return response()->json($order);

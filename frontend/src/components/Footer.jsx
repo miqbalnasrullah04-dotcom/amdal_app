@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /* ── Social icons ──────────────────────────────────────────────────────── */
 function IconFacebook() {
@@ -31,6 +32,7 @@ const SOCIALS = [
 
 /* ── Main component ────────────────────────────────────────────────────── */
 export default function Footer() {
+  const { t } = useTranslation();
   const [showScroll, setShowScroll] = useState(false);
 
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function Footer() {
 
             {/* Copyright */}
             <p className="text-gray-600 text-sm text-center leading-relaxed">
-              Copyright 2020 - {new Date().getFullYear()} © <span className="font-medium">TenagaAhli</span><span className="text-[#0EA5E9] font-medium">.com</span>. All Right Reserved.
+              {t('footer.copyright')}
             </p>
           </div>
         </div>

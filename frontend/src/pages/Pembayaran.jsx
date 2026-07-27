@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 
@@ -18,8 +19,8 @@ const EWALLET_ACCOUNTS = [
   { name: 'DANA',  number: '0812-3456-7890', atas_nama: 'TenagaAhli.com' },
 ];
 
-const PAYMENT_METHODS = [
-  { id: 'qris',          label: 'QRIS',         desc: 'Scan QR dari e-wallet atau m-banking apa pun', icon: 'qr_code_2'              },
+const getPaymentMethods = (t) => [
+  { id: 'qris',          label: 'QRIS',         desc: t('payment.methods.qris_desc', 'Scan QR dari e-wallet atau m-banking apa pun'), icon: 'qr_code_2'              },
   { id: 'transfer_bank', label: 'Transfer Bank', desc: 'BCA, Mandiri, BNI, BRI',                      icon: 'account_balance'        },
   { id: 'e_wallet',      label: 'E-Wallet',      desc: 'GoPay, OVO, DANA',                            icon: 'account_balance_wallet' },
 ];
@@ -31,6 +32,7 @@ function formatRupiah(v) {
 }
 
 function CopyButton({ text }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -43,17 +45,18 @@ function CopyButton({ text }) {
       className="flex items-center gap-1 text-xs font-bold text-[#0EA5E9] hover:text-[#0284C7] transition-colors shrink-0"
     >
       <span className="material-symbols-outlined text-[14px]">{copied ? 'check' : 'content_copy'}</span>
-      {copied ? 'Disalin!' : 'Salin'}
+      {copied ? t('payment.copied', 'Disalin!') : t('payment.copy', 'Salin')}
     </button>
   );
 }
 
 function StatusBadge({ status }) {
+  const { t } = useTranslation();
   const map = {
-    menunggu_pembayaran: { label: 'Menunggu Pembayaran', color: '#7A5900', bg: '#FFF4D6' },
-    menunggu_verifikasi: { label: 'Menunggu Verifikasi', color: '#0369A1', bg: '#E0F2FE' },
-    verified:            { label: 'Disetujui',           color: '#166534', bg: '#DCFCE7' },
-    rejected:            { label: 'Ditolak',             color: '#B3261E', bg: '#FFDAD6' },
+    menunggu_pembayaran: { label: t('payment.status.waiting_payment', 'Menunggu Pembayaran'), color: '#7A5900', bg: '#FFF4D6' },
+    menunggu_verifikasi: { label: t('payment.status.waiting_verification', 'Menunggu Verifikasi'), color: '#0369A1', bg: '#E0F2FE' },
+    verified:            { label: t('payment.status.approved', 'Disetujui'),           color: '#166534', bg: '#DCFCE7' },
+    rejected:            { label: t('payment.status.rejected', 'Ditolak'),             color: '#B3261E', bg: '#FFDAD6' },
   };
   const d = map[status] || { label: status, color: '#414844', bg: '#F5F4F0' };
   return (
@@ -64,6 +67,8 @@ function StatusBadge({ status }) {
 }
 
 export default function Pembayaran() {
+  const { t } = useTranslation();
+  const PAYMENT_METHODS = getPaymentMethods(t);
   const navigate  = useNavigate();
   const location  = useLocation();
   const proofRef  = useRef(null);
@@ -124,7 +129,7 @@ export default function Pembayaran() {
         navigate('/dashboard');
       }
     } catch (e) {
-      setError(e.response?.data?.message || 'Gagal membuat order. Coba lagi.');
+      setError(e.response?.data?.message || t('payment.error_create_order', 'Gagal membuat order. Coba lagi.'));
     } finally {
       setSubmitting(false);
     }
@@ -143,7 +148,7 @@ export default function Pembayaran() {
       setStep('success');
       api.get('/orders/history').then(r => setHistory(Array.isArray(r.data) ? r.data : [])).catch(() => {});
     } catch (e) {
-      setError(e.response?.data?.message || 'Gagal mengunggah bukti. Format JPG/PNG/PDF maks 5MB.');
+      setError(e.response?.data?.message || t('payment.error_upload_proof', 'Gagal mengunggah bukti. Format JPG/PNG/PDF maks 5MB.'));
     } finally {
       setSubmitting(false);
     }
@@ -151,30 +156,30 @@ export default function Pembayaran() {
 
   if (loading) {
     return (
-      <DashboardLayout title="Pembayaran">
+      <DashboardLayout title={t('payment.title', 'Pembayaran')}>
         <div className="flex items-center gap-3 text-[#5B6660] p-6">
           <span className="w-5 h-5 rounded-full border-2 border-[#0EA5E9]/30 border-t-[#0EA5E9] animate-spin" />
-          Memuat data pembayaran...
+          {t('payment.loading', 'Memuat data pembayaran...')}
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Pembayaran" subtitle="Kelola pembayaran paket keanggotaan Anda.">
+    <DashboardLayout title={t('payment.title', 'Pembayaran')} subtitle={t('payment.subtitle', 'Kelola pembayaran paket keanggotaan Anda.')}>
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-outline-variant/20 mb-6">
         {[
-          { id: 'pay',     label: 'Bayar Sekarang',     icon: 'payments'     },
-          { id: 'history', label: 'Riwayat Pembayaran', icon: 'receipt_long' },
-        ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
+          { id: 'pay',     label: t('payment.tabs.pay_now', 'Bayar Sekarang'),     icon: 'payments'     },
+          { id: 'history', label: t('payment.tabs.history', 'Riwayat Pembayaran'), icon: 'receipt_long' },
+        ].map(tabItem => (
+          <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-              tab === t.id ? 'border-[#0EA5E9] text-[#0EA5E9]' : 'border-transparent text-[#5B6660] hover:text-[#0EA5E9]'
+              tab === tabItem.id ? 'border-[#0EA5E9] text-[#0EA5E9]' : 'border-transparent text-[#5B6660] hover:text-[#0EA5E9]'
             }`}>
-            <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
-            {t.label}
+            <span className="material-symbols-outlined text-[18px]">{tabItem.icon}</span>
+            {tabItem.label}
           </button>
         ))}
       </div>
@@ -185,7 +190,7 @@ export default function Pembayaran() {
           {history.length === 0 ? (
             <div className="bg-white rounded-2xl border border-black/5 p-10 text-center">
               <span className="material-symbols-outlined text-5xl text-[#5B6660]/30 block mb-3">receipt_long</span>
-              <p className="text-sm text-[#5B6660]">Belum ada riwayat pembayaran.</p>
+              <p className="text-sm text-[#5B6660]">{t('payment.no_history', 'Belum ada riwayat pembayaran.')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -193,7 +198,7 @@ export default function Pembayaran() {
                 <div key={ord.id} className="bg-white rounded-2xl border border-black/5 p-5">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div>
-                      <p className="font-bold text-[#1F2A22] text-sm">{ord.package_name || 'Paket Premium'}</p>
+                      <p className="font-bold text-[#1F2A22] text-sm">{ord.package_name || t('payment.premium_package', 'Paket Premium')}</p>
                       <p className="text-xs text-[#5B6660] mt-0.5 font-mono">{ord.reference_code}</p>
                     </div>
                     <StatusBadge status={ord.status} />
@@ -205,16 +210,16 @@ export default function Pembayaran() {
                     </span>
                   </div>
                   {ord.reject_reason && (
-                    <p className="mt-2 text-xs text-[#B3261E] bg-[#FFDAD6] rounded-lg px-3 py-2">Ditolak: {ord.reject_reason}</p>
+                    <p className="mt-2 text-xs text-[#B3261E] bg-[#FFDAD6] rounded-lg px-3 py-2">{t('payment.rejected_reason', 'Ditolak:')} {ord.reject_reason}</p>
                   )}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                     <button onClick={() => navigate(`/invoice/${ord.reference_code}`)} className="text-xs text-[#0EA5E9] font-bold hover:underline flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">receipt_long</span> Lihat Invoice
+                      <span className="material-symbols-outlined text-[14px]">receipt_long</span> {t('payment.view_invoice', 'Lihat Invoice')}
                     </button>
                     {ord.proof_of_payment && (
                       <a href={`${BACKEND_URL}/storage/${ord.proof_of_payment}`} target="_blank" rel="noreferrer"
                         className="text-xs text-[#0284C7] hover:underline flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px]">image</span> Bukti Transfer
+                        <span className="material-symbols-outlined text-[14px]">image</span> {t('payment.transfer_proof', 'Bukti Transfer')}
                       </a>
                     )}
                   </div>
@@ -241,18 +246,18 @@ export default function Pembayaran() {
               <div className="w-20 h-20 rounded-full bg-[#DCFCE7] flex items-center justify-center mx-auto mb-5">
                 <span className="material-symbols-outlined text-4xl text-[#166534]">check_circle</span>
               </div>
-              <h2 className="text-2xl font-bold text-[#1F2A22] mb-2">Bukti Pembayaran Dikirim!</h2>
+              <h2 className="text-2xl font-bold text-[#1F2A22] mb-2">{t('payment.success_title', 'Bukti Pembayaran Dikirim!')}</h2>
               <p className="text-sm text-[#5B6660] mb-8 max-w-sm mx-auto leading-relaxed">
-                Bukti transfer sedang diverifikasi oleh admin. Notifikasi dikirim setelah dikonfirmasi.
+                {t('payment.success_desc', 'Bukti transfer sedang diverifikasi oleh admin. Notifikasi dikirim setelah dikonfirmasi.')}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button onClick={() => setTab('history')}
                   className="bg-[#0EA5E9] text-white py-3 px-6 rounded-xl font-bold text-sm hover:bg-[#0284C7] transition-colors flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-[18px]">receipt_long</span>Lihat Riwayat
+                  <span className="material-symbols-outlined text-[18px]">receipt_long</span>{t('payment.view_history', 'Lihat Riwayat')}
                 </button>
                 <button onClick={() => navigate('/dashboard')}
                   className="border border-[#0EA5E9]/40 text-[#0EA5E9] py-3 px-6 rounded-xl font-bold text-sm hover:bg-[#0EA5E9]/5 transition-colors">
-                  Ke Dashboard
+                  {t('payment.to_dashboard', 'Ke Dashboard')}
                 </button>
               </div>
             </div>
@@ -262,10 +267,10 @@ export default function Pembayaran() {
           {step === 'choose' && pkg && (
             <div className="space-y-5">
               <div className="bg-white rounded-2xl border border-black/5 p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-3">Ringkasan Paket</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-3">{t('payment.package_summary', 'Ringkasan Paket')}</p>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-bold text-[#1F2A22]">Paket {pkg.name}</p>
+                    <p className="font-bold text-[#1F2A22]">{t('payment.package')} {pkg.name}</p>
                     <p className="text-sm text-[#5B6660]">{pkg.duration || '12 bulan'}</p>
                   </div>
                   <p className="text-xl font-bold text-[#0EA5E9]">{formatRupiah(pkg.price)}</p>
@@ -273,7 +278,7 @@ export default function Pembayaran() {
               </div>
 
               <div className="bg-white rounded-2xl border border-black/5 p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-3">Metode Pembayaran</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-3">{t('payment.payment_method', 'Metode Pembayaran')}</p>
                 <div className="space-y-2">
                   {PAYMENT_METHODS.map(m => (
                     <label key={m.id}
@@ -294,8 +299,8 @@ export default function Pembayaran() {
               <button type="button" onClick={handleChooseMethod} disabled={submitting}
                 className="w-full bg-[#0EA5E9] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#0284C7] disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
                 {submitting
-                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Memproses...</>
-                  : <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>Lanjut ke Pembayaran</>}
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('payment.processing', 'Memproses...')}</>
+                  : <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>{t('payment.continue_payment', 'Lanjut ke Pembayaran')}</>}
               </button>
             </div>
           )}
@@ -305,17 +310,17 @@ export default function Pembayaran() {
             <div className="space-y-5">
               <div className="bg-[#E0F2FE] rounded-2xl border border-[#0EA5E9]/30 p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#0369A1]">Order Dibuat</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#0369A1]">{t('payment.order_created', 'Order Dibuat')}</p>
                   <StatusBadge status={order.status} />
                 </div>
                 <div className="flex justify-between items-center mt-1">
                   <p className="font-mono text-sm font-bold text-[#075985]">{order.reference_code}</p>
                   <button onClick={() => navigate(`/invoice/${order.reference_code}`)} className="text-xs bg-white text-[#0369A1] px-2 py-1 rounded shadow-sm hover:bg-gray-50 flex items-center gap-1 font-semibold">
-                    <span className="material-symbols-outlined text-[14px]">receipt_long</span> Lihat Invoice
+                    <span className="material-symbols-outlined text-[14px]">receipt_long</span> {t('payment.view_invoice', 'Lihat Invoice')}
                   </button>
                 </div>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#0EA5E9]/20">
-                  <span className="text-sm text-[#0369A1]">Total Pembayaran</span>
+                  <span className="text-sm text-[#0369A1]">{t('payment.total_payment', 'Total Pembayaran')}</span>
                   <span className="font-bold text-[#0EA5E9] text-lg">{formatRupiah(order.amount)}</span>
                 </div>
               </div>
@@ -326,8 +331,8 @@ export default function Pembayaran() {
                   <div className="flex items-center gap-3 mb-4">
                     <span className="material-symbols-outlined text-3xl">payment</span>
                     <div>
-                      <p className="font-bold text-lg">Pembayaran Online</p>
-                      <p className="text-sm text-white/80">Bayar dengan berbagai metode pembayaran</p>
+                      <p className="font-bold text-lg">{t('payment.online_payment', 'Pembayaran Online')}</p>
+                      <p className="text-sm text-white/80">{t('payment.online_payment_desc', 'Bayar dengan berbagai metode pembayaran')}</p>
                     </div>
                   </div>
                   <button
@@ -345,7 +350,7 @@ export default function Pembayaran() {
                           },
                           onError: function(result) {
                             console.log('Payment error:', result);
-                            setError('Pembayaran gagal. Silakan coba lagi.');
+                            setError(t('payment.payment_failed', 'Pembayaran gagal. Silakan coba lagi.'));
                           },
                           onClose: function() {
                             console.log('Payment popup closed');
@@ -370,7 +375,7 @@ export default function Pembayaran() {
                             },
                             onError: function(result) {
                               console.log('Payment error:', result);
-                              setError('Pembayaran gagal. Silakan coba lagi.');
+                              setError(t('payment.payment_failed', 'Pembayaran gagal. Silakan coba lagi.'));
                             },
                             onClose: function() {
                               console.log('Payment popup closed');
@@ -382,10 +387,10 @@ export default function Pembayaran() {
                     className="w-full bg-white text-[#0284C7] py-3.5 rounded-xl font-bold text-sm hover:bg-white/95 transition-colors flex items-center justify-center gap-2 shadow-lg"
                   >
                     <span className="material-symbols-outlined text-[20px]">credit_card</span>
-                    Bayar Sekarang
+                    {t('payment.pay_now', 'Bayar Sekarang')}
                   </button>
                   <p className="text-xs text-white/80 mt-3 text-center">
-                    Mendukung transfer bank, e-wallet, kartu kredit, dan lainnya
+                    {t('payment.support_methods', 'Mendukung transfer bank, e-wallet, kartu kredit, dan lainnya')}
                   </p>
                 </div>
               )}
@@ -393,10 +398,10 @@ export default function Pembayaran() {
               {/* Opsi manual payment (tetap ada sebagai fallback) */}
               <div className="bg-white rounded-2xl border border-black/5 p-5">
                 <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-3">
-                  Atau Upload Bukti Transfer Manual
+                  {t('payment.upload_manual', 'Atau Upload Bukti Transfer Manual')}
                 </p>
                 <p className="text-xs text-[#5B6660] mb-4">
-                  Jika Anda sudah melakukan transfer via ATM/m-banking, upload bukti transfer di sini
+                  {t('payment.upload_manual_desc', 'Jika Anda sudah melakukan transfer via ATM/m-banking, upload bukti transfer di sini')}
                 </p>
 
                 <input type="file" accept="image/*,.pdf" className="hidden" ref={proofRef}
@@ -417,15 +422,15 @@ export default function Pembayaran() {
                     </div>
                     <button type="button" className="text-xs text-red-500 hover:underline shrink-0"
                       onClick={() => { setProof(null); setProofPreview(null); if (proofRef.current) proofRef.current.value = ''; }}>
-                      Hapus
+                      {t('payment.delete', 'Hapus')}
                     </button>
                   </div>
                 ) : (
                   <button type="button" onClick={() => proofRef.current?.click()}
                     className="w-full border-2 border-dashed border-[#0EA5E9]/30 rounded-xl py-6 flex flex-col items-center gap-2 hover:border-[#0EA5E9]/60 transition-colors">
                     <span className="material-symbols-outlined text-3xl text-[#0EA5E9]/50">upload_file</span>
-                    <span className="text-sm text-[#5B6660]">Klik untuk unggah screenshot bukti transfer</span>
-                    <span className="text-xs text-[#5B6660]/60">JPG, PNG, atau PDF — maks. 5MB</span>
+                    <span className="text-sm text-[#5B6660]">{t('payment.click_to_upload', 'Klik untuk unggah screenshot bukti transfer')}</span>
+                    <span className="text-xs text-[#5B6660]/60">{t('payment.format_hint', 'JPG, PNG, atau PDF — maks. 5MB')}</span>
                   </button>
                 )}
               </div>
@@ -433,14 +438,14 @@ export default function Pembayaran() {
               <button type="button" onClick={handleUploadProof} disabled={!proof || submitting}
                 className="w-full bg-[#0EA5E9] text-white py-3.5 rounded-xl font-bold text-sm hover:bg-[#0284C7] disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                 {submitting
-                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Mengirim...</>
-                  : <><span className="material-symbols-outlined text-[18px]">send</span>Kirim Bukti Pembayaran</>}
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('payment.sending', 'Mengirim...')}</>
+                  : <><span className="material-symbols-outlined text-[18px]">send</span>{t('payment.send_proof', 'Kirim Bukti Pembayaran')}</>}
               </button>
 
               <button type="button" onClick={() => setStep('choose')}
                 className="w-full text-[#5B6660] text-sm py-2 hover:text-[#1F2A22] transition-colors flex items-center justify-center gap-1">
                 <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-                Ganti Metode Pembayaran
+                {t('payment.change_method', 'Ganti Metode Pembayaran')}
               </button>
             </div>
           )}
