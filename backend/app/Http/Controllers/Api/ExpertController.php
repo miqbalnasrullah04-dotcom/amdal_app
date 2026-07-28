@@ -62,7 +62,7 @@ class ExpertController extends Controller
 
     public function show(string $slug)
     {
-        $expert = Expert::with(['educations', 'experiences', 'certificates'])
+        $expert = Expert::with(['educations', 'experiences', 'certificates', 'reviews'])
             ->where('slug', $slug)
             ->where('profile_status', 'aktif')
             ->firstOrFail();
@@ -166,6 +166,20 @@ class ExpertController extends Controller
             // Riwayat kegiatan
             'narasumber' => $expert->narasumber_riwayat ?? [],
             'kajian' => $expert->kajian_riwayat ?? [],
+
+            // Ulasan dari database
+            'ulasan' => $expert->reviews->map(fn ($r) => [
+                'id'         => $r->id,
+                'nama'       => $r->reviewer_name,
+                'rating'     => $r->rating,
+                'komentar'   => $r->komentar,
+                'balasan'    => $r->balasan,
+                'replied_at' => $r->replied_at?->toISOString(),
+                'tanggal'    => $r->created_at->format('d M Y'),
+            ]),
+            'rating' => $expert->reviews->count()
+                ? round($expert->reviews->avg('rating'), 1)
+                : ($expert->rating ?? 0),
 
             // Data tambahan untuk template
             'pengalamanProyek' => [], // Akan diisi dari experiences jika ada

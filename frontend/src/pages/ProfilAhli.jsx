@@ -13,6 +13,7 @@ import 'leaflet/dist/leaflet.css';
 const BRAND_BLUE = '#0EA5E9';     // Primary sky blue from TenagaAhli.com
 const NAVY_DARK = '#0B2A4D';      // Deep navy for contrast
 const ACCENT_SKY = '#1479D6';     // Darker blue for verification badges
+const STAR_GOLD = '#F59E0B';      // Rating star color (kept distinct from brand blue)
 
 // Demo data used only if /api/experts/:slug is unreachable.
 const FALLBACK_PROFILE = {
@@ -191,6 +192,38 @@ const FALLBACK_PROFILE = {
     video: '#',
   },
 
+  // ---- Ulasan / Reviews ---------------------------------------------------
+  // Data awal (demo). Ulasan baru yang dikirim pengguna akan ditambahkan
+  // di atas daftar ini secara lokal, dan (jika API tersedia) disimpan ke server.
+  ulasan: [
+    {
+      nama: 'Ahmad Fauzi',
+      rating: 5,
+      komentar:
+        'Sangat membantu dalam penyusunan KLHS RDTR di daerah kami. Penjelasannya detail dan mudah dipahami, baik oleh tim teknis maupun pemangku kepentingan non-teknis. Rekomendasi terbaik untuk kajian lingkungan hidup strategis.',
+      tanggal: '2 minggu lalu',
+    },
+    {
+      nama: 'Siti Rahmawati',
+      rating: 5,
+      komentar: 'Profesional dan responsif sejak konsultasi awal. Hasil pemodelan sistem dinamiknya sangat membantu pengambilan keputusan di daerah kami.',
+      tanggal: '1 bulan lalu',
+    },
+    {
+      nama: 'Budi Santoso',
+      rating: 4,
+      komentar: 'Kompeten di bidangnya dan komunikasi lancar selama proyek berjalan. Hanya perlu sedikit penyesuaian jadwal di tahap awal.',
+      tanggal: '2 bulan lalu',
+    },
+    {
+      nama: 'Dewi Lestari',
+      rating: 5,
+      komentar:
+        'Narasumber yang sangat menguasai materi KLHS dan mampu menjelaskan konsep yang cukup rumit dengan bahasa yang sederhana dan mudah diikuti peserta pelatihan.',
+      tanggal: '3 bulan lalu',
+    },
+  ],
+
   alamat: {
     lengkap: 'Komplek IPB 2, Blok C No. 4 Sindang Barang, Bogor 16117',
     kota: 'Kota Bogor',
@@ -301,6 +334,181 @@ function Card({ children, className = '' }) {
   return <div className={`bg-white border border-gray-200 rounded-xl p-5 shadow-sm ${className}`}>{children}</div>;
 }
 
+// ---------------------------------------------------------------------------
+// Ulasan (Reviews & Ratings) building blocks
+// ---------------------------------------------------------------------------
+
+// Compact row of star glyphs. Pass `onRate` to make it an interactive picker.
+function StarRow({ rating = 0, size = 16, onRate }) {
+  return (
+    <div className={`flex items-center gap-0.5 ${onRate ? 'select-none' : ''}`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span
+          key={n}
+          onClick={onRate ? () => onRate(n) : undefined}
+          className={`material-symbols-outlined ${onRate ? 'cursor-pointer' : ''}`}
+          style={{
+            fontSize: size,
+            fontVariationSettings: n <= rating ? "'FILL' 1" : "'FILL' 0",
+            color: n <= rating ? STAR_GOLD : '#D1D5DB',
+          }}
+        >
+          star
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// One line of the rating distribution (e.g. "5 ★ ▬▬▬▬▬ 18").
+function RatingBar({ label, count, total }) {
+  const pct = total ? Math.round((count / total) * 100) : 0;
+  return (
+    <div className="flex items-center gap-2 text-xs text-gray-500">
+      <span className="w-3 shrink-0 text-right">{label}</span>
+      <div className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-full rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
+      </div>
+      <span className="w-6 text-right shrink-0 tabular-nums">{count}</span>
+    </div>
+  );
+}
+
+// A single review — kept compact with a clamp + "read more" so long reviews
+// don't blow out the page height.
+function ReviewCard({ review }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = review.komentar.length > 160;
+  const displayText = expanded || !isLong ? review.komentar : `${review.komentar.slice(0, 160).trim()}…`;
+  const initials = review.nama
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+
+  return (
+    <div className="py-4 border-b border-gray-100 last:border-b-0">
+      <div className="flex items-start gap-3">
+        <span className="w-9 h-9 shrink-0 rounded-full bg-[#0EA5E9]/10 text-[#0EA5E9] text-xs font-bold flex items-center justify-center">
+          {initials}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
+            <span className="text-sm font-semibold text-gray-900">{review.nama}</span>
+            <span className="text-xs text-gray-400 shrink-0">{review.tanggal}</span>
+          </div>
+          <div className="mt-0.5 mb-1.5">
+            <StarRow rating={review.rating} size={14} />
+          </div>
+          <p className="text-sm text-gray-600 leading-relaxed">{displayText}</p>
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="text-xs font-semibold text-[#0EA5E9] hover:underline mt-1"
+            >
+              {expanded ? 'Sembunyikan' : 'Baca selengkapnya'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Inline, collapsible review form — opens in place of the "Tulis Ulasan"
+// button so it never needs a modal or extra page real estate.
+function ReviewForm({ onSubmit, onCancel }) {
+  const [nama, setNama] = useState('');
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [komentar, setKomentar] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!nama.trim() || !komentar.trim() || rating === 0) {
+      setError('Mohon isi nama, rating, dan ulasan sebelum mengirim.');
+      return;
+    }
+    setError('');
+    setSubmitting(true);
+    await onSubmit({ nama: nama.trim(), rating, komentar: komentar.trim() });
+    setSubmitting(false);
+    setNama('');
+    setRating(0);
+    setKomentar('');
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-[#FAFBF9] border border-gray-200 rounded-xl p-4 mb-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-bold text-gray-900">Tulis Ulasan</h4>
+        <button type="button" onClick={onCancel} className="text-gray-400 hover:text-gray-600" aria-label="Tutup form ulasan">
+          <span className="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-medium text-gray-500">Rating Anda:</span>
+        <div className="flex items-center gap-0.5" onMouseLeave={() => setHoverRating(0)}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <span
+              key={n}
+              onMouseEnter={() => setHoverRating(n)}
+              onClick={() => setRating(n)}
+              className="material-symbols-outlined cursor-pointer"
+              style={{
+                fontSize: 22,
+                fontVariationSettings: n <= (hoverRating || rating) ? "'FILL' 1" : "'FILL' 0",
+                color: n <= (hoverRating || rating) ? STAR_GOLD : '#D1D5DB',
+              }}
+            >
+              star
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <input
+        type="text"
+        value={nama}
+        onChange={(e) => setNama(e.target.value)}
+        placeholder="Nama Anda"
+        maxLength={80}
+        className="w-full text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/40"
+      />
+      <textarea
+        value={komentar}
+        onChange={(e) => setKomentar(e.target.value)}
+        placeholder="Bagikan pengalaman Anda bekerja sama dengan tenaga ahli ini..."
+        rows={3}
+        maxLength={600}
+        className="w-full text-sm rounded-lg border border-gray-200 px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/40"
+      />
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm font-semibold text-gray-500 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          Batal
+        </button>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="text-sm font-semibold text-white bg-[#0EA5E9] px-5 py-2 rounded-full hover:bg-[#0284C7] transition-colors disabled:opacity-60"
+        >
+          {submitting ? 'Mengirim...' : 'Kirim Ulasan'}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 import { useTranslation } from 'react-i18next';
 
 const getNavSections = (t) => [
@@ -308,6 +516,7 @@ const getNavSections = (t) => [
   { id: 'pengalaman', label: t('expert_profile.nav.experience', 'Pengalaman') },
   { id: 'kredensial', label: t('expert_profile.nav.credentials', 'Sertifikasi & Pendidikan') },
   { id: 'akademik', label: t('expert_profile.nav.academic', 'Akademik') },
+  { id: 'ulasan', label: t('expert_profile.nav.reviews', 'Ulasan') },
   { id: 'portofolio', label: t('expert_profile.nav.portfolio', 'Portofolio') },
 ];
 
@@ -320,6 +529,12 @@ export default function ProfilAhli() {
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState('profil');
   const sectionRefs = useRef({});
+
+  // Ulasan / reviews state — separate from `profile` so a newly submitted
+  // review can be reflected instantly without waiting on a refetch.
+  const [reviews, setReviews] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   const scrollToSection = (id) => {
     setActiveSection(id);
@@ -345,6 +560,12 @@ export default function ProfilAhli() {
       })
       .finally(() => setLoading(false));
   }, [slug]);
+
+  // Sync local reviews state whenever a (new) profile loads.
+  useEffect(() => {
+    setReviews(profile?.ulasan || []);
+    setShowAllReviews(false);
+  }, [profile]);
 
   useEffect(() => {
     if (!profile?.lokasi) return;
@@ -400,6 +621,32 @@ export default function ProfilAhli() {
       jumlahKegiatan: (profile.narasumber?.length || 0) + (profile.instruktur?.length || 0),
     };
   }, [profile, yearsActive]);
+
+  // Aggregate rating summary (average + 5→1 star distribution) derived
+  // straight from the current reviews list.
+  const ratingStats = useMemo(() => {
+    const total = reviews.length;
+    const sum = reviews.reduce((acc, r) => acc + (r.rating || 0), 0);
+    const avg = total ? sum / total : 0;
+    const dist = [5, 4, 3, 2, 1].map((n) => ({
+      label: n,
+      count: reviews.filter((r) => r.rating === n).length,
+    }));
+    return { total, avg, dist };
+  }, [reviews]);
+
+  const handleAddReview = async ({ nama, rating, komentar }) => {
+    const entry = { nama, rating, komentar, tanggal: 'Baru saja' };
+    try {
+      // Best-effort sync to the backend; the UI updates locally regardless
+      // so the person always sees their review appear immediately.
+      await api.post(`/experts/${slug}/reviews`, { nama, rating, komentar });
+    } catch (error) {
+      console.error('Failed to save review to server, kept locally:', error);
+    }
+    setReviews((prev) => [entry, ...prev]);
+    setShowReviewForm(false);
+  };
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -509,6 +756,14 @@ export default function ProfilAhli() {
                     <span className="material-symbols-outlined text-[15px]">location_on</span>
                     {profile.alamat?.kota}, {profile.alamat?.provinsi}
                   </span>
+                  {ratingStats.total > 0 && (
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1", color: STAR_GOLD }}>
+                        star
+                      </span>
+                      {ratingStats.avg.toFixed(1)} ({ratingStats.total} ulasan)
+                    </span>
+                  )}
                   {profile.ketersediaan && (
                     <span className="flex items-center gap-1.5">
                       <span
@@ -997,8 +1252,76 @@ export default function ProfilAhli() {
         </div>
       </section>
 
+      {/* ---------- ULASAN (RATING & REVIEWS) ---------- */}
+      {/* Compact two-column layout: rating summary + "Tulis Ulasan" on the
+          left (sticky), scrollable review list with clamp/expand on the
+          right — keeps the section short even with many reviews. */}
+      <section id="ulasan" className="scroll-mt-16 border-t border-gray-200">
+        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
+          <SectionHeading title="Ulasan" eyebrow={`${ratingStats.total} ulasan`} />
+          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+            {/* Ringkasan rating */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm lg:sticky lg:top-24 self-start">
+              <div className="flex items-end gap-2 mb-1.5">
+                <span className="text-4xl font-bold text-gray-900 leading-none">{ratingStats.avg.toFixed(1)}</span>
+                <span className="text-sm text-gray-400 mb-1">/ 5.0</span>
+              </div>
+              <StarRow rating={Math.round(ratingStats.avg)} size={18} />
+              <p className="text-xs text-gray-400 mt-1.5 mb-4">Berdasarkan {ratingStats.total} ulasan</p>
+
+              <div className="flex flex-col gap-1.5 mb-5">
+                {ratingStats.dist.map((d) => (
+                  <RatingBar key={d.label} label={d.label} count={d.count} total={ratingStats.total} />
+                ))}
+              </div>
+
+              {!showReviewForm && (
+                <button
+                  type="button"
+                  onClick={() => setShowReviewForm(true)}
+                  className="w-full bg-[#0EA5E9] text-white text-sm font-semibold py-2.5 rounded-full hover:bg-[#0284C7] transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">rate_review</span>
+                  Tulis Ulasan
+                </button>
+              )}
+            </div>
+
+            {/* Daftar ulasan */}
+            <div>
+              {showReviewForm && (
+                <ReviewForm onSubmit={handleAddReview} onCancel={() => setShowReviewForm(false)} />
+              )}
+
+              {reviews.length === 0 ? (
+                <div className="text-center py-10 text-sm text-gray-400">
+                  Belum ada ulasan. Jadilah yang pertama memberikan ulasan untuk tenaga ahli ini.
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col">
+                    {(showAllReviews ? reviews : reviews.slice(0, 3)).map((r, i) => (
+                      <ReviewCard key={i} review={r} />
+                    ))}
+                  </div>
+                  {reviews.length > 3 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllReviews((v) => !v)}
+                      className="text-sm font-semibold text-[#0EA5E9] hover:underline mt-3"
+                    >
+                      {showAllReviews ? 'Sembunyikan ulasan' : `Lihat semua ${reviews.length} ulasan`}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ---------- 15 & 16. PORTOFOLIO ---------- */}
-      <section id="portofolio" className="scroll-mt-16 border-t border-gray-200">
+      <section id="portofolio" className="scroll-mt-16 bg-[#FAFBF9] border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
           <SectionHeading title="Portofolio" eyebrow="Dokumen pendukung" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -17,10 +17,6 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [userData, setUserData] = useState(null);
 
-  // Dropdown gabungan "Sign in / Daftar"
-  const [authMenuOpen, setAuthMenuOpen] = useState(false);
-  const authDropdownRef = useRef(null);
-
   const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -101,14 +97,11 @@ export default function Navbar() {
     };
   }, [location]);
 
-  // Menutup dropdown profil & auth jika klik di luar area menu
+  // Menutup dropdown profil jika klik di luar area menu
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setProfileOpen(false);
-      }
-      if (authDropdownRef.current && !authDropdownRef.current.contains(event.target)) {
-        setAuthMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -119,7 +112,6 @@ export default function Navbar() {
   useEffect(() => {
     setMenuOpen(false);
     setProfileOpen(false);
-    setAuthMenuOpen(false);
   }, [location.pathname]);
 
   const handleLogout = async () => {
@@ -249,44 +241,18 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              /* TOMBOL GABUNGAN: Sign in + Daftar jadi satu dropdown */
-              <div className="relative" ref={authDropdownRef}>
-                <button
-                  onClick={() => setAuthMenuOpen((v) => !v)}
-                  className="flex items-center gap-1.5 px-5 py-2 rounded-lg font-label-md text-label-md text-white transition-colors"
-                  style={{ backgroundColor: BRAND_BLUE }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE_HOVER)}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE)}
-                >
-                  <span className="material-symbols-outlined text-[18px]">person</span>
-                  {t('navbar.login')} / {t('navbar.register')}
-                  <span className="material-symbols-outlined text-[18px]">
-                    {authMenuOpen ? 'expand_less' : 'expand_more'}
-                  </span>
-                </button>
-
-                {authMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl border border-gray-100 py-2 z-50 text-gray-800">
-                    <Link
-                      to="/sign-in"
-                      onClick={() => setAuthMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-gray-400">login</span>
-                      {t('navbar.login')}
-                    </Link>
-                    <Link
-                      to="/daftar"
-                      onClick={() => setAuthMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
-                      style={{ color: BRAND_BLUE }}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">person_add</span>
-                      {t('navbar.register')}
-                    </Link>
-                  </div>
-                )}
-              </div>
+              /* Satu tombol "Daftar" saja — Sign in tersedia di halaman
+                 pendaftaran ("Sudah punya akun? Masuk di sini"). */
+              <Link
+                to="/daftar"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-label-md text-label-md text-white transition-colors"
+                style={{ backgroundColor: BRAND_BLUE }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE_HOVER)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE)}
+              >
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
+                {t('navbar.register')}
+              </Link>
             )}
           </div>
         </div>
@@ -366,48 +332,16 @@ export default function Navbar() {
             </>
           ) : (
             <div className="flex flex-col gap-3 pt-4">
-              {/* TOMBOL GABUNGAN (MOBILE) */}
-              <div className="relative" ref={authDropdownRef}>
-                <button
-                  onClick={() => setAuthMenuOpen((v) => !v)}
-                  className="w-full flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-lg font-label-md text-label-md text-white"
-                  style={{ backgroundColor: BRAND_BLUE }}
-                >
-                  <span className="material-symbols-outlined text-[18px]">person</span>
-                  Masuk / Daftar
-                  <span className="material-symbols-outlined text-[18px]">
-                    {authMenuOpen ? 'expand_less' : 'expand_more'}
-                  </span>
-                </button>
-
-                {authMenuOpen && (
-                  <div className="mt-2 w-full bg-white rounded-xl border border-gray-100 py-2">
-                    <Link
-                      to="/sign-in"
-                      onClick={() => {
-                        setAuthMenuOpen(false);
-                        setMenuOpen(false);
-                      }}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-gray-400">login</span>
-                      Sign in
-                    </Link>
-                    <Link
-                      to="/daftar"
-                      onClick={() => {
-                        setAuthMenuOpen(false);
-                        setMenuOpen(false);
-                      }}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
-                      style={{ color: BRAND_BLUE }}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">person_add</span>
-                      Daftar
-                    </Link>
-                  </div>
-                )}
-              </div>
+              {/* Satu tombol "Daftar" saja — Sign in ada di halaman /daftar */}
+              <Link
+                to="/daftar"
+                onClick={() => setMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-lg font-label-md text-label-md text-white"
+                style={{ backgroundColor: BRAND_BLUE }}
+              >
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
+                Daftar
+              </Link>
 
               {/* Language Switcher Mobile */}
               <LanguageSwitcher />

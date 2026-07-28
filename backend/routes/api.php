@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PartnerApiController;
 use App\Http\Controllers\Api\PointController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SubmissionController;
 use App\Http\Middleware\EnsureIsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,10 @@ Route::post('/midtrans/notification', [OrderController::class, 'notification']);
 
 Route::get('/experts', [ExpertController::class, 'index']);
 Route::get('/experts/{slug}', [ExpertController::class, 'show']);
+
+// Ulasan publik — siapapun bisa lihat & kirim ulasan
+Route::get('/experts/{slug}/reviews', [ReviewController::class, 'index']);
+Route::post('/experts/{slug}/reviews', [ReviewController::class, 'store']);
 
 Route::get('/partners', [PartnerApiController::class, 'index']);
 Route::get('/articles', [ArticleApiController::class, 'index']);
@@ -85,6 +90,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Points & Level (user)
     Route::get('/my/points', [PointController::class, 'myHistory']);
     Route::get('/leaderboard', [PointController::class, 'leaderboard']);
+
+    // Ulasan (tenaga ahli) — hanya bisa diakses setelah login
+    Route::get('/my/reviews', [ReviewController::class, 'myReviews']);
+    Route::post('/my/reviews/{id}/reply', [ReviewController::class, 'reply']);
+    Route::delete('/my/reviews/{id}/reply', [ReviewController::class, 'deleteReply']);
 
     // Pengajuan (user)
     Route::post('/submissions', [SubmissionController::class, 'store']);

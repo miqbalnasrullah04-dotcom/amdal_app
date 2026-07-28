@@ -79,6 +79,11 @@ class Expert extends Model
         return $this->hasMany(Document::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class)->latest();
+    }
+
     public static function kriteriaRouteMap(): array
     {
         return [

@@ -93,6 +93,11 @@ export default function AdminExperts() {
            (e.email || '').toLowerCase().includes(q);
   });
 
+  const avatarPalette = ['#0284C7', '#7A5900', '#6B4F3B', '#0EA5E9', '#414844'];
+  const getInitials = (name = '') =>
+    name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?';
+  const getAvatarColor = (id) => avatarPalette[(id || 0) % avatarPalette.length];
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -113,14 +118,17 @@ export default function AdminExperts() {
 
       <div className="bg-white rounded-xl border border-[#0284C7]/15 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-[#0284C7]/15 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <input
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Cari nama, email, atau instansi..."
-            className="w-full max-w-sm px-4 py-2 text-sm border border-[#0284C7]/30 rounded-lg focus:ring-[#0284C7] focus:border-[#0284C7]"
-          />
-          
-          <div className="flex gap-2">
+          <div className="relative w-full max-w-sm">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#414844]/40 text-[20px]">search</span>
+            <input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="Cari nama, email, atau instansi..."
+              className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#0284C7]/20 rounded-lg focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7] focus:outline-none transition-all"
+            />
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto">
             {[
               { id: 'all', label: 'Semua Status' },
               { id: 'menunggu_verifikasi', label: 'Menunggu Verifikasi' },
@@ -142,13 +150,18 @@ export default function AdminExperts() {
           </div>
         </div>
 
+        {!loading && (
+          <div className="px-6 pt-4 text-xs text-[#414844]/60">
+            Menampilkan <span className="font-bold text-[#414844]">{filtered.length}</span> dari {experts.length} tenaga ahli
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="bg-[#0284C7]/5 text-[#414844]">
-                <th className="px-6 py-3">Nama</th>
+                <th className="px-6 py-3">Tenaga Ahli</th>
                 <th className="px-6 py-3">Instansi</th>
-                <th className="px-6 py-3">Email</th>
                 <th className="px-6 py-3">Status Akun</th>
                 <th className="px-6 py-3">Status Profil</th>
                 <th className="px-6 py-3">Aksi</th>
@@ -156,15 +169,44 @@ export default function AdminExperts() {
             </thead>
             <tbody className="divide-y divide-[#0284C7]/10">
               {loading ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-[#414844]/70">Memuat data...</td></tr>
+                [1, 2, 3, 4].map((i) => (
+                  <tr key={i}>
+                    <td colSpan={5} className="px-6 py-4">
+                      <div className="flex items-center gap-3 animate-pulse">
+                        <div className="w-9 h-9 rounded-full bg-[#0284C7]/10 shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 w-1/3 bg-[#0284C7]/10 rounded" />
+                          <div className="h-2.5 w-1/4 bg-[#0284C7]/10 rounded" />
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-[#414844]/70">Tidak ada data tenaga ahli.</td></tr>
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-[#414844]/70">
+                    <span className="material-symbols-outlined text-[40px] text-[#414844]/25 block mb-2">groups</span>
+                    Tidak ada data tenaga ahli yang cocok.
+                  </td>
+                </tr>
               ) : (
                 filtered.map((exp) => (
-                  <tr key={exp.id} className="hover:bg-[#0284C7]/5">
-                    <td className="px-6 py-4 font-semibold text-[#0284C7]">{exp.name}</td>
+                  <tr key={exp.id} className="hover:bg-[#0284C7]/5 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                          style={{ backgroundColor: getAvatarColor(exp.id) }}
+                        >
+                          {getInitials(exp.name)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#0284C7] truncate">{exp.name}</p>
+                          <p className="text-xs text-[#414844]/60 truncate">{exp.email || '-'}</p>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 text-[#414844]/80">{exp.institution || '-'}</td>
-                    <td className="px-6 py-4 text-[#414844]/80">{exp.email || '-'}</td>
                     <td className="px-6 py-4">
                       {exp.profile_status === 'nonaktif' ? (
                         <span className="text-xs font-bold text-[#B3261E] bg-[#FFDAD6] px-2.5 py-1 rounded-full">Nonaktif</span>
@@ -184,31 +226,43 @@ export default function AdminExperts() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <button
                           onClick={() => setDetailTarget(exp)}
-                          className="text-[#0284C7] hover:underline text-xs font-bold flex items-center gap-0.5"
+                          title="Lihat detail"
+                          className="flex items-center gap-1 text-[#0284C7] bg-[#0284C7]/10 hover:bg-[#0284C7]/20 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors"
                         >
+                          <span className="material-symbols-outlined text-[16px]">visibility</span>
                           Detail
                         </button>
                         <Link
                           to={`/admin/tenaga-ahli/${exp.id}/edit`}
-                          className="text-[#7A5900] hover:underline text-xs font-bold flex items-center gap-0.5"
+                          title="Edit data"
+                          className="flex items-center gap-1 text-[#7A5900] bg-[#7A5900]/10 hover:bg-[#7A5900]/20 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors"
                         >
+                          <span className="material-symbols-outlined text-[16px]">edit</span>
                           Edit
                         </Link>
                         <button
                           onClick={() => handleToggleDeactivate(exp)}
-                          className={`text-xs font-bold hover:underline ${
-                            exp.profile_status === 'nonaktif' ? 'text-[#0284C7]' : 'text-[#B3261E]'
+                          title={exp.profile_status === 'nonaktif' ? 'Aktifkan akun' : 'Nonaktifkan akun'}
+                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                            exp.profile_status === 'nonaktif'
+                              ? 'text-[#0284C7] bg-[#0284C7]/10 hover:bg-[#0284C7]/20'
+                              : 'text-[#B3261E] bg-[#B3261E]/10 hover:bg-[#B3261E]/20'
                           }`}
                         >
+                          <span className="material-symbols-outlined text-[16px]">
+                            {exp.profile_status === 'nonaktif' ? 'toggle_on' : 'toggle_off'}
+                          </span>
                           {exp.profile_status === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan'}
                         </button>
                         <button
                           onClick={() => setDeleteTarget(exp)}
-                          className="text-[#B3261E]/70 hover:text-[#B3261E] hover:underline text-xs font-bold"
+                          title="Hapus data"
+                          className="flex items-center gap-1 text-[#B3261E]/80 bg-[#B3261E]/10 hover:bg-[#B3261E]/20 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors"
                         >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
                           Hapus
                         </button>
                       </div>
