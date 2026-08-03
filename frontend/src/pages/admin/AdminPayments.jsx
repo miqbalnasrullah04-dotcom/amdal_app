@@ -1,26 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../context/LanguageContext.jsx';
 import api from '../../api/client.js';
 
 export default function AdminPayments() {
   const { t } = useTranslation();
 
   const statusLabel = {
-    menunggu_pembayaran: { text: t('payment.pending'), color: '#414844', bg: '#F5F4F0' },
-    menunggu_verifikasi: { text: t('payment.verifying'), color: '#7A5900', bg: '#FFF4D6' },
-    verified: { text: t('payment.verified'), color: '#0284C7', bg: '#E0F2FE' },
-    rejected: { text: t('payment.rejected'), color: '#B3261E', bg: '#FFDAD6' },
-    pending: { text: t('payment.pending'), color: '#7A5900', bg: '#FFF4D6' },
+    menunggu_pembayaran: { text: t('Menunggu Pembayaran'), color: '#414844', bg: '#F5F4F0' },
+    menunggu_verifikasi: { text: t('Menunggu Verifikasi'), color: '#7A5900', bg: '#FFF4D6' },
+    verified: { text: t('Terverifikasi'), color: '#0284C7', bg: '#E0F2FE' },
+    rejected: { text: t('Ditolak'), color: '#B3261E', bg: '#FFDAD6' },
+    pending: { text: t('Menunggu Pembayaran'), color: '#7A5900', bg: '#FFF4D6' },
     settlement: { text: t('payment.settlement', 'Lunas (Midtrans)'), color: '#166534', bg: '#DCFCE7' },
     expire: { text: t('payment.expired', 'Kedaluwarsa'), color: '#414844', bg: '#F5F4F0' },
     cancel: { text: t('payment.cancelled', 'Dibatalkan'), color: '#B3261E', bg: '#FFDAD6' },
-    deny: { text: t('payment.rejected'), color: '#B3261E', bg: '#FFDAD6' },
+    deny: { text: t('Ditolak'), color: '#B3261E', bg: '#FFDAD6' },
   };
 
   const paymentTypeLabel = {
     midtrans: { text: 'Midtrans', icon: 'credit_card', color: '#0EA5E9' },
-    manual: { text: t('payment.bank_transfer'), icon: 'receipt', color: '#5B6660' },
+    manual: { text: t('Transfer Bank'), icon: 'receipt', color: '#5B6660' },
   };
 
   const [searchParams, setSearchParams] = useSearchParams();

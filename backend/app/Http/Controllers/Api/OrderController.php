@@ -48,8 +48,6 @@ class OrderController extends Controller
             }
         }
 
-        $expert->update(['package_id' => $package->id]);
-
         if ($package->price > 0) {
             // Generate order reference
             $referenceCode = 'ORD-'.strtoupper(Str::random(8));
@@ -111,7 +109,8 @@ class OrderController extends Controller
             ], 201);
         }
 
-        // Paket gratis -> tidak perlu order/pembayaran
+        // Paket gratis -> aktifkan langsung pada profile expert
+        $expert->update(['package_id' => $package->id]);
         return response()->json(['expert' => $expert, 'order' => null]);
     }
 
@@ -145,12 +144,30 @@ class OrderController extends Controller
             $transactionStatus = $notification->transaction_status;
             $fraudStatus = $notification->fraud_status;
             $orderId = $notification->order_id;
+            $statusCode = $notification->status_code;
+            $grossAmount = $notification->gross_amount;
+            $signatureKey = $notification->signature_key;
+            $paymentType = $notification->payment_type;
 
-            \Log::info('Midtrans Notification', [
+            \Log::info('Midtrans Notification received', [
                 'order_id' => $orderId,
                 'transaction_status' => $transactionStatus,
                 'fraud_status' => $fraudStatus,
+                'payment_type' => $paymentType,
             ]);
+
+            // Verifikasi Signature Key Midtrans untuk keamanan
+            $serverKey = config('services.midtrans.server_key');
+            if ($serverKey && $serverKey !== 'your-server-key-here') {
+                $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+                if ($signatureKey !== $expectedSignature) {
+                    \Log::warning('Midtrans Notification Invalid Signature', [
+                        'order_id' => $orderId,
+                        'received_signature' => $signatureKey,
+                    ]);
+                    return response()->json(['message' => 'Invalid signature'], 403);
+                }
+            }
 
             $order = Order::where('reference_code', $orderId)->first();
 
@@ -158,15 +175,26 @@ class OrderController extends Controller
                 return response()->json(['message' => 'Order not found'], 404);
             }
 
+            if ($paymentType) {
+                $order->update(['payment_type' => $paymentType]);
+            }
+
             if ($transactionStatus == 'capture') {
                 if ($fraudStatus == 'accept') {
-                    $order->update(['status' => 'verified']);
+                    $order->update([
+                        'status' => 'verified',
+                        'verified_at' => now(),
+                    ]);
                     $expert = \App\Models\Expert::where('user_id', $order->user_id)->first();
                     if ($expert) {
                         $expert->update([
                             'package_expires_at' => now()->addYear(),
                             'package_id' => $order->package_id
                         ]);
+
+                        // Award 100 poin untuk upgrade premium via Midtrans
+                        $pointService = new PointService();
+                        $pointService->awardPoints($order->user_id, 'upgrade_premium', 'Upgrade ke paket Premium via Midtrans');
                     }
                 }
             } elseif ($transactionStatus == 'settlement') {
@@ -193,6 +221,8 @@ class OrderController extends Controller
                 $order->update(['status' => 'rejected', 'reject_reason' => 'Payment expired']);
             } elseif ($transactionStatus == 'cancel') {
                 $order->update(['status' => 'rejected', 'reject_reason' => 'Payment cancelled']);
+            } elseif ($transactionStatus == 'failure') {
+                $order->update(['status' => 'rejected', 'reject_reason' => 'Payment failed']);
             }
 
             return response()->json(['message' => 'Notification handled']);

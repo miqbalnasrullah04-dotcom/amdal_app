@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 /* ── Social icons ──────────────────────────────────────────────────────── */
 function IconFacebook() {
@@ -66,7 +66,7 @@ export default function Footer() {
 
             {/* Copyright */}
             <p className="text-gray-600 text-sm text-center leading-relaxed">
-              {t('footer.copyright')}
+              {t('┬⌐ 2026 TenagaAhli.com. Hak Cipta Dilindungi.')}
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from '../context/LanguageContext.jsx';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
@@ -21,6 +22,7 @@ function SectionTitle({ icon, children }) {
 }
 
 export default function Pengaturan() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ export default function Pengaturan() {
       <DashboardLayout title="Pengaturan">
         <div className="flex items-center gap-3 text-[#5B6660]">
           <span className="w-5 h-5 rounded-full border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B] animate-spin" />
-          Memuat pengaturan...
+          {t('Memuat pengaturan...')}
         </div>
       </DashboardLayout>
     );

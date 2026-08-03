@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 
 /* ── Password rules ─────────────────────────────────────────────── */
 const getPwRules = (t) => [
-  { key: 'length', label: t('auth.password_rules.length'), test: (v) => v.length >= 8 },
-  { key: 'letter', label: t('auth.password_rules.letter'), test: (v) => /[a-zA-Z]/.test(v) },
-  { key: 'number', label: t('auth.password_rules.number'), test: (v) => /[0-9]/.test(v) },
+  { key: 'length', label: t('Minimal 8 karakter'), test: (v) => v.length >= 8 },
+  { key: 'letter', label: t('Mengandung huruf'), test: (v) => /[a-zA-Z]/.test(v) },
+  { key: 'number', label: t('Mengandung angka'), test: (v) => /[0-9]/.test(v) },
 ];
 
 /* ── Shared input class ─────────────────────────────────────────── */
@@ -39,15 +39,15 @@ export default function Daftar() {
   const canSubmit = () => {
     setError('');
     if (!form.name || !form.email || !form.password) {
-      setError(t('auth.all_fields_required'));
+      setError(t('Semua field wajib diisi.'));
       return false;
     }
     if (form.password.length < 8) {
-      setError(t('auth.password_min_length'));
+      setError(t('Kata sandi minimal 8 karakter.'));
       return false;
     }
     if (form.password !== form.password_confirmation) {
-      setError(t('auth.password_confirmation_mismatch'));
+      setError(t('Konfirmasi kata sandi tidak sama.'));
       return false;
     }
     return true;
@@ -78,13 +78,13 @@ export default function Daftar() {
       if (err.response?.status === 422) {
         const errors = err.response?.data?.errors;
         const firstError = errors ? Object.values(errors)[0]?.[0] : null;
-        setError(firstError || err.response?.data?.message || 'Data tidak valid.');
+        setError(firstError || err.response?.data?.message || t('auth.error.invalid_data', 'Data tidak valid.'));
       } else if (err.response?.status === 502 || err.response?.status === 504) {
-        setError('Server sedang bermasalah. Coba beberapa saat lagi.');
+        setError(t('auth.error.server_issue', 'Server sedang bermasalah. Coba beberapa saat lagi.'));
       } else if (!err.response) {
-        setError('Tidak bisa terhubung ke server.');
+        setError(t('auth.error.no_connection', 'Tidak bisa terhubung ke server.'));
       } else {
-        setError(err.response?.data?.message || 'Pendaftaran gagal. Periksa kembali data Anda.');
+        setError(err.response?.data?.message || t('auth.error.register_failed', 'Pendaftaran gagal. Periksa kembali data Anda.'));
       }
     } finally {
       setLoading(false);
@@ -147,16 +147,16 @@ export default function Daftar() {
 
           <div className="space-y-6">
             <h1 className="font-headline-lg text-4xl font-bold leading-tight">
-              Promosikan <br />Keahlian Anda
+              {t('auth.register_hero.title_line1', 'Promosikan')} <br />{t('auth.register_hero.title_line2', 'Keahlian Anda')}
             </h1>
             <p className="text-white/80 text-base leading-relaxed">
-             Bergabunglah bersama tenaga ahli dari berbagai bidang dan tampilkan profil profesional Anda agar lebih mudah ditemukan oleh instansi, perusahaan, dan mitra yang membutuhkan keahlian Anda.
+             {t('auth.register_hero.desc', 'Bergabunglah bersama tenaga ahli dari berbagai bidang dan tampilkan profil profesional Anda agar lebih mudah ditemukan oleh instansi, perusahaan, dan mitra yang membutuhkan keahlian Anda.')}
             </p>
             <ul className="space-y-3">
               {[
-                'Pendaftaran gratis dan mudah',
-                'Profil Anda akan terverifikasi oleh tim kami',
-                'Dapatkan kesempatan proyek dari seluruh Indonesia',
+                t('auth.register_hero.feature1', 'Pendaftaran gratis dan mudah'),
+                t('auth.register_hero.feature2', 'Profil Anda akan terverifikasi oleh tim kami'),
+                t('auth.register_hero.feature3', 'Dapatkan kesempatan proyek dari seluruh Indonesia'),
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2.5 text-white/80 text-sm">
                   <span className="material-symbols-outlined text-[#7DD3FC] text-[18px] mt-0.5">check_circle</span>
@@ -219,7 +219,7 @@ export default function Daftar() {
             <div className="animate-fadeIn">
               <div className="mb-8 text-center">
                 <h2 className="font-headline-lg text-3xl font-bold text-on-background mb-2">
-                  {t('auth.register_title')}
+                  {t('Daftar')}
                 </h2>
                 <p className="text-sm text-on-surface-variant">
                   {t('auth.register_subtitle', 'Daftar sebagai tenaga ahli profesional di TenagaAhli.com')}
@@ -231,13 +231,13 @@ export default function Daftar() {
                   {/* Nama Lengkap */}
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                      {t('auth.full_name')} <span className="text-red-500">*</span>
+                      {t('Nama Lengkap')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
                       autoFocus
-                      placeholder="Masukkan nama lengkap Anda"
+                      placeholder={t('auth.name_placeholder', 'Masukkan nama lengkap Anda')}
                       value={form.name}
                       onChange={handleChange('name')}
                       className={INPUT_CLS}
@@ -247,12 +247,12 @@ export default function Daftar() {
                   {/* Email */}
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                      {t('auth.email')} <span className="text-red-500">*</span>
+                      {t('Email')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
                       required
-                      placeholder="nama@email.com"
+                      placeholder={t('nama@email.com')}
                       value={form.email}
                       onChange={handleChange('email')}
                       className={INPUT_CLS}
@@ -262,14 +262,14 @@ export default function Daftar() {
                   {/* Password */}
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                      {t('auth.password')} <span className="text-red-500">*</span>
+                      {t('Kata Sandi')} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative mt-1.5">
                       <input
                         type={showPassword ? 'text' : 'password'}
                         required
                         minLength={8}
-                        placeholder="Minimal 8 karakter"
+                        placeholder={t('Minimal 8 karakter')}
                         value={form.password}
                         onChange={handleChange('password')}
                         className="w-full border border-outline-variant/50 rounded-lg px-4 py-2.5 pr-11 text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/30 focus:border-[#0EA5E9] transition-colors bg-white"
@@ -311,12 +311,12 @@ export default function Daftar() {
                   {/* Confirm Password */}
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                      {t('auth.confirm_password')} <span className="text-red-500">*</span>
+                      {t('Konfirmasi Kata Sandi')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      placeholder="Ketik ulang kata sandi"
+                      placeholder={t('Ketik ulang kata sandi')}
                       value={form.password_confirmation}
                       onChange={handleChange('password_confirmation')}
                       className={INPUT_CLS}
@@ -325,14 +325,14 @@ export default function Daftar() {
                       form.password !== form.password_confirmation && (
                         <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                           <span className="material-symbols-outlined text-[14px]">error</span>
-                          {t('auth.password_mismatch')}
+                          {t('Kata sandi tidak cocok')}
                         </p>
                       )}
                     {form.password_confirmation.length > 0 &&
                       form.password === form.password_confirmation && (
                         <p className="text-xs text-[#0284C7] mt-1 flex items-center gap-1">
                           <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                          {t('auth.password_match')}
+                          {t('Kata sandi cocok')}
                         </p>
                       )}
                   </div>
@@ -347,11 +347,11 @@ export default function Daftar() {
                     {loading ? (
                       <>
                         <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                        {t('common.loading')}
+                        {t('Memuat...')}
                       </>
                     ) : (
                       <>
-                        {t('auth.register_button')}
+                        {t('Daftar')}
                         <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                       </>
                     )}
@@ -361,9 +361,9 @@ export default function Daftar() {
 
               {/* Link ke sign in */}
               <p className="text-center text-sm text-on-surface-variant mt-6">
-                {t('auth.have_account')}{' '}
+                {t('Sudah punya akun?')}{' '}
                 <Link to="/sign-in" className="text-[#0284C7] font-bold hover:underline">
-                  {t('auth.login_here')}
+                  {t('Masuk di sini')}
                 </Link>
               </p>
             </div>

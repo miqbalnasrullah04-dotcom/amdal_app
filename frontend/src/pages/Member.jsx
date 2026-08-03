@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import NavbarBackground from '../components/NavbarBackground.jsx';
 import { usePageLoading } from '../context/LoadingContext.jsx';
@@ -155,7 +155,7 @@ export default function Member() {
                 </option>
               ))}
             </select>
-            <span>{t('member.entries', 'entries')}</span>
+            <span>{t('entri')}</span>
           </div>
 
           <div className="relative w-full md:w-72">
@@ -221,51 +221,49 @@ export default function Member() {
         {/* Footer: info + pagination */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#0EA5E9]/20 text-sm text-on-surface-variant">
           <span>
-            {t('member.showing', 'Showing')} {showingFrom} {t('member.to', 'to')} {showingTo} {t('member.of', 'of')} {totalEntries} {t('member.entries', 'entries')}
+            {t('Menampilkan')} {showingFrom} {t('sampai')} {showingTo} {t('dari')} {totalEntries} {t('entri')}
           </span>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-[#0EA5E9]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0EA5E9]/10 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {t('member.previous', 'Previous')}
+              {t('Sebelumnya')}
             </button>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((page) => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
-              .reduce((acc, page, i, arr) => {
-                if (i > 0 && page - arr[i - 1] > 1) acc.push('...');
-                acc.push(page);
-                return acc;
-              }, [])
-              .map((page, i) =>
-                page === '...' ? (
-                  <span key={`dots-${i}`} className="px-2 text-on-surface-variant/60">
-                    …
-                  </span>
-                ) : (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-9 h-9 rounded-lg transition-colors ${
-                      currentPage === page
-                        ? 'bg-[#0EA5E9] text-white'
-                        : 'border border-[#0EA5E9]/30 hover:bg-[#0EA5E9]/10'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                .map((page, idx, arr) => {
+                  const prevPage = arr[idx - 1];
+                  const showEllipsis = prevPage && page - prevPage > 1;
+
+                  return (
+                    <div key={page} className="flex items-center gap-1">
+                      {showEllipsis && <span className="px-1 text-gray-400">...</span>}
+                      <button
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === page
+                            ? 'bg-[#0EA5E9] text-white font-bold shadow-sm'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
 
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg border border-[#0EA5E9]/30 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0EA5E9]/10 transition-colors"
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {t('member.next', 'Next')}
+              {t('Selanjutnya')}
             </button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import Background from '../assets/world.jpg';
 import ShinyText from '../components/ShinyText';
@@ -168,7 +168,7 @@ export default function Home() {
             />
           </h1>
           <p className="font-headline-lg text-white/90 max-w-2xl mx-auto uppercase tracking-widest text-sm md:text-base font-semibold">
-            {t('home.hero_description')}
+            {t('Platform pencarian tenaga ahli profesional untuk mendukung kebutuhan konsultasi, penelitian, pelatihan, dan kolaborasi di berbagai bidang.')}
           </p>
         </div>
 
@@ -200,7 +200,7 @@ export default function Home() {
                 </label>
                 <input
                   className="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder:text-surface-dim text-sm"
-                  placeholder={t('expert.location')}
+                  placeholder={t('Lokasi')}
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
@@ -256,7 +256,7 @@ export default function Home() {
               type="submit"
               className="bg-[#0EA5E9] text-white h-14 px-10 rounded-full flex items-center justify-center gap-2 hover:bg-[#0284C7] transition-all active:scale-95 shadow-lg shadow-[#0EA5E9]/20 font-label-md"
             >
-              {t('common.search')}
+              {t('Cari')}
             </button>
           </div>
         </form>
@@ -265,8 +265,8 @@ export default function Home() {
       {/* Kategori Section */}
       <section className="py-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
         <div className="text-center mb-12">
-          <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('home.browse_experts')}</h2>
-          <p className="text-on-surface-variant">{t('home.categories')}</p>
+          <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('Jelajahi Tenaga Ahli')}</h2>
+          <p className="text-on-surface-variant">{t('Kategori Keahlian')}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {categories.map((cat) => (
@@ -294,7 +294,7 @@ export default function Home() {
       <section className="py-24 px-margin-mobile md:px-margin-desktop bg-white">
         <div className="max-w-container-max mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('home.verified_experts')}</h2>
+            <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('Tenaga Ahli Terverifikasi')}</h2>
             <p className="text-on-surface-variant">{t('home.verified_experts_desc', 'Telusuri tenaga ahli profesional dari berbagai bidang keahlian yang telah melalui proses verifikasi di TenagaAhli.com.')}</p>
           </div>
 
@@ -302,7 +302,7 @@ export default function Home() {
             <div className="flex items-center justify-center py-20">
               <div className="flex items-center gap-3 text-[#5B6660]">
                 <span className="w-6 h-6 rounded-full border-2 border-[#0EA5E9]/30 border-t-[#0EA5E9] animate-spin" />
-                <span>{t('common.loading')}</span>
+                <span>{t('Memuat...')}</span>
               </div>
             </div>
           ) : displayedExperts.length === 0 ? (
@@ -310,7 +310,7 @@ export default function Home() {
               <div className="w-16 h-16 rounded-full bg-[#F5F4F0] flex items-center justify-center mx-auto mb-4">
                 <span className="material-symbols-outlined text-3xl text-[#5B6660]/40">group</span>
               </div>
-              <p className="text-on-surface-variant">{t('expert.no_results')}</p>
+              <p className="text-on-surface-variant">{t('Tidak ada hasil ditemukan')}</p>
             </div>
           ) : (
             <>
@@ -332,7 +332,7 @@ export default function Home() {
                           onClick={(e) => e.stopPropagation()} 
                           className="absolute top-4 right-4 bg-[#0EA5E9] hover:bg-[#0284C7] text-xs font-semibold text-white rounded-full px-3 py-1.5 shadow-lg transition-colors"
                         >
-                          {t('expert.view_profile')}
+                          {t('Lihat Profil')}
                         </Link>
                       )}
 
@@ -375,7 +375,7 @@ export default function Home() {
                       className="flex items-center gap-2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-semibold px-8 py-3.5 rounded-full shadow-lg shadow-[#0EA5E9]/20 transition-all active:scale-95"
                     >
                       <span className="material-symbols-outlined text-[20px]">expand_more</span>
-                      {t('common.more')} ({totalExperts - displayLimit})
+                      {t('Selengkapnya')} ({totalExperts - displayLimit})
                     </button>
                   ) : (
                     <button
@@ -386,7 +386,7 @@ export default function Home() {
                       className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#0EA5E9] font-semibold px-8 py-3.5 rounded-full border-2 border-[#0EA5E9] transition-all active:scale-95"
                     >
                       <span className="material-symbols-outlined text-[20px]">expand_less</span>
-                      {t('common.less')}
+                      {t('Lebih Sedikit')}
                     </button>
                   )}
                 </div>

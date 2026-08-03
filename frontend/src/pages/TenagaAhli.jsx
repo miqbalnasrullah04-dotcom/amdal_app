@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
 import NavbarBackground from '../components/NavbarBackground.jsx';
@@ -25,9 +25,9 @@ import {
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
 const getOrderOptions = (t) => [
-  { value: 'latest', label: t('experts.order.latest', 'Latest') },
-  { value: 'top_rated', label: t('experts.order.top_rated', 'Top rated') },
-  { value: 'random', label: t('experts.order.random', 'Random') },
+  { value: 'latest', label: t('Terbaru') },
+  { value: 'top_rated', label: t('Rating Tertinggi') },
+  { value: 'random', label: t('Acak') },
 ];
 
 const KRITERIA_SUGGESTIONS = [
@@ -109,7 +109,7 @@ const FALLBACK_EXPERTS = [
 
 export default function TenagaAhli() {
   const { t } = useTranslation();
-  const ORDER_OPTIONS = getOrderOptions(t);
+  const orderOptions = getOrderOptions(t);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
@@ -398,20 +398,20 @@ export default function TenagaAhli() {
             </div>
 
             <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
-              <label className="text-sm text-gray-500">{t('experts.order_by', 'Order by')}</label>
+              <label className="text-sm text-gray-500">{t('Urutkan Berdasarkan')}</label>
               <button
                 type="button"
                 onClick={() => setOrderOpen((v) => !v)}
                 className="flex items-center justify-between border-b border-gray-300 py-2 text-sm font-semibold"
               >
-                {ORDER_OPTIONS.find((o) => o.value === order)?.label}
+                {orderOptions.find((o) => o.value === order)?.label}
                 <ChevronDownIcon
                   className={`w-4 h-4 transition-transform ${orderOpen ? 'rotate-180' : ''}`}
                 />
               </button>
               {orderOpen && (
                 <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md z-10 overflow-hidden">
-                  {ORDER_OPTIONS.map((o) => (
+                  {orderOptions.map((o) => (
                     <button
                       key={o.value}
                       type="button"
@@ -435,11 +435,11 @@ export default function TenagaAhli() {
               className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2"
             >
               <MagnifyingGlassIcon className="w-5 h-5" />
-              {t('experts.search_btn', 'Search')}
+              {t('Cari')}
             </button>
             <button type="button" onClick={handleReset} className="text-gray-500 text-sm underline flex items-center gap-1 justify-center">
               <ArrowPathIcon className="w-4 h-4" />
-              {t('experts.reset_filters', 'Reset Filters')}
+              {t('Reset Filter')}
             </button>
           </form>
         </aside>
@@ -451,7 +451,7 @@ export default function TenagaAhli() {
               <ChevronLeftIcon className="w-5 h-5" />
             </button>
             <span className="text-sm">
-              {t('experts.showing', 'Showing')} <b>{sortedExperts.length}</b> {t('experts.result', 'result')}
+              {t('Menampilkan')} <b>{sortedExperts.length}</b> {t('hasil')}
             </span>
             <button onClick={goNext} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
               <ChevronRightIcon className="w-5 h-5" />
@@ -519,7 +519,7 @@ export default function TenagaAhli() {
               checked={searchAsMove}
               onChange={(e) => setSearchAsMove(e.target.checked)}
             />
-            {t('experts.search_as_move', 'Search as I move the map')}
+            {t('Cari saat peta digeser')}
           </label>
 
           <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">

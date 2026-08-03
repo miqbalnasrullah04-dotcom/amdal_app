@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
+
+const RESEND_COOLDOWN = 60; // detik
 
 export default function VerifikasiEmail() {
   const { t } = useTranslation();
@@ -13,6 +15,7 @@ export default function VerifikasiEmail() {
   const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [countdown, setCountdown] = useState(RESEND_COOLDOWN);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -23,6 +26,13 @@ export default function VerifikasiEmail() {
     }
     setEmail(emailFromState);
   }, [location.state, navigate]);
+
+  // Countdown timer untuk tombol resend
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   const handleOtpChange = (index, value) => {
     // Only allow digits
@@ -96,8 +106,9 @@ export default function VerifikasiEmail() {
 
     try {
       await api.post('/resend-otp', { email });
-      setSuccess('Kode OTP baru telah dikirim ke email Anda.');
+      setSuccess('Kode OTP baru telah dikirim. Cek folder Inbox dan Spam/Junk di email Anda.');
       setOtp(['', '', '', '', '', '']);
+      setCountdown(RESEND_COOLDOWN);
       inputRefs.current[0]?.focus();
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal mengirim ulang kode OTP.');
@@ -121,7 +132,7 @@ export default function VerifikasiEmail() {
 
           {/* Header */}
           <h1 className="text-2xl font-bold text-on-background text-center mb-2">
-            {t('auth.verify_email')}
+            {t('Verifikasi Email')}
           </h1>
           <p className="text-sm text-on-surface-variant text-center mb-6">
             {t('auth.verify_email_desc', 'Kami telah mengirim kode verifikasi 6 digit ke')}<br />
@@ -169,7 +180,7 @@ export default function VerifikasiEmail() {
               disabled={loading || otp.join('').length !== 6}
               className="w-full bg-[#0EA5E9] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0284C7] active:scale-[0.99] transition-all disabled:opacity-60 disabled:active:scale-100 mb-4"
             >
-              {loading ? t('common.loading') : t('auth.verify_button')}
+              {loading ? t('Memuat...') : t('Verifikasi')}
             </button>
 
             {/* Resend OTP */}
@@ -180,21 +191,42 @@ export default function VerifikasiEmail() {
               <button
                 type="button"
                 onClick={handleResendOTP}
-                disabled={resending}
-                className="text-sm font-bold text-[#0284C7] hover:underline disabled:opacity-50"
+                disabled={resending || countdown > 0}
+                className="text-sm font-bold text-[#0284C7] hover:underline disabled:opacity-50 disabled:no-underline"
               >
-                {resending ? t('common.loading') : t('auth.resend_otp')}
+                {resending
+                  ? 'Mengirim...'
+                  : countdown > 0
+                  ? `Kirim ulang dalam ${countdown}d`
+                  : t('auth.resend_otp', 'Kirim Ulang Kode')}
               </button>
             </div>
           </form>
 
           {/* Info */}
-          <div className="mt-6 pt-6 border-t border-outline-variant/20">
+          <div className="mt-6 pt-5 border-t border-outline-variant/20 space-y-3">
+            {/* Checklist panduan */}
+            <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+              Tidak menerima email?
+            </p>
+            {[
+              { icon: 'inbox',       text: 'Cek folder <strong>Inbox</strong> di ' + email },
+              { icon: 'report',      text: 'Cek folder <strong>Spam / Junk</strong>' },
+              { icon: 'label',       text: 'Cek tab <strong>Promotions</strong> atau <strong>Social</strong> (Gmail)' },
+              { icon: 'schedule',    text: 'Tunggu <strong>1–2 menit</strong> — email bisa sedikit telat' },
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs text-on-surface-variant">
+                <span className="material-symbols-outlined text-[15px] text-[#0284C7] shrink-0 mt-0.5">{item.icon}</span>
+                <p dangerouslySetInnerHTML={{ __html: item.text }} />
+              </div>
+            ))}
+
+            {/* Divider */}
+            <div className="pt-2 border-t border-outline-variant/15" />
+
             <div className="flex items-start gap-2 text-xs text-on-surface-variant">
-              <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5">info</span>
-              <p className="leading-relaxed">
-                Kode OTP berlaku selama <strong>10 menit</strong>. Periksa folder Spam/Junk jika tidak menemukan email di kotak masuk.
-              </p>
+              <span className="material-symbols-outlined text-[15px] shrink-0 mt-0.5">timer</span>
+              <p>Kode OTP berlaku selama <strong>10 menit</strong> sejak dikirim.</p>
             </div>
           </div>
         </div>

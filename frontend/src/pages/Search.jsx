@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
 import NavbarBackground from '../components/NavbarBackground.jsx';
@@ -24,9 +24,9 @@ import {
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
 const getOrderOptions = (t) => [
-  { value: 'latest', label: t('search.order.latest', 'Latest') },
-  { value: 'top_rated', label: t('search.order.top_rated', 'Top rated') },
-  { value: 'random', label: t('search.order.random', 'Random') },
+  { value: 'latest', label: t('Terbaru') },
+  { value: 'top_rated', label: t('Rating Tertinggi') },
+  { value: 'random', label: t('Acak') },
 ];
 
 const KRITERIA_SUGGESTIONS = [
@@ -135,7 +135,7 @@ function useClickOutside(ref, onOutside) {
 
 export default function Search() {
   const { t } = useTranslation();
-  const ORDER_OPTIONS = getOrderOptions(t);
+  const orderOptions = getOrderOptions(t);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
@@ -265,7 +265,7 @@ export default function Search() {
           <a href="https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lng}" 
              target="_blank" 
              style="color:#0EA5E9;text-decoration:none;font-size:12px;display:inline-flex;align-items:center;gap:4px;margin-top:8px">
-            <span style="font-size:14px">📍</span> Buka di Google Maps
+            <span style="font-size:14px">📍</span> ${t('search.open_in_google_maps', 'Buka di Google Maps')}
           </a>
         </div>
       `;
@@ -463,7 +463,7 @@ export default function Search() {
                   ))
                 ) : (
                   <div className="px-4 py-3 text-xs text-on-surface-variant/60 text-center">
-                    {t('search.no_suggestions_for', 'Tidak ada saran, tekan Search untuk mencari')} "{kriteria}"
+                    {t('Tidak ada saran, tekan Cari untuk mencari')} "{kriteria}"
                   </div>
                 )}
               </div>
@@ -472,7 +472,7 @@ export default function Search() {
 
           <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
             <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
-              {t('search.order_by', 'Order by')}
+              {t('Urutkan Berdasarkan')}
             </label>
             <button
               type="button"
@@ -480,7 +480,7 @@ export default function Search() {
               className="flex items-center justify-between border border-outline-variant/40 rounded-lg px-3 py-2 text-sm text-on-surface bg-transparent"
             >
               <span className="font-semibold">
-                {ORDER_OPTIONS.find((o) => o.value === order)?.label}
+                {orderOptions.find((o) => o.value === order)?.label}
               </span>
               <ChevronDownIcon
                 className={`w-[18px] h-[18px] text-on-surface-variant transition-transform ${orderOpen ? 'rotate-180' : ''}`}
@@ -489,13 +489,13 @@ export default function Search() {
 
             {orderOpen && (
               <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-outline-variant/30 rounded-lg shadow-lg z-20 overflow-hidden">
-                {ORDER_OPTIONS.map((o, i) => (
+                {orderOptions.map((o, i) => (
                   <button
                     key={o.value}
                     type="button"
                     onClick={() => selectOrder(o.value)}
                     className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left hover:bg-surface-container-low active:bg-surface-container-low transition-colors ${
-                      i !== ORDER_OPTIONS.length - 1 ? 'border-b border-outline-variant/20' : ''
+                      i !== orderOptions.length - 1 ? 'border-b border-outline-variant/20' : ''
                     } ${order === o.value ? 'font-semibold text-on-surface' : 'text-on-surface-variant'}`}
                   >
                     {o.label}
@@ -510,7 +510,7 @@ export default function Search() {
             className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors active:scale-95"
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
-            {t('search.search_btn', 'Search')}
+            {t('Cari')}
           </button>
           <button
             type="button"
@@ -518,7 +518,7 @@ export default function Search() {
             className="text-on-surface-variant text-sm underline flex items-center gap-1 justify-center"
           >
             <ArrowPathIcon className="w-4 h-4" />
-            {t('search.reset_filters', 'Reset Filters')}
+            {t('Reset Filter')}
           </button>
         </form>
       </aside>
@@ -530,7 +530,7 @@ export default function Search() {
             <ChevronLeftIcon className="w-5 h-5" />
           </button>
           <span className="text-sm text-on-background">
-            {t('search.showing', 'Showing')} <b className="text-[#0EA5E9]">{sortedExperts.length}</b> {t('search.result', 'result')}
+            {t('Menampilkan')} <b className="text-[#0EA5E9]">{sortedExperts.length}</b> {t('hasil')}
           </span>
           <button onClick={goNext} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
             <ChevronRightIcon className="w-5 h-5" />
@@ -608,7 +608,7 @@ export default function Search() {
             checked={searchAsMove}
             onChange={(e) => setSearchAsMove(e.target.checked)}
           />
-          {t('search.search_as_move', 'Search as I move the map')}
+          {t('Cari saat peta digeser')}
         </label>
 
         <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">

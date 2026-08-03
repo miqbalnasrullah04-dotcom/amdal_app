@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 import PhoneInput from '../components/PhoneInput.jsx';
@@ -1042,24 +1042,25 @@ export default function ProfilSaya() {
 
   /* ── loading ─────────────────────────────────────────────────── */
   if (loading) return (
-    <DashboardLayout title="Profil Saya">
+    <DashboardLayout title={t('auto_profil_saya', 'Profil Saya')}>
       <div className="flex items-center gap-3 text-[#5B6660]">
         <span className="w-5 h-5 rounded-full border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B] animate-spin" />
-        Memuat profil...
-      </div>
+        
+                      {t('auto_memuat_profil', 'Memuat profil...')}
+                    </div>
     </DashboardLayout>
   );
 
   const profileStatus = expert?.profile_status || 'draft';
 
   return (
-    <DashboardLayout title="Profil Saya" subtitle="Kelola data, riwayat, dan dokumen profil tenaga ahli Anda.">
+    <DashboardLayout title={t('auto_profil_saya', 'Profil Saya')} subtitle="Kelola data, riwayat, dan dokumen profil tenaga ahli Anda.">
       {/* ── Status Banner ─────────────────────────────────────── */}
       {profileStatus === 'ditolak' && expert?.reject_reason && (
         <div className="mb-5 bg-[#FFDAD6] border border-[#FFB4AB] rounded-xl p-4 flex items-start gap-3">
           <span className="material-symbols-outlined text-[#B3261E] text-[20px] shrink-0 mt-0.5">error</span>
           <div>
-            <p className="font-bold text-[#93000A] text-sm mb-1">Profil Ditolak — Harap Diperbaiki</p>
+            <p className="font-bold text-[#93000A] text-sm mb-1">{t('auto_profil_ditolak_harap', 'Profil Ditolak — Harap Diperbaiki')}</p>
             <p className="text-sm text-[#410002]">{expert.reject_reason}</p>
           </div>
         </div>
@@ -1067,7 +1068,7 @@ export default function ProfilSaya() {
       {profileStatus === 'aktif' && (
         <div className="mb-5 bg-[#E3F2E7] border border-[#A7D7B0] rounded-xl p-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-[#2E5E3B] text-[20px]">verified</span>
-          <p className="text-sm font-semibold text-[#1C3822]">Profil aktif — perubahan akan ditinjau ulang oleh admin.</p>
+          <p className="text-sm font-semibold text-[#1C3822]">{t('auto_profil_aktif_perubah', 'Profil aktif — perubahan akan ditinjau ulang oleh admin.')}</p>
         </div>
       )}
 
@@ -1105,11 +1106,11 @@ export default function ProfilSaya() {
       {tab === 'pribadi' && (
         <div className="space-y-6 animate-fadeIn">
           <Card>
-            <SectionTitle icon="badge">Identitas & Profesi</SectionTitle>
+            <SectionTitle icon="badge">{t('auto_identitas_profesi', 'Identitas & Profesi')}</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><Label>Nama Lengkap *</Label>
-                <input className={INPUT} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Dr. Nama Anda, S.Hut, M.Si" /></div>
-              <div><Label>No. HP / WhatsApp *</Label>
+              <div><Label>{t('auto_nama_lengkap', 'Nama Lengkap *')}</Label>
+                <input className={INPUT} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t('auto_dr_nama_anda_s_hut_m', 'Dr. Nama Anda, S.Hut, M.Si')} /></div>
+              <div><Label>{t('auto_no_hp_whatsapp', 'No. HP / WhatsApp *')}</Label>
                 <PhoneInput
                   value={form.phone}
                   onChange={(val) => setForm({ ...form, phone: val })}
@@ -1117,35 +1118,35 @@ export default function ProfilSaya() {
                   required
                 />
               </div>
-              <div><Label>Institusi / Perusahaan</Label>
-                <input className={INPUT} value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} placeholder="PSL - IPB University" /></div>
-              <div><Label>Bidang Keahlian</Label>
-                <input className={INPUT} value={form.field} onChange={e => setForm({ ...form, field: e.target.value })} placeholder="Ahli Kehutanan & Tata Ruang" /></div>
-              <div><Label>Tempat Lahir</Label>
-                <input className={INPUT} value={form.tempat_lahir} onChange={e => setForm({ ...form, tempat_lahir: e.target.value })} placeholder="Jakarta" /></div>
-              <div><Label>Tanggal Lahir</Label>
+              <div><Label>{t('auto_institusi_perusahaan', 'Institusi / Perusahaan')}</Label>
+                <input className={INPUT} value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} placeholder={t('auto_psl_ipb_university', 'PSL - IPB University')} /></div>
+              <div><Label>{t('auto_bidang_keahlian', 'Bidang Keahlian')}</Label>
+                <input className={INPUT} value={form.field} onChange={e => setForm({ ...form, field: e.target.value })} placeholder={t('auto_ahli_kehutanan_tata', 'Ahli Kehutanan & Tata Ruang')} /></div>
+              <div><Label>{t('auto_tempat_lahir', 'Tempat Lahir')}</Label>
+                <input className={INPUT} value={form.tempat_lahir} onChange={e => setForm({ ...form, tempat_lahir: e.target.value })} placeholder={t('auto_jakarta', 'Jakarta')} /></div>
+              <div><Label>{t('auto_tanggal_lahir', 'Tanggal Lahir')}</Label>
                 <input type="date" className={INPUT} value={form.tanggal_lahir} onChange={e => setForm({ ...form, tanggal_lahir: e.target.value })} /></div>
             </div>
           </Card>
 
           <Card>
-            <SectionTitle icon="location_on">Alamat</SectionTitle>
+            <SectionTitle icon="location_on">{t('auto_alamat', 'Alamat')}</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2"><Label>Alamat Lengkap</Label>
-                <textarea className={INPUT + ' min-h-[80px] resize-none'} value={form.alamat_lengkap} onChange={e => setForm({ ...form, alamat_lengkap: e.target.value })} placeholder="Jl. Contoh No. 4, Kecamatan..." /></div>
-              <div><Label>Kota / Kabupaten</Label>
-                <input className={INPUT} value={form.alamat_kota} onChange={e => setForm({ ...form, alamat_kota: e.target.value })} placeholder="Kota Bogor" /></div>
-              <div><Label>Provinsi</Label>
-                <input className={INPUT} value={form.alamat_provinsi} onChange={e => setForm({ ...form, alamat_provinsi: e.target.value })} placeholder="Jawa Barat" /></div>
+              <div className="md:col-span-2"><Label>{t('auto_alamat_lengkap', 'Alamat Lengkap')}</Label>
+                <textarea className={INPUT + ' min-h-[80px] resize-none'} value={form.alamat_lengkap} onChange={e => setForm({ ...form, alamat_lengkap: e.target.value })} placeholder={t('auto_jl_contoh_no_4_kecam', 'Jl. Contoh No. 4, Kecamatan...')} /></div>
+              <div><Label>{t('auto_kota_kabupaten', 'Kota / Kabupaten')}</Label>
+                <input className={INPUT} value={form.alamat_kota} onChange={e => setForm({ ...form, alamat_kota: e.target.value })} placeholder={t('auto_kota_bogor', 'Kota Bogor')} /></div>
+              <div><Label>{t('auto_provinsi', 'Provinsi')}</Label>
+                <input className={INPUT} value={form.alamat_provinsi} onChange={e => setForm({ ...form, alamat_provinsi: e.target.value })} placeholder={t('auto_jawa_barat', 'Jawa Barat')} /></div>
 
               {/* Location Picker */}
               <div className="md:col-span-2 mt-4">
-                <Label>Lokasi pada Peta (untuk ditampilkan di pencarian)</Label>
+                <Label>{t('auto_lokasi_pada_peta_unt', 'Lokasi pada Peta (untuk ditampilkan di pencarian)')}</Label>
                 <div className="flex flex-col gap-2">
                   {form.lat && form.lng && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      <span>Koordinat: {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}</span>
+                      <span>{t('auto_koordinat', 'Koordinat:')} {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}</span>
                       {form.location && <span className="text-gray-400">• {form.location}</span>}
                     </div>
                   )}
@@ -1163,8 +1164,8 @@ export default function ProfilSaya() {
           </Card>
 
           <Card>
-            <SectionTitle icon="checklist">Kriteria Profesional</SectionTitle>
-            <p className="text-sm text-gray-600 mb-4">Sama seperti yang diisi saat pendaftaran — pilih semua yang sesuai, atau tambahkan kriteria Anda sendiri.</p>
+            <SectionTitle icon="checklist">{t('auto_kriteria_profesional', 'Kriteria Profesional')}</SectionTitle>
+            <p className="text-sm text-gray-600 mb-4">{t('auto_sama_seperti_yang_di', 'Sama seperti yang diisi saat pendaftaran — pilih semua yang sesuai, atau tambahkan kriteria Anda sendiri.')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {KRITERIA_OPTIONS.map((option) => (
                 <label
@@ -1207,7 +1208,7 @@ export default function ProfilSaya() {
             <div className="flex items-center gap-2 mt-3">
               <input
                 type="text"
-                placeholder="Tambahkan kriteria lain (mis. Auditor Lingkungan)"
+                placeholder={t('auto_tambahkan_kriteria_l', 'Tambahkan kriteria lain (mis. Auditor Lingkungan)')}
                 value={customKriteriaInput}
                 onChange={(e) => setCustomKriteriaInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomKriteria(); } }}
@@ -1219,18 +1220,18 @@ export default function ProfilSaya() {
                 disabled={!customKriteriaInput.trim()}
                 className="shrink-0 flex items-center gap-1 bg-[#2E5E3B] text-white text-sm font-bold px-4 py-2.5 rounded-lg hover:bg-[#244B2F] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <span className="material-symbols-outlined text-[18px]">add</span>Tambah
-              </button>
+                <span className="material-symbols-outlined text-[18px]">add</span>{t('auto_tambah', 'Tambah')}
+                                            </button>
             </div>
           </Card>
 
           <Card>
-            <SectionTitle icon="note_alt">Catatan</SectionTitle>
+            <SectionTitle icon="note_alt">{t('auto_catatan', 'Catatan')}</SectionTitle>
             <textarea
               className={INPUT + ' min-h-[100px] resize-none'}
               value={form.catatan}
               onChange={e => setForm({ ...form, catatan: e.target.value })}
-              placeholder="Ceritakan secara singkat pengalaman profesional Anda sebagai tenaga ahli, konsultan, narasumber, atau peneliti..."
+              placeholder={t('auto_ceritakan_secara_sin', 'Ceritakan secara singkat pengalaman profesional Anda sebagai tenaga ahli, konsultan, narasumber, atau peneliti...')}
             />
           </Card>
 
@@ -1240,7 +1241,8 @@ export default function ProfilSaya() {
               {saving ? 'Menyimpan...' : 'Simpan Data Pribadi'}
             </button>
             <button className={BTN_GHOST} onClick={goNext}>
-              Lanjut<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              
+                                        {t('auto_lanjut', 'Lanjut')}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
             </button>
           </div>
         </div>
@@ -1252,50 +1254,51 @@ export default function ProfilSaya() {
       {tab === 'profil-bio' && (
         <div className="space-y-6 animate-fadeIn">
           <Card>
-            <SectionTitle icon="description">Profil Bio</SectionTitle>
+            <SectionTitle icon="description">{t('auto_profil_bio', 'Profil Bio')}</SectionTitle>
             <div className="space-y-4">
               <div>
-                <Label>Tentang Saya</Label>
+                <Label>{t('auto_tentang_saya', 'Tentang Saya')}</Label>
                 <textarea
                   className={INPUT + ' min-h-[120px] resize-none'}
                   value={bioForm.tentang_saya}
                   onChange={e => setBioForm({ ...bioForm, tentang_saya: e.target.value })}
-                  placeholder="Ceritakan tentang diri Anda, latar belakang profesional, dan pencapaian utama..."
+                  placeholder={t('auto_ceritakan_tentang_di', 'Ceritakan tentang diri Anda, latar belakang profesional, dan pencapaian utama...')}
                 />
               </div>
               <div>
-                <Label>Ringkasan Keahlian</Label>
+                <Label>{t('auto_ringkasan_keahlian', 'Ringkasan Keahlian')}</Label>
                 <textarea
                   className={INPUT + ' min-h-[80px] resize-none'}
                   value={bioForm.ringkasan_keahlian}
                   onChange={e => setBioForm({ ...bioForm, ringkasan_keahlian: e.target.value })}
-                  placeholder="Ringkasan singkat keahlian dan spesialisasi Anda..."
+                  placeholder={t('auto_ringkasan_singkat_ke', 'Ringkasan singkat keahlian dan spesialisasi Anda...')}
                 />
               </div>
               <div>
-                <Label>Bidang Utama (pisahkan dengan koma)</Label>
+                <Label>{t('auto_bidang_utama_pisahka', 'Bidang Utama (pisahkan dengan koma)')}</Label>
                 <input
                   className={INPUT}
                   value={bioForm.bidang_utama}
                   onChange={e => setBioForm({ ...bioForm, bidang_utama: e.target.value })}
-                  placeholder="Contoh: KLHS, Tata Ruang, Pemodelan Sistem"
+                  placeholder={t('auto_contoh_klhs_tata_rua', 'Contoh: KLHS, Tata Ruang, Pemodelan Sistem')}
                 />
-                <p className="text-xs text-gray-500 mt-1">Pisahkan setiap bidang dengan koma (,)</p>
+                <p className="text-xs text-gray-500 mt-1">{t('auto_pisahkan_setiap_bida', 'Pisahkan setiap bidang dengan koma (,)')}</p>
               </div>
             </div>
           </Card>
 
           <div className="flex items-center justify-between gap-3">
             <button className={BTN_GHOST} onClick={goPrev}>
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>Kembali
-            </button>
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t('auto_kembali', 'Kembali')}
+                                      </button>
             <div className="flex items-center gap-3">
               <button className={BTN_PRIMARY} onClick={saveProfilBio} disabled={saving}>
                 <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
                 {saving ? 'Menyimpan...' : 'Simpan Profil Bio'}
               </button>
               <button className={BTN_GHOST} onClick={goNext}>
-                Lanjut<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                
+                                              {t('auto_lanjut', 'Lanjut')}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </button>
             </div>
           </div>
@@ -1308,28 +1311,28 @@ export default function ProfilSaya() {
       {tab === 'akademik' && (
         <div className="space-y-6 animate-fadeIn">
           <Card>
-            <SectionTitle icon="link">Link Profil Akademik</SectionTitle>
-            <p className="text-sm text-gray-600 mb-4">Tambahkan link ke profil akademik Anda untuk meningkatkan kredibilitas.</p>
+            <SectionTitle icon="link">{t('auto_link_profil_akademik', 'Link Profil Akademik')}</SectionTitle>
+            <p className="text-sm text-gray-600 mb-4">{t('auto_tambahkan_link_ke_pr', 'Tambahkan link ke profil akademik Anda untuk meningkatkan kredibilitas.')}</p>
 
             <div className="space-y-5">
               {/* Scopus */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <Label>Scopus URL</Label>
+                  <Label>{t('auto_scopus_url', 'Scopus URL')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.scopus_url}
                     onChange={e => setAkademikForm({ ...akademikForm, scopus_url: e.target.value })}
-                    placeholder="https://www.scopus.com/authid/detail.uri?authorId=..."
+                    placeholder={t('auto_https_www_scopus_com', 'https://www.scopus.com/authid/detail.uri?authorId=...')}
                   />
                 </div>
                 <div>
-                  <Label>Scopus Metrics (opsional)</Label>
+                  <Label>{t('auto_scopus_metrics_opsio', 'Scopus Metrics (opsional)')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.scopus_metrics}
                     onChange={e => setAkademikForm({ ...akademikForm, scopus_metrics: e.target.value })}
-                    placeholder="Contoh: H-index 8 · 24 dokumen"
+                    placeholder={t('auto_contoh_h_index_8_24', 'Contoh: H-index 8 · 24 dokumen')}
                   />
                 </div>
               </div>
@@ -1337,21 +1340,21 @@ export default function ProfilSaya() {
               {/* Google Scholar */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <Label>Google Scholar URL</Label>
+                  <Label>{t('auto_google_scholar_url', 'Google Scholar URL')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.google_scholar_url}
                     onChange={e => setAkademikForm({ ...akademikForm, google_scholar_url: e.target.value })}
-                    placeholder="https://scholar.google.com/citations?user=..."
+                    placeholder={t('auto_https_scholar_google', 'https://scholar.google.com/citations?user=...')}
                   />
                 </div>
                 <div>
-                  <Label>Google Scholar Metrics (opsional)</Label>
+                  <Label>{t('auto_google_scholar_metri', 'Google Scholar Metrics (opsional)')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.google_scholar_metrics}
                     onChange={e => setAkademikForm({ ...akademikForm, google_scholar_metrics: e.target.value })}
-                    placeholder="Contoh: 312 sitasi"
+                    placeholder={t('auto_contoh_312_sitasi', 'Contoh: 312 sitasi')}
                   />
                 </div>
               </div>
@@ -1359,21 +1362,21 @@ export default function ProfilSaya() {
               {/* SINTA */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <Label>SINTA URL</Label>
+                  <Label>{t('auto_sinta_url', 'SINTA URL')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.sinta_url}
                     onChange={e => setAkademikForm({ ...akademikForm, sinta_url: e.target.value })}
-                    placeholder="https://sinta.kemdikbud.go.id/authors/profile/..."
+                    placeholder={t('auto_https_sinta_kemdikbu', 'https://sinta.kemdikbud.go.id/authors/profile/...')}
                   />
                 </div>
                 <div>
-                  <Label>SINTA Metrics (opsional)</Label>
+                  <Label>{t('auto_sinta_metrics_opsion', 'SINTA Metrics (opsional)')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.sinta_metrics}
                     onChange={e => setAkademikForm({ ...akademikForm, sinta_metrics: e.target.value })}
-                    placeholder="Contoh: Skor SINTA 3 · S3"
+                    placeholder={t('auto_contoh_skor_sinta_3', 'Contoh: Skor SINTA 3 · S3')}
                   />
                 </div>
               </div>
@@ -1381,21 +1384,21 @@ export default function ProfilSaya() {
               {/* ORCID */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <Label>ORCID URL</Label>
+                  <Label>{t('auto_orcid_url', 'ORCID URL')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.orcid_url}
                     onChange={e => setAkademikForm({ ...akademikForm, orcid_url: e.target.value })}
-                    placeholder="https://orcid.org/0000-0002-XXXX-XXXX"
+                    placeholder={t('auto_https_orcid_org_0000', 'https://orcid.org/0000-0002-XXXX-XXXX')}
                   />
                 </div>
                 <div>
-                  <Label>ORCID Metrics (opsional)</Label>
+                  <Label>{t('auto_orcid_metrics_opsion', 'ORCID Metrics (opsional)')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.orcid_metrics}
                     onChange={e => setAkademikForm({ ...akademikForm, orcid_metrics: e.target.value })}
-                    placeholder="Contoh: 0000-0002-XXXX-XXXX"
+                    placeholder={t('auto_contoh_0000_0002_xxx', 'Contoh: 0000-0002-XXXX-XXXX')}
                   />
                 </div>
               </div>
@@ -1403,21 +1406,21 @@ export default function ProfilSaya() {
               {/* ResearchGate */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <Label>ResearchGate URL</Label>
+                  <Label>{t('auto_researchgate_url', 'ResearchGate URL')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.researchgate_url}
                     onChange={e => setAkademikForm({ ...akademikForm, researchgate_url: e.target.value })}
-                    placeholder="https://www.researchgate.net/profile/..."
+                    placeholder={t('auto_https_www_researchga', 'https://www.researchgate.net/profile/...')}
                   />
                 </div>
                 <div>
-                  <Label>ResearchGate Metrics (opsional)</Label>
+                  <Label>{t('auto_researchgate_metrics', 'ResearchGate Metrics (opsional)')}</Label>
                   <input
                     className={INPUT}
                     value={akademikForm.researchgate_metrics}
                     onChange={e => setAkademikForm({ ...akademikForm, researchgate_metrics: e.target.value })}
-                    placeholder="Contoh: RG Score 18.4"
+                    placeholder={t('auto_contoh_rg_score_18_4', 'Contoh: RG Score 18.4')}
                   />
                 </div>
               </div>
@@ -1426,15 +1429,16 @@ export default function ProfilSaya() {
 
           <div className="flex items-center justify-between gap-3">
             <button className={BTN_GHOST} onClick={goPrev}>
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>Kembali
-            </button>
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t('auto_kembali', 'Kembali')}
+                                      </button>
             <div className="flex items-center gap-3">
               <button className={BTN_PRIMARY} onClick={saveLinkAkademik} disabled={saving}>
                 <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
                 {saving ? 'Menyimpan...' : 'Simpan Link Akademik'}
               </button>
               <button className={BTN_GHOST} onClick={goNext}>
-                Lanjut<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                
+                                              {t('auto_lanjut', 'Lanjut')}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </button>
             </div>
           </div>
@@ -1447,7 +1451,7 @@ export default function ProfilSaya() {
       {tab === 'pendidikan' && (
         <div className="space-y-4 animate-fadeIn">
           {educations.length === 0 && !addingEdu && (
-            <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada data pendidikan.</p></Card>
+            <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_data_pendi', 'Belum ada data pendidikan.')}</p></Card>
           )}
           {educations.map((e) => (
             <Card key={e.id}>
@@ -1455,23 +1459,23 @@ export default function ProfilSaya() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <Label>Jenjang *</Label>
+                      <Label>{t('auto_jenjang', 'Jenjang *')}</Label>
                       <select className={INPUT} value={editEdu.jenjang} onChange={v => setEditEdu({ ...editEdu, jenjang: v.target.value })}>
-                        <option value="">Pilih Jenjang</option>
-                        <option value="S1 - Sarjana">S1 - Sarjana</option>
-                        <option value="S2 - Magister">S2 - Magister</option>
-                        <option value="S3 - Doktor">S3 - Doktor</option>
-                        <option value="Profesi">Profesi</option>
-                        <option value="Spesialis">Spesialis</option>
+                        <option value="">{t('auto_pilih_jenjang', 'Pilih Jenjang')}</option>
+                        <option value="S1 - Sarjana">{t('auto_s1_sarjana', 'S1 - Sarjana')}</option>
+                        <option value="S2 - Magister">{t('auto_s2_magister', 'S2 - Magister')}</option>
+                        <option value="S3 - Doktor">{t('auto_s3_doktor', 'S3 - Doktor')}</option>
+                        <option value="Profesi">{t('auto_profesi', 'Profesi')}</option>
+                        <option value="Spesialis">{t('auto_spesialis', 'Spesialis')}</option>
                       </select>
                     </div>
-                    <div><Label>Institusi *</Label><input className={INPUT} value={editEdu.institusi} onChange={v => setEditEdu({ ...editEdu, institusi: v.target.value })} /></div>
-                    <div><Label>Jurusan</Label><input className={INPUT} value={editEdu.jurusan || ''} onChange={v => setEditEdu({ ...editEdu, jurusan: v.target.value })} /></div>
-                    <div><Label>Tahun Lulus</Label><input type="number" className={INPUT} value={editEdu.tahun_lulus || ''} onChange={v => setEditEdu({ ...editEdu, tahun_lulus: v.target.value })} /></div>
+                    <div><Label>{t('auto_institusi', 'Institusi *')}</Label><input className={INPUT} value={editEdu.institusi} onChange={v => setEditEdu({ ...editEdu, institusi: v.target.value })} /></div>
+                    <div><Label>{t('auto_jurusan', 'Jurusan')}</Label><input className={INPUT} value={editEdu.jurusan || ''} onChange={v => setEditEdu({ ...editEdu, jurusan: v.target.value })} /></div>
+                    <div><Label>{t('auto_tahun_lulus', 'Tahun Lulus')}</Label><input type="number" className={INPUT} value={editEdu.tahun_lulus || ''} onChange={v => setEditEdu({ ...editEdu, tahun_lulus: v.target.value })} /></div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button className={BTN_PRIMARY} onClick={() => updateEdu(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>Simpan</button>
-                    <button className={BTN_GHOST} onClick={() => setEditEdu(null)}>Batal</button>
+                    <button className={BTN_PRIMARY} onClick={() => updateEdu(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{t('auto_simpan', 'Simpan')}</button>
+                    <button className={BTN_GHOST} onClick={() => setEditEdu(null)}>{t('auto_batal', 'Batal')}</button>
                   </div>
                 </div>
               ) : (
@@ -1479,11 +1483,11 @@ export default function ProfilSaya() {
                   <div>
                     <p className="font-bold text-[#1F2A22]">{e.jenjang} — {e.institusi}</p>
                     {e.jurusan && <p className="text-sm text-[#5B6660]">{e.jurusan}</p>}
-                    {e.tahun_lulus && <p className="text-xs text-[#5B6660] mt-1">Lulus {e.tahun_lulus}</p>}
+                    {e.tahun_lulus && <p className="text-xs text-[#5B6660] mt-1">{t('auto_lulus', 'Lulus')} {e.tahun_lulus}</p>}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button className={BTN_GHOST} onClick={() => setEditEdu({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>Edit</button>
-                    <button className={BTN_DANGER} onClick={() => deleteEdu(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                    <button className={BTN_GHOST} onClick={() => setEditEdu({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>{t('auto_edit', 'Edit')}</button>
+                    <button className={BTN_DANGER} onClick={() => deleteEdu(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
                   </div>
                 </div>
               )}
@@ -1492,32 +1496,32 @@ export default function ProfilSaya() {
 
           {addingEdu ? (
             <Card>
-              <SectionTitle icon="add_circle">Tambah Pendidikan</SectionTitle>
+              <SectionTitle icon="add_circle">{t('auto_tambah_pendidikan', 'Tambah Pendidikan')}</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 <div>
-                  <Label>Jenjang *</Label>
+                  <Label>{t('auto_jenjang', 'Jenjang *')}</Label>
                   <select className={INPUT} value={newEdu.jenjang} onChange={v => setNewEdu({ ...newEdu, jenjang: v.target.value })}>
-                    <option value="">Pilih Jenjang</option>
-                    <option value="S1 - Sarjana">S1 - Sarjana</option>
-                    <option value="S2 - Magister">S2 - Magister</option>
-                    <option value="S3 - Doktor">S3 - Doktor</option>
-                    <option value="Profesi">Profesi</option>
-                    <option value="Spesialis">Spesialis</option>
+                    <option value="">{t('auto_pilih_jenjang', 'Pilih Jenjang')}</option>
+                    <option value="S1 - Sarjana">{t('auto_s1_sarjana', 'S1 - Sarjana')}</option>
+                    <option value="S2 - Magister">{t('auto_s2_magister', 'S2 - Magister')}</option>
+                    <option value="S3 - Doktor">{t('auto_s3_doktor', 'S3 - Doktor')}</option>
+                    <option value="Profesi">{t('auto_profesi', 'Profesi')}</option>
+                    <option value="Spesialis">{t('auto_spesialis', 'Spesialis')}</option>
                   </select>
                 </div>
-                <div><Label>Institusi *</Label><input className={INPUT} value={newEdu.institusi} onChange={v => setNewEdu({ ...newEdu, institusi: v.target.value })} placeholder="Nama Universitas" /></div>
-                <div><Label>Jurusan / Program Studi</Label><input className={INPUT} value={newEdu.jurusan} onChange={v => setNewEdu({ ...newEdu, jurusan: v.target.value })} placeholder="Ilmu Lingkungan" /></div>
-                <div><Label>Tahun Lulus</Label><input type="number" className={INPUT} value={newEdu.tahun_lulus} onChange={v => setNewEdu({ ...newEdu, tahun_lulus: v.target.value })} placeholder="2015" /></div>
+                <div><Label>{t('auto_institusi', 'Institusi *')}</Label><input className={INPUT} value={newEdu.institusi} onChange={v => setNewEdu({ ...newEdu, institusi: v.target.value })} placeholder={t('auto_nama_universitas', 'Nama Universitas')} /></div>
+                <div><Label>{t('auto_jurusan_program_stud', 'Jurusan / Program Studi')}</Label><input className={INPUT} value={newEdu.jurusan} onChange={v => setNewEdu({ ...newEdu, jurusan: v.target.value })} placeholder={t('auto_ilmu_lingkungan', 'Ilmu Lingkungan')} /></div>
+                <div><Label>{t('auto_tahun_lulus', 'Tahun Lulus')}</Label><input type="number" className={INPUT} value={newEdu.tahun_lulus} onChange={v => setNewEdu({ ...newEdu, tahun_lulus: v.target.value })} placeholder="2015" /></div>
               </div>
               <div className="flex gap-2">
                 <button className={BTN_PRIMARY} onClick={addEdu} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                <button className={BTN_GHOST} onClick={() => setAddingEdu(false)}>Batal</button>
+                <button className={BTN_GHOST} onClick={() => setAddingEdu(false)}>{t('auto_batal', 'Batal')}</button>
               </div>
             </Card>
           ) : (
             <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingEdu(true)}>
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Pendidikan
-            </button>
+              <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_pendidikan', 'Tambah Pendidikan')}
+                                          </button>
           )}
 
           <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
@@ -1530,22 +1534,22 @@ export default function ProfilSaya() {
       {tab === 'pengalaman' && (
         <div className="space-y-4 animate-fadeIn">
           {experiences.length === 0 && !addingExp && (
-            <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada data pengalaman.</p></Card>
+            <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_data_penga', 'Belum ada data pengalaman.')}</p></Card>
           )}
           {experiences.map((e) => (
             <Card key={e.id}>
               {editExp?.id === e.id ? (
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div><Label>Posisi / Jabatan *</Label><input className={INPUT} value={editExp.posisi} onChange={v => setEditExp({ ...editExp, posisi: v.target.value })} /></div>
-                    <div><Label>Instansi / Organisasi *</Label><input className={INPUT} value={editExp.instansi} onChange={v => setEditExp({ ...editExp, instansi: v.target.value })} /></div>
-                    <div><Label>Tahun Mulai</Label><input type="number" className={INPUT} value={editExp.tahun_mulai || ''} onChange={v => setEditExp({ ...editExp, tahun_mulai: v.target.value })} /></div>
-                    <div><Label>Tahun Selesai</Label><input type="number" className={INPUT} value={editExp.tahun_selesai || ''} onChange={v => setEditExp({ ...editExp, tahun_selesai: v.target.value })} placeholder="Kosong = masih berlangsung" /></div>
-                    <div className="md:col-span-2"><Label>Deskripsi</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={editExp.deskripsi || ''} onChange={v => setEditExp({ ...editExp, deskripsi: v.target.value })} /></div>
+                    <div><Label>{t('auto_posisi_jabatan', 'Posisi / Jabatan *')}</Label><input className={INPUT} value={editExp.posisi} onChange={v => setEditExp({ ...editExp, posisi: v.target.value })} /></div>
+                    <div><Label>{t('auto_instansi_organisasi', 'Instansi / Organisasi *')}</Label><input className={INPUT} value={editExp.instansi} onChange={v => setEditExp({ ...editExp, instansi: v.target.value })} /></div>
+                    <div><Label>{t('auto_tahun_mulai', 'Tahun Mulai')}</Label><input type="number" className={INPUT} value={editExp.tahun_mulai || ''} onChange={v => setEditExp({ ...editExp, tahun_mulai: v.target.value })} /></div>
+                    <div><Label>{t('auto_tahun_selesai', 'Tahun Selesai')}</Label><input type="number" className={INPUT} value={editExp.tahun_selesai || ''} onChange={v => setEditExp({ ...editExp, tahun_selesai: v.target.value })} placeholder={t('auto_kosong_masih_berlang', 'Kosong = masih berlangsung')} /></div>
+                    <div className="md:col-span-2"><Label>{t('auto_deskripsi', 'Deskripsi')}</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={editExp.deskripsi || ''} onChange={v => setEditExp({ ...editExp, deskripsi: v.target.value })} /></div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button className={BTN_PRIMARY} onClick={() => updateExp(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>Simpan</button>
-                    <button className={BTN_GHOST} onClick={() => setEditExp(null)}>Batal</button>
+                    <button className={BTN_PRIMARY} onClick={() => updateExp(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{t('auto_simpan', 'Simpan')}</button>
+                    <button className={BTN_GHOST} onClick={() => setEditExp(null)}>{t('auto_batal', 'Batal')}</button>
                   </div>
                 </div>
               ) : (
@@ -1559,8 +1563,8 @@ export default function ProfilSaya() {
                     {e.deskripsi && <p className="text-xs text-[#5B6660] mt-1 line-clamp-2">{e.deskripsi}</p>}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button className={BTN_GHOST} onClick={() => setEditExp({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>Edit</button>
-                    <button className={BTN_DANGER} onClick={() => deleteExp(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                    <button className={BTN_GHOST} onClick={() => setEditExp({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>{t('auto_edit', 'Edit')}</button>
+                    <button className={BTN_DANGER} onClick={() => deleteExp(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
                   </div>
                 </div>
               )}
@@ -1569,23 +1573,23 @@ export default function ProfilSaya() {
 
           {addingExp ? (
             <Card>
-              <SectionTitle icon="add_circle">Tambah Pengalaman</SectionTitle>
+              <SectionTitle icon="add_circle">{t('auto_tambah_pengalaman', 'Tambah Pengalaman')}</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                <div><Label>Posisi / Jabatan *</Label><input className={INPUT} value={newExp.posisi} onChange={v => setNewExp({ ...newExp, posisi: v.target.value })} placeholder="Konsultan AMDAL" /></div>
-                <div><Label>Instansi / Organisasi *</Label><input className={INPUT} value={newExp.instansi} onChange={v => setNewExp({ ...newExp, instansi: v.target.value })} placeholder="PT. Contoh Jaya" /></div>
-                <div><Label>Tahun Mulai</Label><input type="number" className={INPUT} value={newExp.tahun_mulai} onChange={v => setNewExp({ ...newExp, tahun_mulai: v.target.value })} placeholder="2020" /></div>
-                <div><Label>Tahun Selesai</Label><input type="number" className={INPUT} value={newExp.tahun_selesai} onChange={v => setNewExp({ ...newExp, tahun_selesai: v.target.value })} placeholder="Kosong = masih berlangsung" /></div>
-                <div className="md:col-span-2"><Label>Deskripsi Singkat</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={newExp.deskripsi} onChange={v => setNewExp({ ...newExp, deskripsi: v.target.value })} /></div>
+                <div><Label>{t('auto_posisi_jabatan', 'Posisi / Jabatan *')}</Label><input className={INPUT} value={newExp.posisi} onChange={v => setNewExp({ ...newExp, posisi: v.target.value })} placeholder={t('auto_konsultan_amdal', 'Konsultan AMDAL')} /></div>
+                <div><Label>{t('auto_instansi_organisasi', 'Instansi / Organisasi *')}</Label><input className={INPUT} value={newExp.instansi} onChange={v => setNewExp({ ...newExp, instansi: v.target.value })} placeholder={t('auto_pt_contoh_jaya', 'PT. Contoh Jaya')} /></div>
+                <div><Label>{t('auto_tahun_mulai', 'Tahun Mulai')}</Label><input type="number" className={INPUT} value={newExp.tahun_mulai} onChange={v => setNewExp({ ...newExp, tahun_mulai: v.target.value })} placeholder="2020" /></div>
+                <div><Label>{t('auto_tahun_selesai', 'Tahun Selesai')}</Label><input type="number" className={INPUT} value={newExp.tahun_selesai} onChange={v => setNewExp({ ...newExp, tahun_selesai: v.target.value })} placeholder={t('auto_kosong_masih_berlang', 'Kosong = masih berlangsung')} /></div>
+                <div className="md:col-span-2"><Label>{t('auto_deskripsi_singkat', 'Deskripsi Singkat')}</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={newExp.deskripsi} onChange={v => setNewExp({ ...newExp, deskripsi: v.target.value })} /></div>
               </div>
               <div className="flex gap-2">
                 <button className={BTN_PRIMARY} onClick={addExp} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                <button className={BTN_GHOST} onClick={() => setAddingExp(false)}>Batal</button>
+                <button className={BTN_GHOST} onClick={() => setAddingExp(false)}>{t('auto_batal', 'Batal')}</button>
               </div>
             </Card>
           ) : (
             <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingExp(true)}>
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Pengalaman
-            </button>
+              <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_pengalaman', 'Tambah Pengalaman')}
+                                          </button>
           )}
 
           <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
@@ -1598,7 +1602,7 @@ export default function ProfilSaya() {
       {tab === 'sertifikat' && (
         <div className="space-y-4 animate-fadeIn">
           {certificates.length === 0 && !addingCert && (
-            <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada data sertifikat.</p></Card>
+            <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_data_serti', 'Belum ada data sertifikat.')}</p></Card>
           )}
           {certificates.map((c) => (
             <Card key={c.id}>
@@ -1608,7 +1612,7 @@ export default function ProfilSaya() {
                   <div>
                     <p className="font-bold text-[#1F2A22]">{c.nama_sertifikat}</p>
                     {c.penerbit && <p className="text-sm text-[#5B6660]">{c.penerbit}</p>}
-                    {c.tahun && <p className="text-xs text-[#5B6660] mt-1">Tahun {c.tahun}</p>}
+                    {c.tahun && <p className="text-xs text-[#5B6660] mt-1">{t('auto_tahun', 'Tahun')} {c.tahun}</p>}
                     {c.file_url && (
                       <a
                         href={getFileUrl(c.file_url)}
@@ -1617,33 +1621,34 @@ export default function ProfilSaya() {
                         className="text-xs text-[#0284C7] hover:underline mt-1 inline-flex items-center gap-1"
                       >
                         <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                        Lihat File
-                      </a>
+                        
+                                                              {t('auto_lihat_file', 'Lihat File')}
+                                                            </a>
                     )}
                   </div>
                 </div>
-                <button className={BTN_DANGER} onClick={() => deleteCert(c.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                <button className={BTN_DANGER} onClick={() => deleteCert(c.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
               </div>
             </Card>
           ))}
 
           {addingCert ? (
             <Card>
-              <SectionTitle icon="add_circle">Tambah Sertifikat</SectionTitle>
+              <SectionTitle icon="add_circle">{t('auto_tambah_sertifikat', 'Tambah Sertifikat')}</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                <div className="md:col-span-2"><Label>Nama Sertifikat *</Label><input className={INPUT} value={newCert.nama_sertifikat} onChange={v => setNewCert({ ...newCert, nama_sertifikat: v.target.value })} placeholder="Sertifikat AMDAL A" /></div>
-                <div><Label>Tahun</Label><input type="number" className={INPUT} value={newCert.tahun} onChange={v => setNewCert({ ...newCert, tahun: v.target.value })} placeholder="2022" /></div>
-                <div className="md:col-span-3"><Label>Penerbit / Lembaga</Label><input className={INPUT} value={newCert.penerbit} onChange={v => setNewCert({ ...newCert, penerbit: v.target.value })} placeholder="KLHK / BPLHD / Instansi Penerbit" /></div>
+                <div className="md:col-span-2"><Label>{t('auto_nama_sertifikat', 'Nama Sertifikat *')}</Label><input className={INPUT} value={newCert.nama_sertifikat} onChange={v => setNewCert({ ...newCert, nama_sertifikat: v.target.value })} placeholder={t('auto_sertifikat_amdal_a', 'Sertifikat AMDAL A')} /></div>
+                <div><Label>{t('auto_tahun', 'Tahun')}</Label><input type="number" className={INPUT} value={newCert.tahun} onChange={v => setNewCert({ ...newCert, tahun: v.target.value })} placeholder="2022" /></div>
+                <div className="md:col-span-3"><Label>{t('auto_penerbit_lembaga', 'Penerbit / Lembaga')}</Label><input className={INPUT} value={newCert.penerbit} onChange={v => setNewCert({ ...newCert, penerbit: v.target.value })} placeholder={t('auto_klhk_bplhd_instansi', 'KLHK / BPLHD / Instansi Penerbit')} /></div>
               </div>
               <div className="flex gap-2">
                 <button className={BTN_PRIMARY} onClick={addCert} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                <button className={BTN_GHOST} onClick={() => setAddingCert(false)}>Batal</button>
+                <button className={BTN_GHOST} onClick={() => setAddingCert(false)}>{t('auto_batal', 'Batal')}</button>
               </div>
             </Card>
           ) : (
             <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingCert(true)}>
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Sertifikat
-            </button>
+              <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_sertifikat', 'Tambah Sertifikat')}
+                                          </button>
           )}
 
           <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
@@ -1657,9 +1662,9 @@ export default function ProfilSaya() {
         <div className="space-y-10 animate-fadeIn">
           {/* ── Publikasi ─────────────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="article">Publikasi</SectionTitle>
+            <SectionTitle icon="article">{t('auto_publikasi', 'Publikasi')}</SectionTitle>
             {publikasi.length === 0 && !addingPub && (
-              <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada data publikasi.</p></Card>
+              <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_data_publi', 'Belum ada data publikasi.')}</p></Card>
             )}
             {publikasi.map((p) => (
               <Card key={p.id}>
@@ -1670,50 +1675,50 @@ export default function ProfilSaya() {
                     {p.penerbit && <p className="text-sm text-[#5B6660]">{p.penerbit}{p.tahun ? ` · ${p.tahun}` : ''}</p>}
                     {p.link && p.link !== '#' && (
                       <a href={p.link} target="_blank" rel="noreferrer" className="text-xs text-[#0284C7] hover:underline mt-1 inline-flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px]">open_in_new</span>Lihat Publikasi
-                      </a>
+                        <span className="material-symbols-outlined text-[14px]">open_in_new</span>{t('auto_lihat_publikasi', 'Lihat Publikasi')}
+                                                          </a>
                     )}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deletePub(p.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deletePub(p.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingPub ? (
               <Card>
-                <SectionTitle icon="add_circle">Tambah Publikasi</SectionTitle>
+                <SectionTitle icon="add_circle">{t('auto_tambah_publikasi', 'Tambah Publikasi')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div>
-                    <Label>Jenis</Label>
+                    <Label>{t('auto_jenis', 'Jenis')}</Label>
                     <select className={INPUT} value={newPub.jenis} onChange={v => setNewPub({ ...newPub, jenis: v.target.value })}>
-                      <option value="">Pilih Jenis</option>
-                      <option value="Jurnal">Jurnal</option>
-                      <option value="Prosiding">Prosiding</option>
-                      <option value="Buku">Buku</option>
-                      <option value="Lainnya">Lainnya</option>
+                      <option value="">{t('auto_pilih_jenis', 'Pilih Jenis')}</option>
+                      <option value="Jurnal">{t('auto_jurnal', 'Jurnal')}</option>
+                      <option value="Prosiding">{t('auto_prosiding', 'Prosiding')}</option>
+                      <option value="Buku">{t('auto_buku', 'Buku')}</option>
+                      <option value="Lainnya">{t('auto_lainnya', 'Lainnya')}</option>
                     </select>
                   </div>
-                  <div><Label>Tahun</Label><input type="number" className={INPUT} value={newPub.tahun} onChange={v => setNewPub({ ...newPub, tahun: v.target.value })} placeholder="2023" /></div>
-                  <div className="md:col-span-2"><Label>Judul *</Label><input className={INPUT} value={newPub.judul} onChange={v => setNewPub({ ...newPub, judul: v.target.value })} placeholder="Judul publikasi" /></div>
-                  <div><Label>Penerbit / Media</Label><input className={INPUT} value={newPub.penerbit} onChange={v => setNewPub({ ...newPub, penerbit: v.target.value })} placeholder="Nama jurnal / penerbit" /></div>
-                  <div><Label>Link (opsional)</Label><input className={INPUT} value={newPub.link} onChange={v => setNewPub({ ...newPub, link: v.target.value })} placeholder="https://..." /></div>
+                  <div><Label>{t('auto_tahun', 'Tahun')}</Label><input type="number" className={INPUT} value={newPub.tahun} onChange={v => setNewPub({ ...newPub, tahun: v.target.value })} placeholder="2023" /></div>
+                  <div className="md:col-span-2"><Label>{t('auto_judul', 'Judul *')}</Label><input className={INPUT} value={newPub.judul} onChange={v => setNewPub({ ...newPub, judul: v.target.value })} placeholder={t('auto_judul_publikasi', 'Judul publikasi')} /></div>
+                  <div><Label>{t('auto_penerbit_media', 'Penerbit / Media')}</Label><input className={INPUT} value={newPub.penerbit} onChange={v => setNewPub({ ...newPub, penerbit: v.target.value })} placeholder={t('auto_nama_jurnal_penerbit', 'Nama jurnal / penerbit')} /></div>
+                  <div><Label>{t('auto_link_opsional', 'Link (opsional)')}</Label><input className={INPUT} value={newPub.link} onChange={v => setNewPub({ ...newPub, link: v.target.value })} placeholder={t('auto_https', 'https://...')} /></div>
                 </div>
                 <div className="flex gap-2">
                   <button className={BTN_PRIMARY} onClick={addPub} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={() => setAddingPub(false)}>Batal</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingPub(false)}>{t('auto_batal', 'Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingPub(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Publikasi
-              </button>
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_publikasi', 'Tambah Publikasi')}
+                                                </button>
             )}
           </div>
 
           {/* ── Organisasi ────────────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="groups">Organisasi</SectionTitle>
+            <SectionTitle icon="groups">{t('auto_organisasi', 'Organisasi')}</SectionTitle>
             {organisasi.length === 0 && !addingOrg && (
-              <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada data organisasi.</p></Card>
+              <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_data_organ', 'Belum ada data organisasi.')}</p></Card>
             )}
             {organisasi.map((o) => (
               <Card key={o.id}>
@@ -1723,36 +1728,36 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{o.jabatan}{o.periode ? ` · ${o.periode}` : ''}</p>
                     {o.kontribusi && <p className="text-xs text-[#5B6660] mt-1">{o.kontribusi}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteOrg(o.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteOrg(o.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingOrg ? (
               <Card>
-                <SectionTitle icon="add_circle">Tambah Organisasi</SectionTitle>
+                <SectionTitle icon="add_circle">{t('auto_tambah_organisasi', 'Tambah Organisasi')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div><Label>Nama Organisasi *</Label><input className={INPUT} value={newOrg.nama} onChange={v => setNewOrg({ ...newOrg, nama: v.target.value })} placeholder="Ikatan Ahli..." /></div>
-                  <div><Label>Jabatan</Label><input className={INPUT} value={newOrg.jabatan} onChange={v => setNewOrg({ ...newOrg, jabatan: v.target.value })} placeholder="Anggota / Pengurus" /></div>
-                  <div><Label>Periode</Label><input className={INPUT} value={newOrg.periode} onChange={v => setNewOrg({ ...newOrg, periode: v.target.value })} placeholder="2019 — Sekarang" /></div>
-                  <div className="md:col-span-2"><Label>Kontribusi</Label><textarea className={INPUT + ' resize-none min-h-[64px]'} value={newOrg.kontribusi} onChange={v => setNewOrg({ ...newOrg, kontribusi: v.target.value })} /></div>
+                  <div><Label>{t('auto_nama_organisasi', 'Nama Organisasi *')}</Label><input className={INPUT} value={newOrg.nama} onChange={v => setNewOrg({ ...newOrg, nama: v.target.value })} placeholder={t('auto_ikatan_ahli', 'Ikatan Ahli...')} /></div>
+                  <div><Label>{t('auto_jabatan', 'Jabatan')}</Label><input className={INPUT} value={newOrg.jabatan} onChange={v => setNewOrg({ ...newOrg, jabatan: v.target.value })} placeholder={t('auto_anggota_pengurus', 'Anggota / Pengurus')} /></div>
+                  <div><Label>{t('auto_periode', 'Periode')}</Label><input className={INPUT} value={newOrg.periode} onChange={v => setNewOrg({ ...newOrg, periode: v.target.value })} placeholder={t('auto_2019_sekarang', '2019 — Sekarang')} /></div>
+                  <div className="md:col-span-2"><Label>{t('auto_kontribusi', 'Kontribusi')}</Label><textarea className={INPUT + ' resize-none min-h-[64px]'} value={newOrg.kontribusi} onChange={v => setNewOrg({ ...newOrg, kontribusi: v.target.value })} /></div>
                 </div>
                 <div className="flex gap-2">
                   <button className={BTN_PRIMARY} onClick={addOrg} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={() => setAddingOrg(false)}>Batal</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingOrg(false)}>{t('auto_batal', 'Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingOrg(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Organisasi
-              </button>
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_organisasi', 'Tambah Organisasi')}
+                                                </button>
             )}
           </div>
 
           {/* ── Reviewer Jurnal ───────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="fact_check">Reviewer Jurnal</SectionTitle>
+            <SectionTitle icon="fact_check">{t('auto_reviewer_jurnal', 'Reviewer Jurnal')}</SectionTitle>
             {reviewerJurnal.length === 0 && !addingRev && (
-              <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada data reviewer jurnal.</p></Card>
+              <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_data_revie', 'Belum ada data reviewer jurnal.')}</p></Card>
             )}
             {reviewerJurnal.map((r) => (
               <Card key={r.id}>
@@ -1762,36 +1767,36 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{r.institusi}{r.periode ? ` · ${r.periode}` : ''}</p>
                     {r.bidang && <p className="text-xs text-[#5B6660] mt-1">{r.bidang}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteRev(r.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteRev(r.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingRev ? (
               <Card>
-                <SectionTitle icon="add_circle">Tambah Reviewer Jurnal</SectionTitle>
+                <SectionTitle icon="add_circle">{t('auto_tambah_reviewer_jurn', 'Tambah Reviewer Jurnal')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div><Label>Nama Jurnal *</Label><input className={INPUT} value={newRev.nama} onChange={v => setNewRev({ ...newRev, nama: v.target.value })} /></div>
-                  <div><Label>Institusi Penerbit</Label><input className={INPUT} value={newRev.institusi} onChange={v => setNewRev({ ...newRev, institusi: v.target.value })} /></div>
-                  <div><Label>Bidang</Label><input className={INPUT} value={newRev.bidang} onChange={v => setNewRev({ ...newRev, bidang: v.target.value })} /></div>
-                  <div><Label>Periode</Label><input className={INPUT} value={newRev.periode} onChange={v => setNewRev({ ...newRev, periode: v.target.value })} placeholder="2020 — Sekarang" /></div>
+                  <div><Label>{t('auto_nama_jurnal', 'Nama Jurnal *')}</Label><input className={INPUT} value={newRev.nama} onChange={v => setNewRev({ ...newRev, nama: v.target.value })} /></div>
+                  <div><Label>{t('auto_institusi_penerbit', 'Institusi Penerbit')}</Label><input className={INPUT} value={newRev.institusi} onChange={v => setNewRev({ ...newRev, institusi: v.target.value })} /></div>
+                  <div><Label>{t('auto_bidang', 'Bidang')}</Label><input className={INPUT} value={newRev.bidang} onChange={v => setNewRev({ ...newRev, bidang: v.target.value })} /></div>
+                  <div><Label>{t('auto_periode', 'Periode')}</Label><input className={INPUT} value={newRev.periode} onChange={v => setNewRev({ ...newRev, periode: v.target.value })} placeholder={t('auto_2020_sekarang', '2020 — Sekarang')} /></div>
                 </div>
                 <div className="flex gap-2">
                   <button className={BTN_PRIMARY} onClick={addRev} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={() => setAddingRev(false)}>Batal</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingRev(false)}>{t('auto_batal', 'Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingRev(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Reviewer Jurnal
-              </button>
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_reviewer_jurn', 'Tambah Reviewer Jurnal')}
+                                                </button>
             )}
           </div>
 
           {/* ── Narasumber ────────────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="campaign">Narasumber</SectionTitle>
+            <SectionTitle icon="campaign">{t('auto_narasumber', 'Narasumber')}</SectionTitle>
             {narasumber.length === 0 && !addingNara && (
-              <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada riwayat sebagai narasumber.</p></Card>
+              <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_riwayat_se', 'Belum ada riwayat sebagai narasumber.')}</p></Card>
             )}
             {narasumber.map((n) => (
               <Card key={n.id}>
@@ -1801,36 +1806,36 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{n.penyelenggara}</p>
                     {(n.tempat || n.tanggal) && <p className="text-xs text-[#5B6660] mt-1">{n.tempat}{n.tempat && n.tanggal ? ', ' : ''}{n.tanggal}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteNara(n.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteNara(n.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingNara ? (
               <Card>
-                <SectionTitle icon="add_circle">Tambah Riwayat Narasumber</SectionTitle>
+                <SectionTitle icon="add_circle">{t('auto_tambah_riwayat_naras', 'Tambah Riwayat Narasumber')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div className="md:col-span-2"><Label>Judul Kegiatan *</Label><input className={INPUT} value={newNara.title} onChange={v => setNewNara({ ...newNara, title: v.target.value })} /></div>
-                  <div><Label>Penyelenggara</Label><input className={INPUT} value={newNara.penyelenggara} onChange={v => setNewNara({ ...newNara, penyelenggara: v.target.value })} /></div>
-                  <div><Label>Tempat</Label><input className={INPUT} value={newNara.tempat} onChange={v => setNewNara({ ...newNara, tempat: v.target.value })} /></div>
-                  <div><Label>Tanggal</Label><input className={INPUT} value={newNara.tanggal} onChange={v => setNewNara({ ...newNara, tanggal: v.target.value })} placeholder="15 Nov 2022" /></div>
+                  <div className="md:col-span-2"><Label>{t('auto_judul_kegiatan', 'Judul Kegiatan *')}</Label><input className={INPUT} value={newNara.title} onChange={v => setNewNara({ ...newNara, title: v.target.value })} /></div>
+                  <div><Label>{t('auto_penyelenggara', 'Penyelenggara')}</Label><input className={INPUT} value={newNara.penyelenggara} onChange={v => setNewNara({ ...newNara, penyelenggara: v.target.value })} /></div>
+                  <div><Label>{t('auto_tempat', 'Tempat')}</Label><input className={INPUT} value={newNara.tempat} onChange={v => setNewNara({ ...newNara, tempat: v.target.value })} /></div>
+                  <div><Label>{t('auto_tanggal', 'Tanggal')}</Label><input className={INPUT} value={newNara.tanggal} onChange={v => setNewNara({ ...newNara, tanggal: v.target.value })} placeholder={t('auto_15_nov_2022', '15 Nov 2022')} /></div>
                 </div>
                 <div className="flex gap-2">
                   <button className={BTN_PRIMARY} onClick={addNara} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={() => setAddingNara(false)}>Batal</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingNara(false)}>{t('auto_batal', 'Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingNara(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Riwayat Narasumber
-              </button>
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_riwayat_naras', 'Tambah Riwayat Narasumber')}
+                                                </button>
             )}
           </div>
 
           {/* ── Instruktur / Trainer ──────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="cast_for_education">Instruktur / Trainer</SectionTitle>
+            <SectionTitle icon="cast_for_education">{t('auto_instruktur_trainer', 'Instruktur / Trainer')}</SectionTitle>
             {instruktur.length === 0 && !addingIns && (
-              <Card><p className="text-sm text-[#5B6660] text-center py-4">Belum ada riwayat sebagai instruktur.</p></Card>
+              <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('auto_belum_ada_riwayat_se', 'Belum ada riwayat sebagai instruktur.')}</p></Card>
             )}
             {instruktur.map((i) => (
               <Card key={i.id}>
@@ -1840,29 +1845,29 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{i.materi}</p>
                     <p className="text-xs text-[#5B6660] mt-1">{i.peran}{i.peran && i.penyelenggara ? ' · ' : ''}{i.penyelenggara}{i.tahun ? ` (${i.tahun})` : ''}</p>
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteIns(i.id)}><span className="material-symbols-outlined text-[16px]">delete</span>Hapus</button>
+                  <button className={BTN_DANGER} onClick={() => deleteIns(i.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('auto_hapus', 'Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingIns ? (
               <Card>
-                <SectionTitle icon="add_circle">Tambah Riwayat Instruktur</SectionTitle>
+                <SectionTitle icon="add_circle">{t('auto_tambah_riwayat_instr', 'Tambah Riwayat Instruktur')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div className="md:col-span-2"><Label>Nama Kegiatan *</Label><input className={INPUT} value={newIns.nama} onChange={v => setNewIns({ ...newIns, nama: v.target.value })} /></div>
-                  <div><Label>Materi</Label><input className={INPUT} value={newIns.materi} onChange={v => setNewIns({ ...newIns, materi: v.target.value })} /></div>
-                  <div><Label>Penyelenggara</Label><input className={INPUT} value={newIns.penyelenggara} onChange={v => setNewIns({ ...newIns, penyelenggara: v.target.value })} /></div>
-                  <div><Label>Peran</Label><input className={INPUT} value={newIns.peran} onChange={v => setNewIns({ ...newIns, peran: v.target.value })} placeholder="Instruktur Utama / Fasilitator" /></div>
-                  <div><Label>Tahun</Label><input type="number" className={INPUT} value={newIns.tahun} onChange={v => setNewIns({ ...newIns, tahun: v.target.value })} /></div>
+                  <div className="md:col-span-2"><Label>{t('auto_nama_kegiatan', 'Nama Kegiatan *')}</Label><input className={INPUT} value={newIns.nama} onChange={v => setNewIns({ ...newIns, nama: v.target.value })} /></div>
+                  <div><Label>{t('auto_materi', 'Materi')}</Label><input className={INPUT} value={newIns.materi} onChange={v => setNewIns({ ...newIns, materi: v.target.value })} /></div>
+                  <div><Label>{t('auto_penyelenggara', 'Penyelenggara')}</Label><input className={INPUT} value={newIns.penyelenggara} onChange={v => setNewIns({ ...newIns, penyelenggara: v.target.value })} /></div>
+                  <div><Label>{t('auto_peran', 'Peran')}</Label><input className={INPUT} value={newIns.peran} onChange={v => setNewIns({ ...newIns, peran: v.target.value })} placeholder={t('auto_instruktur_utama_fas', 'Instruktur Utama / Fasilitator')} /></div>
+                  <div><Label>{t('auto_tahun', 'Tahun')}</Label><input type="number" className={INPUT} value={newIns.tahun} onChange={v => setNewIns({ ...newIns, tahun: v.target.value })} /></div>
                 </div>
                 <div className="flex gap-2">
                   <button className={BTN_PRIMARY} onClick={addIns} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
-                  <button className={BTN_GHOST} onClick={() => setAddingIns(false)}>Batal</button>
+                  <button className={BTN_GHOST} onClick={() => setAddingIns(false)}>{t('auto_batal', 'Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingIns(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>Tambah Riwayat Instruktur
-              </button>
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('auto_tambah_riwayat_instr', 'Tambah Riwayat Instruktur')}
+                                                </button>
             )}
           </div>
 
@@ -1877,7 +1882,7 @@ export default function ProfilSaya() {
         <div className="space-y-6 animate-fadeIn">
           {/* ── Foto Profil ─────────────────────────────────── */}
           <Card>
-            <SectionTitle icon="photo_camera">Foto Profil</SectionTitle>
+            <SectionTitle icon="photo_camera">{t('auto_foto_profil', 'Foto Profil')}</SectionTitle>
             <div className="flex items-start gap-6">
               {/* Foto (klik untuk buka opsi WhatsApp-style) */}
               <button
@@ -1890,12 +1895,12 @@ export default function ProfilSaya() {
               </button>
               <div className="flex flex-col gap-3 flex-1">
                 <div>
-                  <p className="text-xs font-semibold text-[#1F2A22] mb-1">Panduan Foto Profil:</p>
+                  <p className="text-xs font-semibold text-[#1F2A22] mb-1">{t('auto_panduan_foto_profil', 'Panduan Foto Profil:')}</p>
                   <ul className="text-xs text-[#5B6660] list-disc list-inside space-y-0.5">
-                    <li>Format JPG atau PNG, maksimal 2MB</li>
-                    <li>Gunakan foto formal dengan latar polos</li>
-                    <li>Wajah terlihat jelas dan profesional</li>
-                    <li><strong>Klik foto</strong> untuk mengganti, melihat, atau menghapus</li>
+                    <li>{t('auto_format_jpg_atau_png', 'Format JPG atau PNG, maksimal 2MB')}</li>
+                    <li>{t('auto_gunakan_foto_formal', 'Gunakan foto formal dengan latar polos')}</li>
+                    <li>{t('auto_wajah_terlihat_jelas', 'Wajah terlihat jelas dan profesional')}</li>
+                    <li><strong>{t('auto_klik_foto', 'Klik foto')}</strong>  {t('auto_untuk_mengganti_meli', 'untuk mengganti, melihat, atau menghapus')}</li>
                   </ul>
                 </div>
                 {/* Hidden input for file selection (triggered from modal) */}
@@ -1911,7 +1916,7 @@ export default function ProfilSaya() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-2 rounded-lg">
                       <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                      <span className="flex-1 truncate">Foto siap diupload · {(photoFile.size / 1024).toFixed(0)} KB</span>
+                      <span className="flex-1 truncate">{t('auto_foto_siap_diupload', 'Foto siap diupload ·')} {(photoFile.size / 1024).toFixed(0)} KB</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -1939,8 +1944,9 @@ export default function ProfilSaya() {
                         }}
                       >
                         <span className="material-symbols-outlined text-[16px]">close</span>
-                        Batal
-                      </button>
+                        
+                                                                      {t('auto_batal', 'Batal')}
+                                                                    </button>
                     </div>
                   </div>
                 )}
@@ -1950,7 +1956,7 @@ export default function ProfilSaya() {
 
           {/* ── Foto Cover / Background ────────────────────── */}
           <Card>
-            <SectionTitle icon="image">Foto Cover / Background</SectionTitle>
+            <SectionTitle icon="image">{t('auto_foto_cover_backgroun', 'Foto Cover / Background')}</SectionTitle>
             <div className="space-y-4">
               {/* Preview Cover */}
               {coverPreview && (
@@ -1960,7 +1966,7 @@ export default function ProfilSaya() {
                     onClick={deleteCover}
                     disabled={saving}
                     className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors disabled:opacity-50"
-                    title="Hapus foto cover"
+                    title={t('auto_hapus_foto_cover', 'Hapus foto cover')}
                   >
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
@@ -1969,12 +1975,12 @@ export default function ProfilSaya() {
 
               {/* Panduan */}
               <div>
-                <p className="text-xs font-semibold text-[#1F2A22] mb-1">Panduan Foto Cover:</p>
+                <p className="text-xs font-semibold text-[#1F2A22] mb-1">{t('auto_panduan_foto_cover', 'Panduan Foto Cover:')}</p>
                 <ul className="text-xs text-[#5B6660] list-disc list-inside space-y-0.5">
-                  <li>Format JPG atau PNG, maksimal 5MB</li>
-                  <li>Ukuran rekomendasi: 1400x400 piksel (landscape)</li>
-                  <li>Gunakan foto yang profesional dan relevan dengan keahlian Anda</li>
-                  <li>Foto ini akan ditampilkan di halaman profil dan pencarian</li>
+                  <li>{t('auto_format_jpg_atau_png', 'Format JPG atau PNG, maksimal 5MB')}</li>
+                  <li>{t('auto_ukuran_rekomendasi_1', 'Ukuran rekomendasi: 1400x400 piksel (landscape)')}</li>
+                  <li>{t('auto_gunakan_foto_yang_pr', 'Gunakan foto yang profesional dan relevan dengan keahlian Anda')}</li>
+                  <li>{t('auto_foto_ini_akan_ditamp', 'Foto ini akan ditampilkan di halaman profil dan pencarian')}</li>
                 </ul>
               </div>
 
@@ -2012,8 +2018,9 @@ export default function ProfilSaya() {
                         }}
                       >
                         <span className="material-symbols-outlined text-[16px]">close</span>
-                        Batal
-                      </button>
+                        
+                                                                      {t('auto_batal', 'Batal')}
+                                                                    </button>
                     </>
                   )}
                 </div>
@@ -2031,13 +2038,13 @@ export default function ProfilSaya() {
 
           {/* ── CV ──────────────────────────────────────────── */}
           <Card>
-            <SectionTitle icon="description">Curriculum Vitae (CV)</SectionTitle>
-            <p className="text-xs text-[#5B6660] mb-3">Format PDF, maksimal 5MB. Pastikan CV Anda terbaru dan lengkap.</p>
+            <SectionTitle icon="description">{t('auto_curriculum_vitae_cv', 'Curriculum Vitae (CV)')}</SectionTitle>
+            <p className="text-xs text-[#5B6660] mb-3">{t('auto_format_pdf_maksimal', 'Format PDF, maksimal 5MB. Pastikan CV Anda terbaru dan lengkap.')}</p>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2 items-center">
                 <label className={BTN_GHOST + ' cursor-pointer'}>
-                  <span className="material-symbols-outlined text-[16px]">upload_file</span>Pilih File CV
-                  <input
+                  <span className="material-symbols-outlined text-[16px]">upload_file</span>{t('auto_pilih_file_cv', 'Pilih File CV')}
+                                                    <input
                     type="file"
                     accept=".pdf,application/pdf"
                     className="hidden"
@@ -2073,8 +2080,9 @@ export default function ProfilSaya() {
                       }}
                     >
                       <span className="material-symbols-outlined text-[16px]">close</span>
-                      Batal
-                    </button>
+                      
+                                                                {t('auto_batal', 'Batal')}
+                                                              </button>
                   </>
                 )}
               </div>
@@ -2090,13 +2098,13 @@ export default function ProfilSaya() {
 
           {/* ── Bukti Kompetensi ────────────────────────────── */}
           <Card>
-            <SectionTitle icon="verified">Bukti Kompetensi</SectionTitle>
-            <p className="text-xs text-[#5B6660] mb-3">Sertifikat, ijazah, atau dokumen pendukung lainnya (PDF/JPG/PNG, maksimal 5MB).</p>
+            <SectionTitle icon="verified">{t('auto_bukti_kompetensi', 'Bukti Kompetensi')}</SectionTitle>
+            <p className="text-xs text-[#5B6660] mb-3">{t('auto_sertifikat_ijazah_at', 'Sertifikat, ijazah, atau dokumen pendukung lainnya (PDF/JPG/PNG, maksimal 5MB).')}</p>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2 items-center">
                 <label className={BTN_GHOST + ' cursor-pointer'}>
-                  <span className="material-symbols-outlined text-[16px]">upload_file</span>Pilih Bukti Kompetensi
-                  <input
+                  <span className="material-symbols-outlined text-[16px]">upload_file</span>{t('auto_pilih_bukti_kompeten', 'Pilih Bukti Kompetensi')}
+                                                    <input
                     type="file"
                     accept=".pdf,image/jpeg,image/jpg,image/png,application/pdf"
                     className="hidden"
@@ -2132,8 +2140,9 @@ export default function ProfilSaya() {
                       }}
                     >
                       <span className="material-symbols-outlined text-[16px]">close</span>
-                      Batal
-                    </button>
+                      
+                                                                {t('auto_batal', 'Batal')}
+                                                              </button>
                   </>
                 )}
               </div>
@@ -2172,7 +2181,7 @@ export default function ProfilSaya() {
           {/* ── Daftar Dokumen Tersimpan ─────────────────────── */}
           {documents.length > 0 ? (
             <Card>
-              <SectionTitle icon="folder_open">Dokumen Tersimpan ({documents.length})</SectionTitle>
+              <SectionTitle icon="folder_open">{t('auto_dokumen_tersimpan', 'Dokumen Tersimpan (')}{documents.length})</SectionTitle>
               <ul className="divide-y divide-outline-variant/20">
                 {documents.map((doc) => {
                   const docTypeLabel = {
@@ -2213,19 +2222,21 @@ export default function ProfilSaya() {
                               className="text-xs text-[#0284C7] hover:underline inline-flex items-center gap-1 font-medium"
                             >
                               <span className="material-symbols-outlined text-[14px]">visibility</span>
-                              Lihat & Unduh File
-                            </a>
+                              
+                                                                        {t('auto_lihat_unduh_file', 'Lihat & Unduh File')}
+                                                                      </a>
                           )}
                         </div>
                       </div>
                       <button
                         className={BTN_DANGER}
                         onClick={() => deleteDoc(doc.id)}
-                        title="Hapus dokumen"
+                        title={t('auto_hapus_dokumen', 'Hapus dokumen')}
                       >
                         <span className="material-symbols-outlined text-[16px]">delete</span>
-                        Hapus
-                      </button>
+                        
+                                                      {t('auto_hapus', 'Hapus')}
+                                                    </button>
                     </li>
                   );
                 })}
@@ -2237,8 +2248,8 @@ export default function ProfilSaya() {
                 <div className="w-16 h-16 rounded-full bg-[#F5F4F0] flex items-center justify-center mx-auto mb-3">
                   <span className="material-symbols-outlined text-3xl text-[#5B6660]/40">folder_open</span>
                 </div>
-                <p className="text-sm text-[#5B6660] mb-1">Belum ada dokumen tersimpan</p>
-                <p className="text-xs text-[#5B6660]/70">Upload foto profil, CV, atau dokumen pendukung di atas</p>
+                <p className="text-sm text-[#5B6660] mb-1">{t('auto_belum_ada_dokumen_te', 'Belum ada dokumen tersimpan')}</p>
+                <p className="text-xs text-[#5B6660]/70">{t('auto_upload_foto_profil_c', 'Upload foto profil, CV, atau dokumen pendukung di atas')}</p>
               </div>
             </Card>
           )}
@@ -2253,31 +2264,31 @@ export default function ProfilSaya() {
       {tab === 'verifikasi' && (
         <div className="space-y-6 animate-fadeIn">
           <button className={BTN_GHOST + ' self-start'} onClick={goPrev}>
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>Kembali ke {TABS[currentTabIdx - 1]?.label}
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t('auto_kembali_ke', 'Kembali ke')} {TABS[currentTabIdx - 1]?.label}
           </button>
 
           {/* ── Status Saat Ini ──────────────────────────────── */}
           <Card>
-            <SectionTitle icon="verified_user">Kirim Profil untuk Verifikasi</SectionTitle>
+            <SectionTitle icon="verified_user">{t('auto_kirim_profil_untuk_v', 'Kirim Profil untuk Verifikasi')}</SectionTitle>
             <div className="text-sm text-[#414844] leading-relaxed mb-6">
-              <p>Setelah Anda melengkapi seluruh data profil, memilih paket keanggotaan, dan mengunggah dokumen pendukung, Anda dapat mengirimkan profil ini untuk ditinjau oleh admin.</p>
-              <p className="mt-2">Pastikan semua data sudah benar karena profil tidak dapat diubah selama proses verifikasi berlangsung.</p>
+              <p>{t('auto_setelah_anda_melengk', 'Setelah Anda melengkapi seluruh data profil, memilih paket keanggotaan, dan mengunggah dokumen pendukung, Anda dapat mengirimkan profil ini untuk ditinjau oleh admin.')}</p>
+              <p className="mt-2">{t('auto_pastikan_semua_data', 'Pastikan semua data sudah benar karena profil tidak dapat diubah selama proses verifikasi berlangsung.')}</p>
             </div>
 
             {expert?.profile_status === 'aktif' ? (
               <div className="bg-[#E3F2E7] border border-[#A7D7B0] rounded-xl p-4 flex items-start gap-3">
                 <span className="material-symbols-outlined text-[#2E5E3B] text-[20px] shrink-0 mt-0.5">check_circle</span>
                 <div className="text-sm text-[#1C3822]">
-                  <p className="font-semibold mb-0.5">Profil Telah Disetujui</p>
-                  <p className="text-xs">Profil Anda sudah aktif dan tayang di direktori publik.</p>
+                  <p className="font-semibold mb-0.5">{t('auto_profil_telah_disetuj', 'Profil Telah Disetujui')}</p>
+                  <p className="text-xs">{t('auto_profil_anda_sudah_ak', 'Profil Anda sudah aktif dan tayang di direktori publik.')}</p>
                 </div>
               </div>
             ) : expert?.profile_status === 'menunggu_verifikasi' ? (
               <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
                 <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">schedule</span>
                 <div className="text-sm text-[#5C3D00]">
-                  <p className="font-semibold mb-0.5">Menunggu Verifikasi Admin</p>
-                  <p className="text-xs">Profil Anda sedang ditinjau. Kami akan memberi tahu Anda melalui email setelah proses selesai.</p>
+                  <p className="font-semibold mb-0.5">{t('auto_menunggu_verifikasi', 'Menunggu Verifikasi Admin')}</p>
+                  <p className="text-xs">{t('auto_profil_anda_sedang_d', 'Profil Anda sedang ditinjau. Kami akan memberi tahu Anda melalui email setelah proses selesai.')}</p>
                 </div>
               </div>
             ) : (
@@ -2287,8 +2298,8 @@ export default function ProfilSaya() {
                   <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
                     <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">warning</span>
                     <div className="text-sm text-[#5C3D00]">
-                      <p className="font-semibold mb-1">Lengkapi profil Anda terlebih dahulu</p>
-                      <p className="text-xs leading-relaxed mb-2">Profil baru bisa dikirim ke admin setelah bagian berikut lengkap:</p>
+                      <p className="font-semibold mb-1">{t('auto_lengkapi_profil_anda', 'Lengkapi profil Anda terlebih dahulu')}</p>
+                      <p className="text-xs leading-relaxed mb-2">{t('auto_profil_baru_bisa_dik', 'Profil baru bisa dikirim ke admin setelah bagian berikut lengkap:')}</p>
                       <ul className="text-xs list-disc list-inside space-y-0.5">
                         {missingSteps.map((s) => <li key={s}>{s}</li>)}
                       </ul>
@@ -2300,8 +2311,8 @@ export default function ProfilSaya() {
                 <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl p-4 flex items-start gap-3 mb-6">
                   <span className="material-symbols-outlined text-[#0284C7] text-[20px] shrink-0 mt-0.5">workspace_premium</span>
                   <div className="text-sm text-[#0369A1]">
-                    <p className="font-semibold mb-0.5">Syarat Verifikasi</p>
-                    <p className="text-xs">Anda harus memiliki <strong>Paket Aktif</strong> (telah memilih paket dan melunasi pembayaran) sebelum admin memproses verifikasi profil ini.</p>
+                    <p className="font-semibold mb-0.5">{t('auto_syarat_verifikasi', 'Syarat Verifikasi')}</p>
+                    <p className="text-xs">{t('auto_anda_harus_memiliki', 'Anda harus memiliki')} <strong>{t('auto_paket_aktif', 'Paket Aktif')}</strong>  {t('auto__telah_memilih_paket', '(telah memilih paket dan melunasi pembayaran) sebelum admin memproses verifikasi profil ini.')}</p>
                   </div>
                 </div>
 
@@ -2312,9 +2323,9 @@ export default function ProfilSaya() {
                     className="w-full sm:w-auto bg-[#0284C7] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#0369A1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                   >
                     {submitting ? (
-                      <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Mengirim...</>
+                      <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />  {t('auto_mengirim', 'Mengirim...')}</>
                     ) : (
-                      <><span className="material-symbols-outlined text-[20px]">send</span> Kirim Profil Sekarang</>
+                      <><span className="material-symbols-outlined text-[20px]">send</span>  {t('auto_kirim_profil_sekaran', 'Kirim Profil Sekarang')}</>
                     )}
                   </button>
                 </div>
@@ -2374,7 +2385,7 @@ export default function ProfilSaya() {
                   className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
                 >
                   <span className="material-symbols-outlined text-[24px] text-[#5B6660]">visibility</span>
-                  <span className="text-[15px] font-medium text-[#1F2A22]">Lihat Foto</span>
+                  <span className="text-[15px] font-medium text-[#1F2A22]">{t('auto_lihat_foto', 'Lihat Foto')}</span>
                 </button>
               )}
 
@@ -2383,7 +2394,7 @@ export default function ProfilSaya() {
                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
               >
                 <span className="material-symbols-outlined text-[24px] text-[#5B6660]">photo_camera</span>
-                <span className="text-[15px] font-medium text-[#1F2A22]">Ambil Foto</span>
+                <span className="text-[15px] font-medium text-[#1F2A22]">{t('auto_ambil_foto', 'Ambil Foto')}</span>
               </button>
 
               <button
@@ -2413,8 +2424,9 @@ export default function ProfilSaya() {
                 onClick={() => setPhotoModal(false)}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 mt-2 text-[14px] font-semibold text-[#5B6660] hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
               >
-                Batal
-              </button>
+                
+                                              {t('auto_batal', 'Batal')}
+                                            </button>
             </div>
           </div>
         </div>
@@ -2458,8 +2470,8 @@ export default function ProfilSaya() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/20">
               <div>
-                <h3 className="text-lg font-bold text-[#1F2A22]">Pilih Lokasi Anda</h3>
-                <p className="text-xs text-[#5B6660] mt-0.5">Klik pada peta atau geser marker untuk menandai lokasi</p>
+                <h3 className="text-lg font-bold text-[#1F2A22]">{t('auto_pilih_lokasi_anda', 'Pilih Lokasi Anda')}</h3>
+                <p className="text-xs text-[#5B6660] mt-0.5">{t('auto_klik_pada_peta_atau', 'Klik pada peta atau geser marker untuk menandai lokasi')}</p>
               </div>
               <button
                 onClick={cancelMapPicker}
@@ -2483,9 +2495,10 @@ export default function ProfilSaya() {
                   <div className="flex items-start gap-3">
                     <span className="material-symbols-outlined text-[#0EA5E9] text-[22px] shrink-0 mt-0.5">location_on</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#1F2A22] mb-1">Lokasi Terpilih</p>
+                      <p className="text-sm font-semibold text-[#1F2A22] mb-1">{t('auto_lokasi_terpilih', 'Lokasi Terpilih')}</p>
                       <p className="text-xs text-[#5B6660]">
-                        Koordinat: {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}
+                        
+                                                                      {t('auto_koordinat', 'Koordinat:')} {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}
                       </p>
                       {form.location && (
                         <p className="text-xs text-[#5B6660] mt-0.5">{form.location}</p>
@@ -2495,7 +2508,7 @@ export default function ProfilSaya() {
                 ) : (
                   <div className="flex items-center gap-2 text-sm text-[#5B6660]">
                     <span className="material-symbols-outlined text-[18px]">info</span>
-                    <span>Klik pada peta untuk menandai lokasi Anda</span>
+                    <span>{t('auto_klik_pada_peta_untuk', 'Klik pada peta untuk menandai lokasi Anda')}</span>
                   </div>
                 )}
               </div>
@@ -2532,24 +2545,27 @@ export default function ProfilSaya() {
                 className="flex items-center gap-2 text-sm font-semibold text-[#0EA5E9] hover:text-[#0284C7] transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]">my_location</span>
-                Gunakan Lokasi Saya
-              </button>
+                
+                                              {t('auto_gunakan_lokasi_saya', 'Gunakan Lokasi Saya')}
+                                            </button>
 
               <div className="flex gap-2">
                 <button
                   onClick={cancelMapPicker}
                   className={BTN_GHOST}
                 >
-                  Batal
-                </button>
+                  
+                                                    {t('auto_batal', 'Batal')}
+                                                  </button>
                 <button
                   onClick={saveMapLocation}
                   disabled={!form.lat || !form.lng}
                   className={BTN_PRIMARY + ' disabled:opacity-50 disabled:cursor-not-allowed'}
                 >
                   <span className="material-symbols-outlined text-[18px]">check</span>
-                  Pilih Lokasi Ini
-                </button>
+                  
+                                                    {t('auto_pilih_lokasi_ini', 'Pilih Lokasi Ini')}
+                                                  </button>
               </div>
             </div>
           </div>

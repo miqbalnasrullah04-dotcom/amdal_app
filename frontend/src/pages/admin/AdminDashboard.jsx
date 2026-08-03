@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../context/LanguageContext.jsx';
 import api from '../../api/client.js';
 
 const AVATAR_PALETTE = [
@@ -132,9 +132,9 @@ export default function AdminDashboard() {
 
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">Ringkasan Dashboard</h2>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">{t('admin.dashboard.overview_title', 'Ringkasan Dashboard')}</h2>
             <p className="mt-1 max-w-xl text-sm text-white/80">
-              Pantau status pendaftaran, verifikasi, dan keanggotaan TenagaAhli.com secara real-time.
+              {t('admin.dashboard.overview_desc', 'Pantau status pendaftaran, verifikasi, dan keanggotaan TenagaAhli.com secara real-time.')}
             </p>
             {lastUpdated && (
               <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-white/70">
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
             <span className={`material-symbols-outlined text-[18px] ${isLoading ? 'animate-spin' : ''}`}>
               refresh
             </span>
-            {isLoading ? 'Memuat...' : 'Segarkan'}
+            {isLoading ? t('common.loading', 'Memuat...') : t('common.refresh', 'Segarkan')}
           </button>
         </div>
 
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
       <div className="mb-6 rounded-xl border border-[#0284C7]/10 bg-white p-6 shadow-sm">
         <h3 className="mb-6 flex items-center gap-2 text-sm font-bold text-[#0F172A]">
           <span className="material-symbols-outlined text-[18px] text-[#0284C7]">route</span>
-          Alur Pendaftaran Tenaga Ahli
+          {t('admin.dashboard.flow_title', 'Alur Pendaftaran Tenaga Ahli')}
         </h3>
         <div className="flex items-start overflow-x-auto pt-3 pb-2">
           {flowSteps.map((item, i, arr) => (
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between border-b border-[#0284C7]/10 p-6">
             <h3 className="flex items-center gap-2 text-base font-bold text-[#0F172A]">
               <span className="material-symbols-outlined text-[#B45309]">pending_actions</span>
-              Profil Menunggu Verifikasi
+              {t('admin.dashboard.pending_experts', 'Profil Menunggu Verifikasi')}
               {stats.pending_verifikasi > 0 && (
                 <span className="rounded-full bg-[#B45309]/10 px-2 py-0.5 text-xs font-bold text-[#B45309]">
                   {stats.pending_verifikasi}
@@ -260,10 +260,10 @@ export default function AdminDashboard() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="bg-[#0284C7]/5 text-xs uppercase tracking-wide text-[#414844]/70">
-                  <th className="px-6 py-3 font-semibold">Nama</th>
-                  <th className="px-6 py-3 font-semibold">Email</th>
-                  <th className="px-6 py-3 font-semibold">Instansi</th>
-                  <th className="px-6 py-3 font-semibold">Bidang</th>
+                  <th className="px-6 py-3 font-semibold">{t('admin.dashboard.table_name', 'Nama')}</th>
+                  <th className="px-6 py-3 font-semibold">{t('admin.dashboard.table_email', 'Email')}</th>
+                  <th className="px-6 py-3 font-semibold">{t('admin.dashboard.table_institution', 'Instansi')}</th>
+                  <th className="px-6 py-3 font-semibold">{t('admin.dashboard.table_field', 'Bidang')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#0284C7]/10">
@@ -331,13 +331,13 @@ export default function AdminDashboard() {
         <div className="rounded-xl border border-[#0284C7]/10 bg-white p-6 shadow-sm">
           <h3 className="mb-5 flex items-center gap-2 text-base font-bold text-[#0F172A]">
             <span className="material-symbols-outlined text-[#6B4F3B]">donut_large</span>
-            Distribusi Pengguna
+            {t('admin.dashboard.user_distribution', 'Distribusi Pengguna')}
           </h3>
 
           {isLoading ? (
             <div className="h-3 w-full animate-pulse rounded-full bg-[#414844]/10" />
           ) : totalPengguna === 0 ? (
-            <p className="text-sm text-[#414844]/60">Belum ada data pengguna.</p>
+            <p className="text-sm text-[#414844]/60">{t('admin.dashboard.no_user_data', 'Belum ada data pengguna.')}</p>
           ) : (
             <>
               <div className="flex h-3 w-full overflow-hidden rounded-full bg-[#414844]/10">

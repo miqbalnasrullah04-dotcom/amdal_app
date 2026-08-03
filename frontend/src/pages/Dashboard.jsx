@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 import LevelBadge from '../components/LevelBadge.jsx';
@@ -97,7 +97,7 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-on-surface-variant uppercase tracking-wider font-bold mb-1">{t('dashboard.account_status')}</p>
+              <p className="text-xs text-on-surface-variant uppercase tracking-wider font-bold mb-1">{t('Status Akun')}</p>
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                 <span className={`inline-block w-2.5 h-2.5 rounded-full ${
                   isApproved ? 'bg-[#2E5E3B]' : 
@@ -106,19 +106,19 @@ export default function Dashboard() {
                   'bg-[#5B6660]'
                 }`}></span>
                 <p className="font-bold text-on-background text-sm">
-                  {isApproved ? t('profile.approved') : 
-                   isRejected ? t('profile.rejected') :
-                   isPending ? t('profile.pending') :
-                   t('profile.draft')}
+                  {isApproved ? t('Disetujui') : 
+                   isRejected ? t('Ditolak') :
+                   isPending ? t('Menunggu Verifikasi') :
+                   t('Draf')}
                 </p>
               </div>
               <p className="text-xs text-on-surface-variant leading-relaxed">
-                {isApproved ? t('dashboard.account_verified') : 
-                 isRejected ? t('dashboard.account_rejected') :
-                 isPending ? t('dashboard.account_pending') :
-                 needsDocumentUpload ? t('dashboard.need_documents') :
-                 hasPendingPayment ? t('dashboard.pending_payment') :
-                 t('dashboard.complete_profile')}
+                {isApproved ? t('Akun telah diverifikasi admin') : 
+                 isRejected ? t('Perlu perbaikan data') :
+                 isPending ? t('Sedang ditinjau admin') :
+                 needsDocumentUpload ? t('Perlu upload dokumen') :
+                 hasPendingPayment ? t('Menunggu pembayaran') :
+                 t('Lengkapi profil Anda')}
               </p>
             </div>
           </div>
@@ -288,7 +288,7 @@ export default function Dashboard() {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-[#5C4A00] text-base mb-2">{t('dashboard.pending_title', 'Menunggu Verifikasi Admin')}</h3>
-                <p className="text-sm text-[#5C4A00] leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: t('dashboard.pending_desc') }}>
+                <p className="text-sm text-[#5C4A00] leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: t('Terima kasih telah mendaftar! Data Anda sedang dalam proses verifikasi oleh tim kami. Harap bersabar, proses ini biasanya <strong>memakan waktu 1-3 hari kerja</strong>.') }}>
                 </p>
                 <div className="flex items-center gap-2 text-xs text-[#5C4A00]">
                   <span className="material-symbols-outlined text-[16px]">info</span>
@@ -416,7 +416,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h3 className="font-bold text-[#075985] text-lg mb-2">{t('dashboard.upgrade_premium_title', 'Tingkatkan ke Premium!')}</h3>
-                  <p className="text-sm text-[#0369A1] leading-relaxed" dangerouslySetInnerHTML={{ __html: t('dashboard.upgrade_premium_desc') }}></p>
+                  <p className="text-sm text-[#0369A1] leading-relaxed" dangerouslySetInnerHTML={{ __html: t('Dapatkan visibilitas lebih tinggi, badge premium, dan fitur unggulan lainnya dengan upgrade ke paket <strong>Premium</strong>.') }}></p>
                 </div>
               </div>
               <button
@@ -440,7 +440,7 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-[#1C3822] text-lg mb-2 flex items-center gap-2 flex-wrap">
                   {t('dashboard.published_title', 'Profil Anda Sedang Tayang!')}
-                  <span className="text-xs font-bold bg-[#2E5E3B] text-white px-2.5 py-1 rounded-full">LIVE</span>
+                  <span className="text-xs font-bold bg-[#2E5E3B] text-white px-2.5 py-1 rounded-full">{t('auto_live', 'LIVE')}</span>
                 </h3>
                 <p className="text-sm text-[#2E5E3B] leading-relaxed mb-4">
                   {t('dashboard.published_success_desc', 'Profil tenaga ahli Anda sudah aktif dan dapat dilihat oleh publik di direktori website. Pastikan data Anda selalu up-to-date agar mendapat peluang kolaborasi lebih baik.')}

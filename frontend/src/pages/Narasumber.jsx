@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import Navbar from '../components/Navbar.jsx';
 import NavbarBackground from '../components/NavbarBackground.jsx';
@@ -24,10 +25,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
-const ORDER_OPTIONS = [
-  { value: 'latest', label: 'Latest' },
-  { value: 'top_rated', label: 'Top rated' },
-  { value: 'random', label: 'Random' },
+const getOrderOptions = (t) => [
+  { value: 'latest', label: t('Terbaru') },
+  { value: 'top_rated', label: t('Rating Tertinggi') },
+  { value: 'random', label: t('Acak') },
 ];
 
 const KRITERIA_SUGGESTIONS = [
@@ -108,6 +109,8 @@ const FALLBACK_EXPERTS = [
 ];
 
 export default function Narasumber() {
+  const { t } = useTranslation();
+  const orderOptions = getOrderOptions(t);
   const [searchParams, setSearchParams] = useSearchParams();
   const { reportReady } = usePageLoading();
 
@@ -301,7 +304,7 @@ export default function Narasumber() {
     if (!map || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
-      () => alert('Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.')
+      () => alert(t('experts.location_error', 'Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.'))
     );
   };
 
@@ -317,27 +320,27 @@ export default function Narasumber() {
         <aside className="p-6 border-r border-gray-200">
           <form onSubmit={handleSearch} className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500">Masukan Kata Kunci</label>
+              <label className="text-sm text-gray-500">{t('experts.search_keyword', 'Masukan Kata Kunci')}</label>
               <input
                 className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
-                placeholder="Ahli Kehutanan, Tata Ruang"
+                placeholder={t("experts.search_keyword_placeholder", "Ahli Kehutanan, Tata Ruang")}
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500">Kota/Kabupaten/Provinsi</label>
+              <label className="text-sm text-gray-500">{t('experts.search_location', 'Kota/Kabupaten/Provinsi')}</label>
               <input
                 className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
-                placeholder="Pilih Lokasi"
+                placeholder={t("experts.search_location_placeholder", "Pilih Lokasi")}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
 
             <div className="flex flex-col gap-1 relative" ref={kriteriaBoxRef}>
-              <label className="text-sm text-gray-500">Kriteria Keanggotaan</label>
+              <label className="text-sm text-gray-500">{t('experts.membership_criteria', 'Kriteria Keanggotaan')}</label>
 
               {kriteria ? (
                 <div className="flex items-center justify-between bg-gray-100 rounded-md px-3 py-2 text-sm">
@@ -346,7 +349,7 @@ export default function Narasumber() {
                     type="button"
                     onClick={() => setKriteria('')}
                     className="text-gray-500 hover:text-black"
-                    aria-label="Hapus kriteria"
+                    aria-label={t("experts.remove_criteria", "Hapus kriteria")}
                   >
                     <XMarkIcon className="w-4 h-4" />
                   </button>
@@ -354,7 +357,7 @@ export default function Narasumber() {
               ) : (
                 <input
                   className="border-b border-gray-300 focus:border-[#0EA5E9] outline-none py-2 text-sm bg-transparent"
-                  placeholder="Ketik untuk mencari kriteria..."
+                  placeholder={t("experts.criteria_placeholder", "Ketik untuk mencari kriteria...")}
                   value={kriteriaInput}
                   onChange={(e) => setKriteriaInput(e.target.value)}
                   onFocus={() => setKriteriaOpen(true)}
@@ -378,27 +381,27 @@ export default function Narasumber() {
                     </button>
                   ))}
                   {kriteriaMatches.length === 0 && (
-                    <div className="px-4 py-2 text-xs text-gray-400">Tidak ada saran</div>
+                    <div className="px-4 py-2 text-xs text-gray-400">{t('experts.no_suggestions', 'Tidak ada saran')}</div>
                   )}
                 </div>
               )}
             </div>
 
             <div className="flex flex-col gap-1 relative" ref={orderBoxRef}>
-              <label className="text-sm text-gray-500">Order by</label>
+              <label className="text-sm text-gray-500">{t('Urutkan Berdasarkan')}</label>
               <button
                 type="button"
                 onClick={() => setOrderOpen((v) => !v)}
                 className="flex items-center justify-between border-b border-gray-300 py-2 text-sm font-semibold"
               >
-                {ORDER_OPTIONS.find((o) => o.value === order)?.label}
+                {orderOptions.find((o) => o.value === order)?.label}
                 <ChevronDownIcon
                   className={`w-4 h-4 transition-transform ${orderOpen ? 'rotate-180' : ''}`}
                 />
               </button>
               {orderOpen && (
                 <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-md z-10 overflow-hidden">
-                  {ORDER_OPTIONS.map((o) => (
+                  {orderOptions.map((o) => (
                     <button
                       key={o.value}
                       type="button"
@@ -421,13 +424,9 @@ export default function Narasumber() {
               type="submit"
               className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white py-3 rounded-full font-semibold flex items-center justify-center gap-2 transition-colors"
             >
-              <MagnifyingGlassIcon className="w-5 h-5" />
-              Search
-            </button>
+              <MagnifyingGlassIcon className="w-5 h-5" />{t('Cari')}</button>
             <button type="button" onClick={handleReset} className="text-gray-500 text-sm underline flex items-center gap-1 justify-center hover:text-gray-800">
-              <ArrowPathIcon className="w-4 h-4" />
-              Reset Filters
-            </button>
+              <ArrowPathIcon className="w-4 h-4" />{t('Reset Filter')}</button>
           </form>
         </aside>
 
@@ -438,7 +437,7 @@ export default function Narasumber() {
               <ChevronLeftIcon className="w-5 h-5" />
             </button>
             <span className="text-sm">
-              Showing <b>{sortedExperts.length}</b> result
+              {t('Menampilkan')} <b>{sortedExperts.length}</b> {t('hasil')}
             </span>
             <button onClick={goNext} className="p-2 disabled:opacity-30" disabled={!sortedExperts.length}>
               <ChevronRightIcon className="w-5 h-5" />
@@ -447,9 +446,9 @@ export default function Narasumber() {
 
           {!loading && sortedExperts.length === 0 && (
             <div className="text-center text-gray-500 text-sm py-16 px-6">
-              Tidak ada tenaga ahli yang cocok.
+              {t('experts.no_results', 'Tidak ada tenaga ahli yang cocok.')}
               <br />
-              Coba ubah kata kunci atau filter lokasi.
+              {t('experts.try_change_keywords', 'Coba ubah kata kunci atau filter lokasi.')}
             </div>
           )}
 
@@ -475,9 +474,7 @@ export default function Narasumber() {
                       to={`/profil/${expert.slug}`}
                       onClick={(e) => e.stopPropagation()}
                       className="absolute top-3 right-3 bg-white/90 hover:bg-white text-xs font-semibold text-[#0284C7] rounded-full px-3 py-1.5 transition-colors"
-                    >
-                      Lihat Profil
-                    </Link>
+                    >{t('Lihat Profil')}</Link>
                   )}
                   
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center gap-2">
@@ -509,7 +506,7 @@ export default function Narasumber() {
               checked={searchAsMove}
               onChange={(e) => setSearchAsMove(e.target.checked)}
             />
-            Search as I move the map
+            {t('Cari saat peta digeser')}
           </label>
 
           <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">

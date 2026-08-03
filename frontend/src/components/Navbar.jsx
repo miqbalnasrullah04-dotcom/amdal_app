@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import logo from '../assets/logo-tenaga-ahli.png';
 import api from '../api/client.js';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
@@ -22,11 +22,11 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const navLinks = [
-    { to: '/', label: t('navbar.home') },
-    { to: '/tentang-kami', label: t('navbar.about') },
-    { to: '/member', label: t('navbar.members') },
-    { to: '/peraturan-amdal', label: t('navbar.regulations') },
-    { to: '/pamflet', label: t('navbar.pamphlets') },
+    { to: '/', label: t('Beranda') },
+    { to: '/tentang-kami', label: t('Tentang Kami') },
+    { to: '/member', label: t('Anggota') },
+    { to: '/peraturan-amdal', label: t('Peraturan AMDAL') },
+    { to: '/pamflet', label: t('Pamflet') },
   ];
 
   // Helper untuk resolve foto URL (sama seperti di ProfilSaya)
@@ -216,7 +216,7 @@ export default function Navbar() {
                       className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[18px] text-gray-400">dashboard</span>
-                      {t('navbar.dashboard')}
+                      {t('Dashboard')}
                     </Link>
 
                     <Link
@@ -225,7 +225,7 @@ export default function Navbar() {
                       className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[18px] text-gray-400">person</span>
-                      {t('navbar.profile')}
+                      {t('Profil Saya')}
                     </Link>
 
                     <hr className="border-gray-100 my-1" />
@@ -235,7 +235,7 @@ export default function Navbar() {
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#B3261E] hover:bg-red-50 transition-colors text-left font-medium"
                     >
                       <span className="material-symbols-outlined text-[18px]">logout</span>
-                      {t('navbar.logout')}
+                      {t('Keluar')}
                     </button>
                   </div>
                 )}
@@ -251,7 +251,7 @@ export default function Navbar() {
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE)}
               >
                 <span className="material-symbols-outlined text-[18px]">person_add</span>
-                {t('navbar.register')}
+                {t('Daftar')}
               </Link>
             )}
           </div>

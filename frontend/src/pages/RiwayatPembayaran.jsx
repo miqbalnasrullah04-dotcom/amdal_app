@@ -1,3 +1,4 @@
+import { useTranslation } from '../context/LanguageContext.jsx';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
@@ -23,6 +24,7 @@ function formatRupiah(value) {
 }
 
 export default function RiwayatPembayaran() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(location.state?.tab || 'riwayat'); // tagihan, riwayat

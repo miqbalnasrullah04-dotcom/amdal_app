@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 const PRIORITIES = {
   rendah: { label: 'Rendah', color: '#2E5E3B', bg: '#E3F2E7' },
@@ -69,6 +70,7 @@ function formatDate(dateStr) {
 }
 
 export default function Tiket() {
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState(DEMO_TICKETS);
   const [activeTab, setActiveTab] = useState('daftar'); // daftar | buat
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -82,7 +84,7 @@ export default function Tiket() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState('');
 
-  const filteredTickets = filter === 'semua' ? tickets : tickets.filter((t) => t.status === filter);
+  const filteredTickets = filter === 'semua' ? tickets : tickets.filter((tk) => tk.status === filter);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -121,7 +123,7 @@ export default function Tiket() {
     const p = PRIORITIES[selectedTicket.prioritas];
     return (
       <DashboardLayout
-        title="Detail Tiket"
+        title={t('auto_detail_tiket', 'Detail Tiket')}
         subtitle={selectedTicket.id}
         headerRight={
           <button
@@ -129,8 +131,9 @@ export default function Tiket() {
             className="text-sm font-bold text-[#0284C7] hover:underline flex items-center gap-1"
           >
             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-            Kembali
-          </button>
+            
+                            {t('auto_kembali', 'Kembali')}
+                          </button>
         }
       >
         <div className="space-y-5 animate-fadeIn">
@@ -149,32 +152,33 @@ export default function Tiket() {
                   className="text-[10px] font-bold px-2.5 py-1 rounded-full"
                   style={{ color: p.color, backgroundColor: p.bg }}
                 >
-                  Prioritas {p.label}
+                  
+                                                  {t('auto_prioritas', 'Prioritas')} {p.label}
                 </span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mb-5">
               <div>
-                <span className="text-[#414844]/60 block font-medium">ID Tiket</span>
+                <span className="text-[#414844]/60 block font-medium">{t('auto_id_tiket', 'ID Tiket')}</span>
                 <span className="font-bold text-[#1F2A22]">{selectedTicket.id}</span>
               </div>
               <div>
-                <span className="text-[#414844]/60 block font-medium">Kategori</span>
+                <span className="text-[#414844]/60 block font-medium">{t('auto_kategori', 'Kategori')}</span>
                 <span className="font-bold text-[#1F2A22]">{selectedTicket.kategori}</span>
               </div>
               <div>
-                <span className="text-[#414844]/60 block font-medium">Dibuat</span>
+                <span className="text-[#414844]/60 block font-medium">{t('auto_dibuat', 'Dibuat')}</span>
                 <span className="font-bold text-[#1F2A22]">{formatDate(selectedTicket.created_at)}</span>
               </div>
               <div>
-                <span className="text-[#414844]/60 block font-medium">Update Terakhir</span>
+                <span className="text-[#414844]/60 block font-medium">{t('auto_update_terakhir', 'Update Terakhir')}</span>
                 <span className="font-bold text-[#1F2A22]">{formatDate(selectedTicket.updated_at)}</span>
               </div>
             </div>
 
             <div className="border-t border-black/5 pt-4">
-              <p className="text-xs font-bold text-[#414844]/60 uppercase tracking-wide mb-2">Pesan Anda</p>
+              <p className="text-xs font-bold text-[#414844]/60 uppercase tracking-wide mb-2">{t('auto_pesan_anda', 'Pesan Anda')}</p>
               <div className="bg-[#F5F4EF] rounded-xl p-4 text-sm text-[#414844] leading-relaxed">
                 {selectedTicket.pesan}
               </div>
@@ -183,11 +187,11 @@ export default function Tiket() {
 
           {/* Balasan */}
           <Card className="p-6">
-            <SectionTitle icon="forum">Balasan</SectionTitle>
+            <SectionTitle icon="forum">{t('auto_balasan', 'Balasan')}</SectionTitle>
             {selectedTicket.balasan.length === 0 ? (
               <div className="text-center py-8">
                 <span className="material-symbols-outlined text-[40px] text-[#0284C7]/20 mb-2 block">forum</span>
-                <p className="text-sm text-[#414844]/60">Belum ada balasan. Tim kami akan segera merespons.</p>
+                <p className="text-sm text-[#414844]/60">{t('auto_belum_ada_balasan_ti', 'Belum ada balasan. Tim kami akan segera merespons.')}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -225,7 +229,7 @@ export default function Tiket() {
   }
 
   return (
-    <DashboardLayout title="Tiket Bantuan" subtitle="Sampaikan kendala atau pertanyaan teknis ke tim Admin.">
+    <DashboardLayout title={t('auto_tiket_bantuan', 'Tiket Bantuan')} subtitle={t('auto_tiket_subtitle', 'Sampaikan kendala atau pertanyaan teknis ke tim Admin.')}>
       <div className="space-y-5 animate-fadeIn">
         {/* Tab switch */}
         <div className="flex gap-2">
@@ -238,8 +242,9 @@ export default function Tiket() {
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">list_alt</span>
-            Daftar Tiket
-          </button>
+            
+                                  {t('auto_daftar_tiket', 'Daftar Tiket')}
+                                </button>
           <button
             onClick={() => { setActiveTab('buat'); setSuccess(''); }}
             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
@@ -249,8 +254,9 @@ export default function Tiket() {
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
-            Buat Tiket Baru
-          </button>
+            
+                                  {t('auto_buat_tiket_baru', 'Buat Tiket Baru')}
+                                </button>
         </div>
 
         {/* ── DAFTAR TIKET ── */}
@@ -268,7 +274,7 @@ export default function Tiket() {
                       : 'bg-[#0284C7]/5 text-[#414844] hover:bg-[#0284C7]/10'
                   }`}
                 >
-                  {f === 'semua' ? 'Semua' : STATUS_MAP[f]?.label || f}
+                  {f === 'semua' ? t('auto_semua', 'Semua') : STATUS_MAP[f]?.label || f}
                 </button>
               ))}
             </div>
@@ -278,17 +284,19 @@ export default function Tiket() {
                 <span className="material-symbols-outlined text-[56px] text-[#0284C7]/20 mb-3 block">
                   confirmation_number
                 </span>
-                <h3 className="text-base font-bold text-[#1F2A22] mb-1">Tidak ada tiket</h3>
+                <h3 className="text-base font-bold text-[#1F2A22] mb-1">{t('auto_tidak_ada_tiket', 'Tidak ada tiket')}</h3>
                 <p className="text-sm text-[#414844]/60 mb-4">
-                  Anda belum memiliki tiket bantuan{filter !== 'semua' ? ` dengan status "${STATUS_MAP[filter]?.label}"` : ''}.
+                  
+                                                    {t('auto_anda_belum_memiliki', 'Anda belum memiliki tiket bantuan')}{filter !== 'semua' ? t('auto_dengan_status', ` dengan status "${STATUS_MAP[filter]?.label}"`) : ''}.
                 </p>
                 <button
                   onClick={() => setActiveTab('buat')}
                   className="text-sm font-bold text-[#0284C7] hover:underline inline-flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[16px]">add</span>
-                  Buat tiket baru
-                </button>
+                  
+                                                    {t('auto_buat_tiket_baru', 'Buat tiket baru')}
+                                                  </button>
               </div>
             ) : (
               <div className="divide-y divide-black/5">
@@ -336,8 +344,8 @@ export default function Tiket() {
                           {ticket.balasan.length > 0 && (
                             <span className="text-[10px] text-[#0284C7] font-bold flex items-center gap-0.5">
                               <span className="material-symbols-outlined text-[12px]">reply</span>
-                              {ticket.balasan.length} balasan
-                            </span>
+                              {ticket.balasan.length}  {t('auto_balasan', 'balasan')}
+                                                                      </span>
                           )}
                         </div>
                       </div>
@@ -355,7 +363,7 @@ export default function Tiket() {
         {/* ── BUAT TIKET BARU ── */}
         {activeTab === 'buat' && (
           <Card className="p-6">
-            <SectionTitle icon="edit_note">Formulir Tiket Baru</SectionTitle>
+            <SectionTitle icon="edit_note">{t('auto_formulir_tiket_baru', 'Formulir Tiket Baru')}</SectionTitle>
 
             {success && (
               <div className="flex items-start gap-2 bg-[#E3F2E7] text-[#2E5E3B] text-sm rounded-xl p-4 mb-5">
@@ -367,14 +375,15 @@ export default function Tiket() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="text-xs font-bold uppercase tracking-wide text-[#414844]/60 block mb-1.5">
-                  Judul Tiket *
-                </label>
+                  
+                                                    {t('auto_judul_tiket', 'Judul Tiket *')}
+                                                  </label>
                 <input
                   type="text"
                   value={judul}
                   onChange={(e) => setJudul(e.target.value)}
                   required
-                  placeholder="Contoh: Gagal upload dokumen CV"
+                  placeholder={t('auto_contoh_gagal_upload', 'Contoh: Gagal upload dokumen CV')}
                   className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0284C7]/30 focus:border-[#0284C7] transition-all"
                 />
               </div>
@@ -382,15 +391,16 @@ export default function Tiket() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wide text-[#414844]/60 block mb-1.5">
-                    Kategori *
-                  </label>
+                    
+                                                          {t('auto_kategori', 'Kategori *')}
+                                                        </label>
                   <select
                     value={kategori}
                     onChange={(e) => setKategori(e.target.value)}
                     required
                     className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0284C7]/30 focus:border-[#0284C7] transition-all"
                   >
-                    <option value="">Pilih kategori...</option>
+                    <option value="">{t('auto_pilih_kategori', 'Pilih kategori...')}</option>
                     {KATEGORI_OPTIONS.map((k) => (
                       <option key={k} value={k}>
                         {k}
@@ -400,8 +410,9 @@ export default function Tiket() {
                 </div>
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wide text-[#414844]/60 block mb-1.5">
-                    Prioritas
-                  </label>
+                    
+                                                          {t('auto_prioritas', 'Prioritas')}
+                                                        </label>
                   <div className="flex gap-2">
                     {Object.entries(PRIORITIES).map(([key, val]) => (
                       <button
@@ -428,14 +439,15 @@ export default function Tiket() {
 
               <div>
                 <label className="text-xs font-bold uppercase tracking-wide text-[#414844]/60 block mb-1.5">
-                  Deskripsi Masalah *
-                </label>
+                  
+                                                    {t('auto_deskripsi_masalah', 'Deskripsi Masalah *')}
+                                                  </label>
                 <textarea
                   value={pesan}
                   onChange={(e) => setPesan(e.target.value)}
                   required
                   rows={5}
-                  placeholder="Jelaskan kendala yang Anda alami secara detail..."
+                  placeholder={t('auto_jelaskan_kendala_yan', 'Jelaskan kendala yang Anda alami secara detail...')}
                   className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0284C7]/30 focus:border-[#0284C7] transition-all resize-none"
                 />
               </div>
@@ -449,13 +461,15 @@ export default function Tiket() {
                   {submitting ? (
                     <>
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Mengirim...
-                    </>
+                      
+                                                                {t('auto_mengirim', 'Mengirim...')}
+                                                              </>
                   ) : (
                     <>
                       <span className="material-symbols-outlined text-[18px]">send</span>
-                      Kirim Tiket
-                    </>
+                      
+                                                                    {t('auto_kirim_tiket', 'Kirim Tiket')}
+                                                                  </>
                   )}
                 </button>
               </div>

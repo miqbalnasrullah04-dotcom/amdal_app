@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
 import logo from '../assets/tenaga ahli 2.png';
+import { useTranslation } from '../context/LanguageContext.jsx';
 
 /* ─── helpers ─────────────────────────────────────────────────── */
 function formatRupiah(v) {
@@ -90,6 +91,7 @@ function InfoRow({ label, value, mono = false }) {
 
 /* ─── Main ─────────────────────────────────────────────────────── */
 export default function Invoice() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const printRef = useRef(null);
@@ -120,7 +122,7 @@ export default function Invoice() {
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#F0F4F8' }}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#0EA5E9] animate-spin" />
-          <p className="text-gray-500 text-sm font-medium">Memuat invoice...</p>
+          <p className="text-gray-500 text-sm font-medium">{t('auto_memuat_invoice', 'Memuat invoice...')}</p>
         </div>
       </div>
     );
@@ -133,16 +135,16 @@ export default function Invoice() {
         <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-5">
           <span className="material-symbols-outlined text-4xl text-gray-400">receipt_long</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Invoice Tidak Ditemukan</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('auto_invoice_tidak_ditemu', 'Invoice Tidak Ditemukan')}</h1>
         <p className="text-gray-500 mb-6 max-w-sm">
-          Tagihan yang Anda cari tidak ada atau Anda tidak memiliki akses ke invoice ini.
+          {t('auto_tagihan_yang_anda_ca', 'Tagihan yang Anda cari tidak ada atau Anda tidak memiliki akses ke invoice ini.')}
         </p>
         <button
           onClick={() => navigate('/pembayaran')}
           className="bg-[#0EA5E9] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#0284C7] transition-colors flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-          Kembali ke Pembayaran
+          {t('auto_kembali_ke_pembayara', 'Kembali ke Pembayaran')}
         </button>
       </div>
     );
@@ -152,44 +154,49 @@ export default function Invoice() {
   
   const handlePay = () => {
     if (order?.snap_token) {
-      if (!window.snap) {
-        const script = document.createElement('script');
-        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-        script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || '');
-        document.head.appendChild(script);
-        script.onload = () => {
-          window.snap.pay(order.snap_token, {
-            onSuccess: () => window.location.reload(),
-            onPending: () => window.location.reload(),
-            onError: () => alert('Pembayaran gagal, silakan coba lagi.'),
-            onClose: () => {}
-          });
-        };
-      } else {
+      const isProd = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === '1';
+      const snapUrl = isProd
+        ? 'https://app.midtrans.com/snap/snap.js'
+        : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+      const openSnap = () => {
         window.snap.pay(order.snap_token, {
           onSuccess: () => window.location.reload(),
           onPending: () => window.location.reload(),
           onError: () => alert('Pembayaran gagal, silakan coba lagi.'),
           onClose: () => {}
         });
+      };
+
+      if (!window.snap) {
+        const script = document.createElement('script');
+        script.src = snapUrl;
+        script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || '');
+        document.head.appendChild(script);
+        script.onload = () => {
+          openSnap();
+        };
+      } else {
+        openSnap();
       }
     } else {
       navigate('/pembayaran');
     }
   };
+
   const isPaid = order.status === 'verified';
   const isPending = order.status === 'menunggu_pembayaran';
   
-  // Format dates strictly for the new layout
+  // Format dates strictly for the layout
   const rawCreatedAt = new Date(order.created_at);
   const invoiceDateShort = rawCreatedAt.toLocaleDateString('id-ID', {
     day: '2-digit', month: '2-digit', year: 'numeric'
-  }); // 24/07/2026
+  });
   
   const dueRaw = new Date(rawCreatedAt.getTime() + 3 * 24 * 60 * 60 * 1000);
   const dueDateLong = dueRaw.toLocaleDateString('en-GB', {
     day: 'numeric', month: 'long', year: 'numeric'
-  }); // 24 July 2026
+  });
 
   const invoiceNumber = order.reference_code || order.id;
   const amount = order.amount ?? 0;
@@ -230,17 +237,17 @@ export default function Invoice() {
         <div className="no-print max-w-[800px] mx-auto mb-6 flex justify-between items-center">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 font-semibold text-sm">
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            Kembali
+            {t('auto_kembali', 'Kembali')}
           </button>
           <div className="flex gap-2">
             {!isPaid && (
               <button onClick={handlePay} className="bg-[#0284C7] text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors shadow-sm">
-                Bayar Sekarang
+                {t('auto_bayar_sekarang', 'Bayar Sekarang')}
               </button>
             )}
             <button onClick={() => window.print()} className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors border border-gray-300 shadow-sm">
               <span className="material-symbols-outlined text-[18px]">print</span>
-              Cetak
+              {t('auto_cetak', 'Cetak')}
             </button>
           </div>
         </div>
@@ -252,7 +259,7 @@ export default function Invoice() {
           <div className="flex justify-between items-start mb-8">
             <img src={logo} alt="TenagaAhli.com" className="h-10 w-auto" style={{ filter: 'grayscale(0%)' }} />
             <div className="text-right">
-              <h1 className="text-3xl font-extrabold text-[#374151] tracking-tight uppercase">INVOICE</h1>
+              <h1 className="text-3xl font-extrabold text-[#374151] tracking-tight uppercase">{t('auto_invoice', 'INVOICE')}</h1>
               <p className="text-[#4B5563] text-sm font-semibold mt-1">{invoiceNumber}</p>
             </div>
           </div>
@@ -260,7 +267,7 @@ export default function Invoice() {
           {/* Due Date Pill */}
           <div className="mb-8">
             <span className="inline-block bg-[#FEF3C7] text-[#92400E] px-4 py-1.5 rounded-full text-sm font-bold">
-              Due date: {dueDateLong}
+              {t('auto_due_date', 'Due date:')} {dueDateLong}
             </span>
           </div>
 
@@ -268,21 +275,21 @@ export default function Invoice() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-[13px]">
             {/* From */}
             <div className="pr-4">
-              <p className="font-bold text-gray-900 mb-1">From:</p>
+              <p className="font-bold text-gray-900 mb-1">{t('auto_from', 'From:')}</p>
               <p className="text-gray-700 leading-relaxed">
-                TenagaAhli.com<br />
-                Jl. Contoh Alamat No.123<br />
-                Jakarta Selatan, 12345<br />
+                {t('auto_tenagaahli_com', 'TenagaAhli.com')}<br />
+                {t('auto_jl_contoh_alamat_no', 'Jl. Contoh Alamat No.123')}<br />
+                {t('auto_jakarta_selatan_1234', 'Jakarta Selatan, 12345')}<br />
                 +62 858 83658814<br />
-                www.tenagaahli.com<br />
-                support@tenagaahli.com<br />
-                NPWP: 10 000 000 0 000 000
+                {t('auto_www_tenagaahli_com', 'www.tenagaahli.com')}<br />
+                {t('auto_support_tenagaahli_c', 'support@tenagaahli.com')}<br />
+                {t('auto_npwp_10_000_000_0_00', 'NPWP: 10 000 000 0 000 000')}
               </p>
             </div>
 
             {/* Bill to */}
             <div className="pr-4">
-              <p className="font-bold text-gray-900 mb-1">Bill to:</p>
+              <p className="font-bold text-gray-900 mb-1">{t('auto_bill_to', 'Bill to:')}</p>
               <p className="text-gray-700 leading-relaxed">
                 {customerName}<br />
                 {order.user?.email || user?.email || '-'}<br />
@@ -293,16 +300,16 @@ export default function Invoice() {
             {/* Pay via */}
             <div>
               <div className="bg-[#F3F4F6] rounded-xl p-4 w-full h-full">
-                <p className="font-bold text-gray-900 mb-1">Pay via:</p>
+                <p className="font-bold text-gray-900 mb-1">{t('auto_pay_via', 'Pay via:')}</p>
                 {isPaid ? (
-                  <p className="text-gray-700 font-medium">LUNAS (Midtrans)</p>
+                  <p className="text-gray-700 font-medium">{t('auto_lunas_midtrans', 'LUNAS (Midtrans)')}</p>
                 ) : (
-                  <p className="text-gray-700 font-medium">Midtrans Payment Link / Snap</p>
+                  <p className="text-gray-700 font-medium">{t('auto_midtrans_payment_lin', 'Midtrans Payment Link / Snap')}</p>
                 )}
                 {isPaid && (
                   <div className="mt-2 text-green-600 font-bold flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                    PAID
+                    {t('auto_paid', 'PAID')}
                   </div>
                 )}
               </div>
@@ -311,17 +318,17 @@ export default function Invoice() {
 
           {/* Reference */}
           <div className="mb-8 text-[13px]">
-            <span className="font-bold text-gray-900 mr-2">Reference:</span>
-            <span className="text-gray-700">Invoice for TenagaAhli {order.package_name || 'Premium'} Subscription</span>
+            <span className="font-bold text-gray-900 mr-2">{t('auto_reference', 'Reference:')}</span>
+            <span className="text-gray-700">{t('auto_invoice_for_tenagaah', 'Invoice for TenagaAhli')} {order.package_name || 'Premium'} {t('auto_subscription', 'Subscription')}</span>
           </div>
 
           {/* Amount Due Header */}
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-900 mb-1">
-              Total amount due: {formatRupiah(amount)}
+              {t('auto_total_amount_due', 'Total amount due:')} {formatRupiah(amount)}
             </h2>
             <p className="text-sm font-bold text-gray-900">
-              Order ID: <span className="font-semibold">{invoiceNumber}</span>
+              {t('auto_order_id', 'Order ID:')} <span className="font-semibold">{invoiceNumber}</span>
             </p>
           </div>
 
@@ -329,17 +336,17 @@ export default function Invoice() {
           <div className="w-full text-[13px]">
             {/* Thead */}
             <div className="flex font-bold text-gray-900 py-3 border-b border-gray-200">
-              <div className="flex-[4]">Description</div>
-              <div className="flex-1 text-center">Qty</div>
-              <div className="flex-[1.5] text-right">Price (Rp)</div>
-              <div className="flex-[1.5] text-right">Total (Rp)</div>
+              <div className="flex-[4]">{t('auto_description', 'Description')}</div>
+              <div className="flex-1 text-center">{t('auto_qty', 'Qty')}</div>
+              <div className="flex-[1.5] text-right">{t('auto_price_rp', 'Price (Rp)')}</div>
+              <div className="flex-[1.5] text-right">{t('auto_total_rp', 'Total (Rp)')}</div>
             </div>
             
             {/* Row */}
             <div className="flex text-gray-700 py-3 border-b border-gray-100">
               <div className="flex-[4] pr-4">
-                <p className="mb-1">{order.package_name || 'Premium'} Package Subscription</p>
-                <p className="text-gray-500 text-[12px]">Langganan 1 Tahun TenagaAhli</p>
+                <p className="mb-1">{order.package_name || 'Premium'} {t('auto_package_subscription', 'Package Subscription')}</p>
+                <p className="text-gray-500 text-[12px]">{t('auto_langganan_1_tahun_te', 'Langganan 1 Tahun TenagaAhli')}</p>
               </div>
               <div className="flex-1 text-center">1</div>
               <div className="flex-[1.5] text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
@@ -348,23 +355,23 @@ export default function Invoice() {
 
             {/* Footer rows */}
             <div className="flex justify-end py-2">
-              <div className="font-bold text-gray-900 w-32 text-right pr-6">Subtotal</div>
+              <div className="font-bold text-gray-900 w-32 text-right pr-6">{t('auto_subtotal', 'Subtotal')}</div>
               <div className="text-gray-700 w-24 text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
             </div>
             <div className="flex justify-end py-2">
-              <div className="text-gray-600 w-32 text-right pr-6">Discount</div>
+              <div className="text-gray-600 w-32 text-right pr-6">{t('auto_discount', 'Discount')}</div>
               <div className="text-gray-700 w-24 text-right">0</div>
             </div>
             <div className="flex justify-end py-2">
-              <div className="text-gray-600 w-32 text-right pr-6">Tax</div>
+              <div className="text-gray-600 w-32 text-right pr-6">{t('auto_tax', 'Tax')}</div>
               <div className="text-gray-700 w-24 text-right">0</div>
             </div>
             <div className="flex justify-end py-2 border-b border-gray-200">
-              <div className="text-gray-600 w-32 text-right pr-6">Shipping</div>
+              <div className="text-gray-600 w-32 text-right pr-6">{t('auto_shipping', 'Shipping')}</div>
               <div className="text-gray-700 w-24 text-right">0</div>
             </div>
             <div className="flex justify-end py-3">
-              <div className="font-bold text-gray-900 w-48 text-right pr-6">Total amount due</div>
+              <div className="font-bold text-gray-900 w-48 text-right pr-6">{t('auto_total_amount_due', 'Total amount due')}</div>
               <div className="font-bold text-gray-900 w-24 text-right">{formatRupiah(amount).replace('Rp', '').trim()}</div>
             </div>
           </div>
@@ -373,8 +380,8 @@ export default function Invoice() {
           <div className="flex justify-end mt-12 mb-16 mr-10">
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="font-bold text-[13px] text-gray-900">Admin TenagaAhli,</p>
-                <p className="font-bold text-[13px] text-gray-900">Director</p>
+                <p className="font-bold text-[13px] text-gray-900">{t('auto_admin_tenagaahli', 'Admin TenagaAhli,')}</p>
+                <p className="font-bold text-[13px] text-gray-900">{t('auto_director', 'Director')}</p>
               </div>
               {/* Dummy signature drawn with SVG to mimic the blue signature */}
               <svg width="80" height="50" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80">
@@ -386,22 +393,22 @@ export default function Invoice() {
 
           {/* Footer Notes */}
           <div className="grid grid-cols-[100px_1fr] gap-4 text-[12px] text-gray-700 mb-6">
-            <div className="font-bold text-gray-900">Notes</div>
+            <div className="font-bold text-gray-900">{t('auto_notes', 'Notes')}</div>
             <div>
-              Please pay via payment link or VA number provided. Be sure to pay before the due date mentioned above.
+              {t('auto_please_pay_via_payme', 'Please pay via payment link or VA number provided. Be sure to pay before the due date mentioned above.')}
             </div>
-            <div className="font-bold text-gray-900">Terms &<br/>Conditions</div>
+            <div className="font-bold text-gray-900">{t('auto_terms', 'Terms &')}<br/>{t('auto_conditions', 'Conditions')}</div>
             <div>
-              Access to premium features will be granted immediately upon successful payment verification. Contact support for any billing issues.
+              {t('auto_access_to_premium_fe', 'Access to premium features will be granted immediately upon successful payment verification. Contact support for any billing issues.')}
             </div>
           </div>
 
           {/* Bottom Branding */}
           <div className="flex justify-between items-center text-[11px] pt-4 border-t border-gray-100">
             <div className="flex items-center gap-1 text-gray-400">
-              Powered by <span className="font-bold text-[#0EA5E9] ml-1 tracking-tighter text-sm">midtrans</span>
+              {t('auto_powered_by', 'Powered by')} <span className="font-bold text-[#0EA5E9] ml-1 tracking-tighter text-sm">{t('auto_midtrans', 'midtrans')}</span>
             </div>
-            <div className="font-bold text-gray-900">Page 1 of 1</div>
+            <div className="font-bold text-gray-900">{t('auto_page_1_of_1', 'Page 1 of 1')}</div>
           </div>
 
         </div>

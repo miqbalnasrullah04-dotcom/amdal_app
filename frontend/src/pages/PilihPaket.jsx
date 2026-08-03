@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 
@@ -40,7 +40,7 @@ const STATIC_PACKAGES = [
 ];
 
 function formatRupiah(value, t) {
-  if (value === 0) return t('packages.free');
+  if (value === 0) return t('Gratis');
   return new Intl.NumberFormat('id-ID', {
     style: 'currency', currency: 'IDR', maximumFractionDigits: 0,
   }).format(value);
@@ -98,7 +98,7 @@ export default function PilihPaket() {
 
       if (selected.price === 0) {
         // Paket Free langsung aktif
-        navigate('/dashboard', { state: { message: t('packages.freeActivated') } });
+        navigate('/dashboard', { state: { message: t('Paket Free berhasil diaktifkan!') } });
       } else {
         // Paket Premium - arahkan ke halaman Invoice untuk pembayaran
         if (res.data?.order?.id) {
@@ -111,7 +111,7 @@ export default function PilihPaket() {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || t('packages.errorChoosing'));
+      setError(err.response?.data?.message || t('Gagal memilih paket. Coba lagi.'));
       setSubmitting(false);
     }
   };
@@ -119,12 +119,12 @@ export default function PilihPaket() {
   if (loading) {
     return (
       <DashboardLayout
-        title={t('packages.title')}
-        subtitle={t('packages.subtitle')}
+        title={t('Pilih Paket')}
+        subtitle={t('Pilih paket yang sesuai untuk mengaktifkan publikasi profil Anda.')}
       >
         <div className="flex items-center gap-3 text-[#5B6660]">
           <span className="w-5 h-5 rounded-full border-2 border-[#0EA5E9]/30 border-t-[#0EA5E9] animate-spin" />
-          {t('packages.loading')}
+          {t('Memuat data paket...')}
         </div>
       </DashboardLayout>
     );
@@ -132,8 +132,8 @@ export default function PilihPaket() {
 
   return (
     <DashboardLayout
-      title={t('packages.title')}
-      subtitle={t('packages.subtitle')}
+      title={t('Pilih Paket')}
+      subtitle={t('Pilih paket yang sesuai untuk mengaktifkan publikasi profil Anda.')}
     >
       <div className="w-full max-w-3xl">
         {error && (
@@ -169,7 +169,7 @@ export default function PilihPaket() {
                   {isActive && (
                     <span className="self-start text-[10px] font-bold uppercase tracking-wide bg-[#2E5E3B] text-white px-2.5 py-1 rounded-full flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px]">check_circle</span>
-                      {t('packages.active')}
+                      {t('Aktif')}
                     </span>
                   )}
                 </div>
@@ -199,7 +199,7 @@ export default function PilihPaket() {
                   <div className="w-full text-center text-sm font-semibold py-2.5 rounded-xl border-2 bg-[#E3F2E7] text-[#2E5E3B] border-[#2E5E3B]">
                     <span className="flex items-center justify-center gap-1.5">
                       <span className="material-symbols-outlined text-[16px]">verified</span>
-                      {t('packages.yourCurrentPackage')}
+                      {t('Paket Saat Ini')}
                     </span>
                   </div>
                 ) : (
@@ -211,9 +211,9 @@ export default function PilihPaket() {
                     {isSelected ? (
                       <span className="flex items-center justify-center gap-1.5">
                         <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                        {t('packages.selected')}
+                        {t('Dipilih')}
                       </span>
-                    ) : (pkg.id === 'premium' ? t('packages.upgradeNow') : t('packages.selectThisPackage'))}
+                    ) : (pkg.id === 'premium' ? t('Upgrade Sekarang') : t('Pilih Paket Ini'))}
                   </div>
                 )}
               </button>
@@ -224,8 +224,8 @@ export default function PilihPaket() {
         <div className="bg-[#E0F2FE] rounded-xl p-4 mb-8 flex gap-3 text-sm text-[#075985]">
           <span className="material-symbols-outlined text-[#0284C7] text-[20px] shrink-0 mt-0.5">info</span>
           <div>
-            <p className="font-semibold mb-1">{t('packages.aboutPackages.title')}</p>
-            <p className="leading-relaxed" dangerouslySetInnerHTML={{ __html: t('packages.aboutPackages.desc') }} />
+            <p className="font-semibold mb-1">{t('Tentang Paket Free & Premium')}</p>
+            <p className="leading-relaxed" dangerouslySetInnerHTML={{ __html: t('Paket Free langsung aktif tanpa biaya. Paket Premium memerlukan pembayaran dan akan diaktifkan setelah konfirmasi pembayaran oleh admin.') }} />
           </div>
         </div>
 
@@ -233,10 +233,10 @@ export default function PilihPaket() {
         <div className="bg-white rounded-xl border border-[#0284C7]/20 p-6 mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="material-symbols-outlined text-[#0284C7] text-[24px]">payment</span>
-            <h3 className="text-lg font-bold text-[#1F2A22]">{t('packages.paymentMethods')}</h3>
+            <h3 className="text-lg font-bold text-[#1F2A22]">{t('Metode Pembayaran')}</h3>
           </div>
           <p className="text-sm text-[#5B6660] mb-5">
-            {t('packages.paymentMethodsDesc')}
+            {t('Kami menyediakan berbagai pilihan metode pembayaran yang aman dan mudah:')}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -244,22 +244,22 @@ export default function PilihPaket() {
             <div className="bg-[#F5F4F0] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">qr_code_2</span>
-                <p className="font-bold text-sm text-[#1F2A22]">QRIS</p>
+                <p className="font-bold text-sm text-[#1F2A22]">{t('auto_qris', 'QRIS')}</p>
               </div>
-              <p className="text-xs text-[#5B6660]">{t('packages.qrisDesc')}</p>
+              <p className="text-xs text-[#5B6660]">{t('Bayar langsung dengan scan QR dari semua e-wallet dan mobile banking')}</p>
             </div>
 
             {/* Virtual Account */}
             <div className="bg-[#F5F4F0] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">account_balance</span>
-                <p className="font-bold text-sm text-[#1F2A22]">{t('packages.bankTransfer')}</p>
+                <p className="font-bold text-sm text-[#1F2A22]">{t('Transfer Bank')}</p>
               </div>
               <ul className="text-xs text-[#5B6660] space-y-1">
-                <li>• BCA Virtual Account</li>
-                <li>• BNI Virtual Account</li>
-                <li>• Mandiri Virtual Account</li>
-                <li>• BRI Virtual Account</li>
+                <li>{t('auto__bca_virtual_account', '• BCA Virtual Account')}</li>
+                <li>{t('auto__bni_virtual_account', '• BNI Virtual Account')}</li>
+                <li>{t('auto__mandiri_virtual_acc', '• Mandiri Virtual Account')}</li>
+                <li>{t('auto__bri_virtual_account', '• BRI Virtual Account')}</li>
               </ul>
             </div>
 
@@ -267,13 +267,13 @@ export default function PilihPaket() {
             <div className="bg-[#F5F4F0] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">wallet</span>
-                <p className="font-bold text-sm text-[#1F2A22]">E-Wallet</p>
+                <p className="font-bold text-sm text-[#1F2A22]">{t('auto_e_wallet', 'E-Wallet')}</p>
               </div>
               <ul className="text-xs text-[#5B6660] space-y-1">
-                <li>• GoPay</li>
-                <li>• ShopeePay</li>
-                <li>• DANA</li>
-                <li>• OVO</li>
+                <li>{t('auto__gopay', '• GoPay')}</li>
+                <li>{t('auto__shopeepay', '• ShopeePay')}</li>
+                <li>{t('auto__dana', '• DANA')}</li>
+                <li>{t('auto__ovo', '• OVO')}</li>
               </ul>
             </div>
 
@@ -281,19 +281,19 @@ export default function PilihPaket() {
             <div className="bg-[#F5F4F0] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">credit_card</span>
-                <p className="font-bold text-sm text-[#1F2A22]">{t('packages.creditCard')}</p>
+                <p className="font-bold text-sm text-[#1F2A22]">{t('Kartu Kredit/Debit')}</p>
               </div>
               <ul className="text-xs text-[#5B6660] space-y-1">
-                <li>• Visa</li>
-                <li>• Mastercard</li>
-                <li>• JCB</li>
+                <li>{t('auto__visa', '• Visa')}</li>
+                <li>{t('auto__mastercard', '• Mastercard')}</li>
+                <li>{t('auto__jcb', '• JCB')}</li>
               </ul>
             </div>
           </div>
 
           <div className="mt-4 bg-[#FFF4D6] rounded-lg px-4 py-3 flex items-start gap-2">
             <span className="material-symbols-outlined text-[#7A5900] text-[18px] shrink-0 mt-0.5">verified_user</span>
-            <p className="text-xs text-[#7A5900] leading-relaxed" dangerouslySetInnerHTML={{ __html: t('packages.securePayment') }} />
+            <p className="text-xs text-[#7A5900] leading-relaxed" dangerouslySetInnerHTML={{ __html: t('Semua transaksi dilindungi dengan enkripsi SSL dan diproses melalui gateway pembayaran Midtrans yang telah tersertifikasi PCI DSS Level 1.') }} />
           </div>
         </div>
 
@@ -306,11 +306,11 @@ export default function PilihPaket() {
               className="bg-[#0EA5E9] text-white py-3.5 px-12 rounded-full font-bold text-sm hover:bg-[#0284C7] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {submitting ? (
-                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('packages.processing')}</>
+                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('Memproses...')}</>
               ) : selected?.price === 0 ? (
-                <><span className="material-symbols-outlined text-[18px]">check_circle</span>{t('packages.activateFree')}</>
+                <><span className="material-symbols-outlined text-[18px]">check_circle</span>{t('Aktifkan Paket Free')}</>
               ) : (
-                <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>{isFreePackageActive ? t('packages.upgradeToPremium') : t('packages.continueToPayment')}</>
+                <><span className="material-symbols-outlined text-[18px]">arrow_forward</span>{isFreePackageActive ? t('Upgrade ke Premium') : t('Lanjut ke Pembayaran')}</>
               )}
             </button>
           </div>
@@ -320,9 +320,9 @@ export default function PilihPaket() {
           <div className="bg-[#E3F2E7] rounded-xl p-5 flex items-start gap-3 text-sm text-[#1C3822]">
             <span className="material-symbols-outlined text-[#2E5E3B] text-[20px] shrink-0 mt-0.5">info</span>
             <div>
-              <p className="font-semibold mb-1">{t('packages.alreadyActive.title')}</p>
+              <p className="font-semibold mb-1">{t('Paket Sudah Aktif')}</p>
               <p className="leading-relaxed">
-                {t('packages.alreadyActive.desc')}
+                {t('Anda sudah memiliki paket premium yang aktif. Jika ingin mengganti paket, silakan hubungi admin.')}
               </p>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 
@@ -270,7 +270,7 @@ export default function Pembayaran() {
                 <p className="text-xs font-bold uppercase tracking-wider text-[#5B6660] mb-3">{t('payment.package_summary', 'Ringkasan Paket')}</p>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-bold text-[#1F2A22]">{t('payment.package')} {pkg.name}</p>
+                    <p className="font-bold text-[#1F2A22]">{t('Paket')} {pkg.name}</p>
                     <p className="text-sm text-[#5B6660]">{pkg.duration || '12 bulan'}</p>
                   </div>
                   <p className="text-xl font-bold text-[#0EA5E9]">{formatRupiah(pkg.price)}</p>
@@ -338,7 +338,12 @@ export default function Pembayaran() {
                   <button
                     type="button"
                     onClick={() => {
-                      if (window.snap) {
+                      const isProd = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === '1';
+                      const snapUrl = isProd
+                        ? 'https://app.midtrans.com/snap/snap.js'
+                        : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+                      const handlePayNow = () => {
                         window.snap.pay(order.snap_token, {
                           onSuccess: function(result) {
                             console.log('Payment success:', result);
@@ -356,31 +361,19 @@ export default function Pembayaran() {
                             console.log('Payment popup closed');
                           }
                         });
+                      };
+
+                      if (window.snap) {
+                        handlePayNow();
                       } else {
-                        // Load Midtrans Snap script
+                        // Load Midtrans Snap script dynamically
                         const script = document.createElement('script');
-                        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+                        script.src = snapUrl;
                         script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 'your-client-key');
                         document.head.appendChild(script);
                         
                         script.onload = () => {
-                          window.snap.pay(order.snap_token, {
-                            onSuccess: function(result) {
-                              console.log('Payment success:', result);
-                              setStep('success');
-                            },
-                            onPending: function(result) {
-                              console.log('Payment pending:', result);
-                              window.location.reload();
-                            },
-                            onError: function(result) {
-                              console.log('Payment error:', result);
-                              setError(t('payment.payment_failed', 'Pembayaran gagal. Silakan coba lagi.'));
-                            },
-                            onClose: function() {
-                              console.log('Payment popup closed');
-                            }
-                          });
+                          handlePayNow();
                         };
                       }
                     }}

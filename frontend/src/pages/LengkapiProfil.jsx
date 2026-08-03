@@ -1,3 +1,4 @@
+import { useTranslation } from '../context/LanguageContext.jsx';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/client.js';
@@ -24,6 +25,7 @@ function emptyCertificate() {
 }
 
 export default function LengkapiProfil() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [step, setStep] = useState(0);
@@ -162,7 +164,7 @@ export default function LengkapiProfil() {
       <DashboardLayout title="Lengkapi Profil">
         <div className="flex items-center gap-3 text-[#5B6660]">
           <span className="w-5 h-5 rounded-full border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B] animate-spin" />
-          Memuat...
+          {t('Memuat...')}
         </div>
       </DashboardLayout>
     );

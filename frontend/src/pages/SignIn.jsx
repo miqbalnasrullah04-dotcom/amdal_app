@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 
 export default function SignIn() {
@@ -49,7 +49,7 @@ export default function SignIn() {
       if (status === 422) {
         const errors = err.response?.data?.errors;
         const firstError = errors ? Object.values(errors)[0]?.[0] : null;
-        setError(firstError || message || 'Data tidak valid.');
+        setError(firstError || message || t('auth.error.invalid_data', 'Data tidak valid.'));
       } else if (status === 403 && !err.response?.data?.email_verified) {
         navigate('/verifikasi-email', { 
           state: { 
@@ -57,13 +57,13 @@ export default function SignIn() {
           } 
         });
       } else if (status === 401) {
-        setError('Email atau kata sandi salah.');
+        setError(t('auth.error.wrong_credentials', 'Email atau kata sandi salah.'));
       } else if (status === 502 || status === 504) {
-        setError('Server sedang bermasalah. Coba beberapa saat lagi.');
+        setError(t('auth.error.server_issue', 'Server sedang bermasalah. Coba beberapa saat lagi.'));
       } else if (!err.response) {
-        setError('Tidak bisa terhubung ke server.');
+        setError(t('auth.error.no_connection', 'Tidak bisa terhubung ke server.'));
       } else {
-        setError(message || 'Email atau kata sandi salah.');
+        setError(message || t('auth.error.wrong_credentials', 'Email atau kata sandi salah.'));
       }
     } finally {
       setLoading(false);
@@ -132,17 +132,16 @@ export default function SignIn() {
 
           <div>
             <h1 className="font-headline-lg text-4xl font-bold leading-tight mb-4">
-              Akses dan Kembangkan<br />Profil Profesional Anda.
+              {t('auth.hero.title_line1', 'Akses dan Kembangkan')}<br />{t('auth.hero.title_line2', 'Profil Profesional Anda.')}
             </h1>
             <p className="text-white/70 text-sm max-w-sm leading-relaxed mb-6">
-              Masuk ke akun Anda untuk mengelola profil, menampilkan keahlian, dan terhubung
-              dengan berbagai peluang profesional di seluruh Indonesia.
+              {t('auth.hero.desc', 'Masuk ke akun Anda untuk mengelola profil, menampilkan keahlian, dan terhubung dengan berbagai peluang profesional di seluruh Indonesia.')}
             </p>
             <ul className="space-y-3">
               {[
-                'Kelola profil dan informasi keahlian Anda',
-                'Perbarui pengalaman, pendidikan, dan sertifikat',
-                'Tingkatkan visibilitas Anda sebagai tenaga ahli profesional',
+                t('auth.hero.feature1', 'Kelola profil dan informasi keahlian Anda'),
+                t('auth.hero.feature2', 'Perbarui pengalaman, pendidikan, dan sertifikat'),
+                t('auth.hero.feature3', 'Tingkatkan visibilitas Anda sebagai tenaga ahli profesional'),
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2.5 text-white/80 text-sm">
                   <span className="material-symbols-outlined text-[#7DD3FC] text-[18px] mt-0.5">check_circle</span>
@@ -191,13 +190,13 @@ export default function SignIn() {
             </Link>
           </div>
 
-          <h2 className="font-headline-md text-2xl font-bold text-on-background mb-1">{t('auth.login_title')}</h2>
+          <h2 className="font-headline-md text-2xl font-bold text-on-background mb-1">{t('Masuk')}</h2>
           <p className="text-sm text-on-surface-variant mb-8">{t('auth.login_subtitle', 'Masuk untuk mengelola profil tenaga ahli Anda.')}</p>
 
           {(justRegistered || successMessage) && !error && (
             <p className="bg-[#E0F2FE] text-[#0369A1] text-sm rounded-lg px-4 py-3 mb-5 flex items-start gap-2">
               <span className="material-symbols-outlined text-[18px] mt-0.5 shrink-0">check_circle</span>
-              <span>{successMessage || 'Pendaftaran berhasil. Silakan masuk dengan akun Anda.'}</span>
+              <span>{successMessage || t('auth.register_success', 'Pendaftaran berhasil. Silakan masuk dengan akun Anda.')}</span>
             </p>
           )}
 
@@ -207,12 +206,12 @@ export default function SignIn() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{t('auth.email')}</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{t('Email')}</label>
               <input
                 type="email"
                 required
                 autoFocus
-                placeholder="nama@email.com"
+                placeholder={t('nama@email.com')}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="w-full mt-1.5 border border-outline-variant/50 rounded-lg px-4 py-2.5 text-sm placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/30 focus:border-[#0EA5E9] transition-colors"
@@ -221,7 +220,7 @@ export default function SignIn() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{t('auth.password')}</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{t('Kata Sandi')}</label>
               </div>
               <div className="relative">
                 <input
@@ -250,7 +249,7 @@ export default function SignIn() {
               disabled={loading}
               className="mt-2 bg-[#0EA5E9] text-white py-3 rounded-lg text-sm font-bold hover:bg-[#0284C7] active:scale-[0.99] transition-all disabled:opacity-60 disabled:active:scale-100"
             >
-              {loading ? t('common.loading') : t('auth.login_button')}
+              {loading ? t('Memuat...') : t('Masuk')}
             </button>
 
             <Link
@@ -258,14 +257,14 @@ export default function SignIn() {
               className="flex items-center justify-center gap-1.5 border border-outline-variant/50 text-on-surface-variant py-3 rounded-lg text-sm font-semibold hover:bg-surface-container-low hover:text-on-background transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              {t('common.back')}
+              {t('Kembali')}
             </Link>
           </form>
 
           <p className="text-center text-sm text-on-surface-variant mt-8">
-            {t('auth.no_account')}{' '}
+            {t('Belum punya akun?')}{' '}
             <Link to="/daftar" className="text-[#0284C7] font-bold hover:underline">
-              {t('auth.register_here')}
+              {t('Daftar di sini')}
             </Link>
           </p>
         </div>

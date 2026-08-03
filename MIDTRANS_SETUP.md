@@ -89,12 +89,15 @@ https://your-domain.com/api/midtrans/notification
 5. Centang **HTTP Notification**
 6. Save
 
-### 3. Verifikasi Webhook
-OrderController sudah memiliki signature verification:
+### 3. Verifikasi Webhook & Keamanan Signature Key
+OrderController memiliki verifikasi signature key SHA512 otomatis untuk memastikan notifikasi berasal dari Midtrans:
 ```php
-$notification = new \Midtrans\Notification();
-$status = $notification->transaction_status;
+$expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+if ($signatureKey !== $expectedSignature) {
+    return response()->json(['message' => 'Invalid signature'], 403);
+}
 ```
+*Aktivasi paket keanggotaan pengguna hanya dilakukan setelah webhook resmi Midtrans diverifikasi oleh backend.*
 
 ---
 
@@ -103,30 +106,32 @@ $status = $notification->transaction_status;
 ### 1. Upgrade ke Production Account
 1. Login ke dashboard sandbox
 2. Klik **"Activate Production"**
-3. Lengkapi verifikasi bisnis (KTP, NPWP, dokumen)
+3. Lengkapi verifikasi bisnis (KTP, NPWP, Rekening Bank Merchant)
 4. Tunggu approval (biasanya 1-3 hari kerja)
 
 ### 2. Update Credentials Production
 Setelah approved, dapatkan production keys:
 ```env
+# Backend (.env)
 MIDTRANS_SERVER_KEY=Mid-server-xxxxxxxxxxxxxx
 MIDTRANS_CLIENT_KEY=Mid-client-xxxxxxxxxxxxxx
 MIDTRANS_IS_PRODUCTION=true
+
+# Frontend (.env)
+VITE_MIDTRANS_CLIENT_KEY=Mid-client-xxxxxxxxxxxxxx
+VITE_MIDTRANS_IS_PRODUCTION=true
 ```
 
-### 3. Update Snap Script URL
-Di `PilihPaket.jsx` dan `Pembayaran.jsx`:
-```javascript
-// Sandbox (testing):
-script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+### 3. Pencairan Dana (Settlement Payouts)
+- Seluruh proses transfer dan penampungan dana pembayaran dilakukan langsung oleh **Midtrans**.
+- Pada mode Production, Midtrans menyalurkan dana yang berhasil diselesaikan (`settlement`) langsung ke rekening bank merchant yang didaftarkan pada dashboard Midtrans secara berkala (sesuai jadwal pencairan Midtrans).
+- Aplikasi website **hanya menerima notifikasi HTTP webhook** untuk mengubah status pembayaran dan mengaktifkan keanggotaan.
 
-// Production (live):
-script.src = 'https://app.midtrans.com/snap/snap.js';
-```
-
-**Gunakan environment variable untuk switch otomatis:**
+### 4. Snap Script URL Dinamis
+Aplikasi frontend (`Pembayaran.jsx` dan `Invoice.jsx`) otomatis memuat Snap script sesuai environment:
 ```javascript
-const snapUrl = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true'
+const isProd = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === '1';
+const snapUrl = isProd
   ? 'https://app.midtrans.com/snap/snap.js'
   : 'https://app.sandbox.midtrans.com/snap/snap.js';
 ```

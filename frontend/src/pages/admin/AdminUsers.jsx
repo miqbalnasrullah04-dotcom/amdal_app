@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from '../../context/LanguageContext.jsx';
 import api from '../../api/client.js';
 import ConfirmDialog from '../../components/admin/ConfirmDialog.jsx';
 
@@ -11,6 +12,7 @@ const roleLabel = {
 };
 
 export default function AdminUsers() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,7 +35,7 @@ export default function AdminUsers() {
         const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
         setUsers(data);
       })
-      .catch(() => setError('Gagal memuat data pengguna dari server.'))
+      .catch(() => setError(t('admin.users.error_load', 'Gagal memuat data pengguna dari server.')))
       .finally(() => setLoading(false));
   };
 
@@ -73,7 +75,7 @@ export default function AdminUsers() {
       closeForm();
       loadData();
     } catch (err) {
-      setFormError(err.response?.data?.message || 'Gagal menyimpan data pengguna.');
+      setFormError(err.response?.data?.message || t('admin.users.error_save', 'Gagal menyimpan data pengguna.'));
     } finally {
       setSaving(false);
     }
@@ -124,15 +126,15 @@ export default function AdminUsers() {
     <div>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#0284C7]">Manajemen Pengguna</h2>
-          <p className="text-[#414844]/80 text-sm mt-1">Kelola data seluruh akun pengguna di sistem TenagaAhli.com.</p>
+          <h2 className="text-2xl font-bold text-[#0284C7]">{t('admin.users.title', 'Manajemen Pengguna')}</h2>
+          <p className="text-[#414844]/80 text-sm mt-1">{t('admin.users.subtitle', 'Kelola data seluruh akun pengguna di sistem TenagaAhli.com.')}</p>
         </div>
         <button
           onClick={openAdd}
           className="flex items-center gap-2 bg-[#0284C7] text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-[#0369A1] transition-colors"
         >
           <span className="material-symbols-outlined text-[20px]">person_add</span>
-          Tambah Pengguna
+          {t('admin.users.add_user', 'Tambah Pengguna')}
         </button>
       </div>
 
@@ -143,7 +145,7 @@ export default function AdminUsers() {
           <input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Cari nama atau email..."
+            placeholder={t('admin.users.search_placeholder', 'Cari nama atau email...')}
             className="w-full max-w-sm px-4 py-2 text-sm border border-[#0284C7]/30 rounded-lg focus:ring-[#0284C7] focus:border-[#0284C7]"
           />
           <div className="flex gap-2">
@@ -172,13 +174,13 @@ export default function AdminUsers() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="bg-[#0284C7]/5 text-[#414844]">
-                <th className="px-6 py-3">Nama</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Role</th>
-                <th className="px-6 py-3">Status Akun</th>
-                <th className="px-6 py-3">Verifikasi</th>
-                <th className="px-6 py-3">Bergabung</th>
-                <th className="px-6 py-3">Aksi</th>
+                <th className="px-6 py-3">{t('admin.users.table_name', 'Nama')}</th>
+                <th className="px-6 py-3">{t('admin.users.table_email', 'Email')}</th>
+                <th className="px-6 py-3">{t('admin.users.table_role', 'Role')}</th>
+                <th className="px-6 py-3">{t('admin.users.table_status', 'Status Akun')}</th>
+                <th className="px-6 py-3">{t('admin.users.table_verification', 'Verifikasi')}</th>
+                <th className="px-6 py-3">{t('admin.users.table_joined', 'Bergabung')}</th>
+                <th className="px-6 py-3">{t('admin.users.table_actions', 'Aksi')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#0284C7]/10">

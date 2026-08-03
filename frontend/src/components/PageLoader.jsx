@@ -1,6 +1,8 @@
+import { useTranslation } from '../context/LanguageContext.jsx';
 import logo from '../assets/logo-tenaga-ahli.png';
 
 export default function PageLoader({ visible }) {
+  const { t } = useTranslation();
   return (
     <div
       aria-hidden={!visible}
@@ -72,7 +74,7 @@ export default function PageLoader({ visible }) {
           TenagaAhli<span className="text-[#0EA5E9]">.com</span>
         </span>
         <span className="text-white/40 text-xs tracking-wide">
-          Memuat halaman...
+          {t('Memuat halaman...')}
         </span>
 
         {/* Progress bar tipis untuk sentuhan profesional */}
