@@ -53,10 +53,11 @@ function MiniBarChart({ data, labels }) {
 }
 
 export default function Statistik() {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState('7hari');
 
   return (
-    <DashboardLayout title={t('auto_statistik_laporan', 'Statistik & Laporan')} subtitle="Analisis performa profil dan interaksi Anda.">
+    <DashboardLayout title={t('Statistik & Laporan')} subtitle={t('Analisis performa profil dan interaksi Anda.')}>
       <div className="space-y-5 animate-fadeIn">
         {/* Period selector */}
         <div className="flex gap-2 flex-wrap">
@@ -140,9 +141,8 @@ export default function Statistik() {
           <Card className="p-6">
             <h3 className="text-xs font-bold text-[#414844]/60 uppercase tracking-wider mb-5 flex items-center gap-2">
               <span className="material-symbols-outlined text-[16px] text-[#0284C7]">trending_up</span>
-              
-                                        {t('auto_kunjungan_profil_per', 'Kunjungan Profil per Bulan')}
-                                      </h3>
+              {t('Kunjungan Profil per Bulan')}
+            </h3>
             <MiniBarChart data={DEMO_STATS.monthlyViews} labels={MONTHS} />
           </Card>
 
@@ -150,9 +150,8 @@ export default function Statistik() {
           <Card className="p-6">
             <h3 className="text-xs font-bold text-[#414844]/60 uppercase tracking-wider mb-5 flex items-center gap-2">
               <span className="material-symbols-outlined text-[16px] text-[#0284C7]">pie_chart</span>
-              
-                                        {t('auto_sumber_pengunjung', 'Sumber Pengunjung')}
-                                      </h3>
+              {t('Sumber Pengunjung')}
+            </h3>
             <div className="space-y-3">
               {DEMO_STATS.topSources.map((src) => (
                 <div key={src.label}>
@@ -176,9 +175,8 @@ export default function Statistik() {
         <Card className="p-6">
           <h3 className="text-xs font-bold text-[#414844]/60 uppercase tracking-wider mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px] text-[#0284C7]">analytics</span>
-            
-                                  {t('auto_bagian_profil_paling', 'Bagian Profil Paling Banyak Dikunjungi')}
-                                </h3>
+            {t('Bagian Profil Paling Banyak Dikunjungi')}
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {DEMO_STATS.popularSections.map((section, idx) => (
               <div
@@ -191,7 +189,7 @@ export default function Statistik() {
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-[#1F2A22] truncate">{section.label}</p>
                   <p className="text-lg font-black text-[#0284C7]">{section.visits}</p>
-                  <p className="text-[9px] text-[#414844]/50">{t('auto_kunjungan', 'kunjungan')}</p>
+                  <p className="text-[9px] text-[#414844]/50">{t('kunjungan')}</p>
                 </div>
               </div>
             ))}
@@ -205,12 +203,10 @@ export default function Statistik() {
               <span className="material-symbols-outlined text-[28px] text-[#0284C7]">tips_and_updates</span>
             </div>
             <div>
-              <h3 className="font-bold text-[#075985] text-sm mb-1">{t('auto_tips_meningkatkan_vi', 'Tips Meningkatkan Visibilitas')}</h3>
+              <h3 className="font-bold text-[#075985] text-sm mb-1">{t('Tips Meningkatkan Visibilitas')}</h3>
               <p className="text-xs text-[#0369A1] leading-relaxed">
-                Lengkapi semua bagian profil Anda, termasuk sertifikasi dan pengalaman kerja terbaru. 
-                Profil yang lengkap mendapat hingga <strong>{t('auto_5x_lebih_banyak_kunj', '5x lebih banyak kunjungan')}</strong> dibanding profil yang tidak lengkap.
-                Upgrade ke paket <strong>{t('auto_premium', 'Premium')}</strong>  {t('auto_untuk_tampil_priorit', 'untuk tampil prioritas di pencarian!')}
-                                            </p>
+                {t('Lengkapi semua bagian profil Anda, termasuk sertifikasi dan pengalaman kerja terbaru. Profil yang lengkap mendapat hingga')} <strong>{t('5x lebih banyak kunjungan')}</strong> {t('dibanding profil yang tidak lengkap. Upgrade ke paket')} <strong>{t('Premium')}</strong> {t('untuk tampil prioritas di pencarian!')}
+              </p>
             </div>
           </div>
         </div>

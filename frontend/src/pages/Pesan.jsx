@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import DashboardLayout from '../components/DashboardLayout';
 
 function formatTime(dateStr) {
@@ -74,6 +75,7 @@ function Card({ children, className = '' }) {
 }
 
 export default function Pesan() {
+  const { t } = useTranslation();
   const [conversations] = useState(DEMO_CONVERSATIONS);
   const [selectedConvo, setSelectedConvo] = useState(null);
   const [newMessage, setNewMessage] = useState('');
@@ -99,7 +101,7 @@ export default function Pesan() {
   };
 
   return (
-    <DashboardLayout title="Pesan" subtitle="Kelola percakapan Anda dengan klien dan admin.">
+    <DashboardLayout title={t('Pesan')} subtitle={t('Kelola percakapan Anda dengan klien dan admin.')}>
       <div className="animate-fadeIn">
         <Card className="overflow-hidden">
           <div className="flex h-[65vh] min-h-[480px]">
@@ -117,7 +119,7 @@ export default function Pesan() {
                   </span>
                   <input
                     type="text"
-                    placeholder="Cari percakapan..."
+                    placeholder={t('Cari percakapan...')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full pl-9 pr-3 py-2.5 text-sm border border-black/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7] transition-all"
@@ -126,7 +128,7 @@ export default function Pesan() {
                 {totalUnread > 0 && (
                   <p className="text-[10px] text-[#0284C7] font-bold mt-2 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
-                    {totalUnread} pesan belum dibaca
+                    {totalUnread} {t('pesan belum dibaca')}
                   </p>
                 )}
               </div>
@@ -138,7 +140,7 @@ export default function Pesan() {
                     <span className="material-symbols-outlined text-[40px] text-[#0284C7]/20 mb-2 block">
                       chat_bubble_outline
                     </span>
-                    <p className="text-sm text-[#414844]/60">Tidak ada percakapan ditemukan</p>
+                    <span className="text-sm text-[#414844]/60">{t('Tidak ada percakapan ditemukan')}</span>
                   </div>
                 ) : (
                   filteredConvos.map((convo) => (
@@ -238,7 +240,7 @@ export default function Pesan() {
                   <div className="flex items-center gap-3">
                     <input
                       type="text"
-                      placeholder="Ketik pesan..."
+                      placeholder={t('Ketik pesan...')}
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       className="flex-1 border border-black/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0284C7]/20 focus:border-[#0284C7] transition-all"
@@ -257,9 +259,9 @@ export default function Pesan() {
               /* No conversation selected */
               <div className="flex-1 hidden sm:flex flex-col items-center justify-center text-center px-8">
                 <span className="material-symbols-outlined text-[72px] text-[#0284C7]/15 mb-4">chat</span>
-                <h3 className="text-lg font-bold text-[#1F2A22] mb-2">Pilih percakapan</h3>
+                <h3 className="text-lg font-bold text-[#1F2A22] mb-2">{t('Pilih percakapan')}</h3>
                 <p className="text-sm text-[#414844]/60 max-w-xs">
-                  Pilih percakapan dari daftar di samping atau mulai percakapan baru untuk berkomunikasi dengan klien dan admin.
+                  {t('Pilih percakapan dari daftar di samping atau mulai percakapan baru untuk berkomunikasi dengan klien dan admin.')}
                 </p>
               </div>
             )}

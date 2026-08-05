@@ -5,13 +5,13 @@ import api from '../api/client.js';
 import logo from '../assets/tenaga ahli 2.png';
 
 const menuItems = [
-  { to: '/admin', label: 'admin.dashboard', icon: 'dashboard', end: true },
-  { to: '/admin/verifikasi', label: 'admin.verification', icon: 'verified_user' },
-  { to: '/admin/pembayaran', label: 'admin.payments', icon: 'payments' },
-  { to: '/admin/tenaga-ahli', label: 'admin.experts', icon: 'people' },
-  { to: '/admin/paket', label: 'admin.packages', icon: 'workspace_premium' },
-  { to: '/admin/laporan', label: 'admin.reports', icon: 'bar_chart' },
-  { to: '/admin/pengaturan', label: 'admin.settings', icon: 'settings' },
+  { to: '/admin', label: 'Dashboard', icon: 'dashboard', end: true },
+  { to: '/admin/verifikasi', label: 'Verifikasi', icon: 'verified_user' },
+  { to: '/admin/pembayaran', label: 'Pembayaran', icon: 'payments' },
+  { to: '/admin/tenaga-ahli', label: 'Tenaga Ahli', icon: 'people' },
+  { to: '/admin/paket', label: 'Paket', icon: 'workspace_premium' },
+  { to: '/admin/laporan', label: 'Laporan', icon: 'bar_chart' },
+  { to: '/admin/pengaturan', label: 'Pengaturan', icon: 'settings' },
 ];
 
 export default function AdminLayout() {

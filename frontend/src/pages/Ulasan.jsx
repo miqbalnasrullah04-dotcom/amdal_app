@@ -75,8 +75,9 @@ function formatDate(dateStr) {
 }
 
 export default function Ulasan() {
+  const { t } = useTranslation();
   const [reviews] = useState(DEMO_REVIEWS);
-  const [filterRating, setFilterRating] = useState(0); // 0 = semua
+  const [filterRating, setFilterRating] = useState(0);
 
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
@@ -91,20 +92,18 @@ export default function Ulasan() {
   const filteredReviews = filterRating === 0 ? reviews : reviews.filter((r) => r.rating === filterRating);
 
   return (
-    <DashboardLayout title={t('auto_ulasan_rating', 'Ulasan & Rating')} subtitle="Lihat feedback dan penilaian dari klien Anda.">
+    <DashboardLayout title={t('Ulasan & Rating')} subtitle={t('Lihat feedback dan penilaian dari klien Anda.')}>
       <div className="space-y-5 animate-fadeIn">
         {/* Summary Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Average Rating */}
           <Card className="p-6 flex flex-col items-center justify-center text-center">
             <p className="text-4xl font-black text-[#1F2A22] mb-1">{avgRating}</p>
             <StarRating rating={Math.round(avgRating)} size={22} />
-            <p className="text-xs text-[#414844]/60 mt-2">{reviews.length}  {t('auto_ulasan_total', 'ulasan total')}</p>
+            <p className="text-xs text-[#414844]/60 mt-2">{reviews.length} {t('ulasan total')}</p>
           </Card>
 
-          {/* Rating Distribution */}
           <Card className="p-6 md:col-span-2">
-            <h3 className="text-xs font-bold text-[#414844]/60 uppercase tracking-wider mb-3">{t('auto_distribusi_rating', 'Distribusi Rating')}</h3>
+            <h3 className="text-xs font-bold text-[#414844]/60 uppercase tracking-wider mb-3">{t('Distribusi Rating')}</h3>
             <div className="space-y-2">
               {ratingDist.map((d) => (
                 <button
@@ -141,8 +140,7 @@ export default function Ulasan() {
                 : 'bg-[#0284C7]/5 text-[#414844] hover:bg-[#0284C7]/10'
             }`}
           >
-            
-                                  {t('auto_semua', 'Semua (')}{reviews.length})
+            {t('Semua')} ({reviews.length})
           </button>
           {[5, 4, 3, 2, 1].map((r) => {
             const cnt = reviews.filter((rev) => rev.rating === r).length;
@@ -167,11 +165,10 @@ export default function Ulasan() {
         {filteredReviews.length === 0 ? (
           <Card className="p-12 text-center">
             <span className="material-symbols-outlined text-[56px] text-[#F59E0B]/20 mb-3 block">star</span>
-            <h3 className="text-base font-bold text-[#1F2A22] mb-1">{t('auto_tidak_ada_ulasan', 'Tidak ada ulasan')}</h3>
+            <h3 className="text-base font-bold text-[#1F2A22] mb-1">{t('Tidak ada ulasan')}</h3>
             <p className="text-sm text-[#414844]/60">
-              
-                                        {t('auto_belum_ada_ulasan_den', 'Belum ada ulasan dengan rating ini. Berikan layanan terbaik untuk mendapatkan ulasan dari klien!')}
-                                      </p>
+              {t('Belum ada ulasan dengan rating ini. Berikan layanan terbaik untuk mendapatkan ulasan dari klien!')}
+            </p>
           </Card>
         ) : (
           <div className="space-y-4">
@@ -200,9 +197,8 @@ export default function Ulasan() {
                       <div className="mt-3 bg-[#F5F4EF] rounded-xl p-3 border border-black/5">
                         <p className="text-[10px] font-bold text-[#0284C7] uppercase tracking-wider mb-1 flex items-center gap-1">
                           <span className="material-symbols-outlined text-[12px]">reply</span>
-                          
-                                                                  {t('auto_balasan_anda', 'Balasan Anda')}
-                                                                </p>
+                          {t('Balasan Anda')}
+                        </p>
                         <p className="text-xs text-[#414844] leading-relaxed">{review.balasan}</p>
                       </div>
                     )}

@@ -35,7 +35,11 @@ class ExpertController extends Controller
         }
 
         if ($request->filled('kriteria')) {
-            $query->where('kriteria', 'like', '%'.$request->kriteria.'%');
+            $kriteria = $request->kriteria;
+            $query->where(function ($q) use ($kriteria) {
+                $q->where('kriteria', 'like', '%'.$kriteria.'%')
+                  ->orWhere('kriteria_list', 'like', '%'.$kriteria.'%');
+            });
         }
 
         if ($request->boolean('featured')) {
@@ -53,7 +57,7 @@ class ExpertController extends Controller
         };
 
         $experts = $query->get([
-            'id', 'slug', 'name', 'field', 'kriteria', 'location',
+            'id', 'slug', 'name', 'field', 'kriteria', 'kriteria_list', 'location',
             'lat', 'lng', 'rating', 'photo', 'cover', 'verified', 'featured', 'package_id',
         ]);
 

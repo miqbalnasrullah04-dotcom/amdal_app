@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
@@ -440,7 +440,7 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-[#1C3822] text-lg mb-2 flex items-center gap-2 flex-wrap">
                   {t('dashboard.published_title', 'Profil Anda Sedang Tayang!')}
-                  <span className="text-xs font-bold bg-[#2E5E3B] text-white px-2.5 py-1 rounded-full">{t('auto_live', 'LIVE')}</span>
+                  <span className="text-xs font-bold bg-[#2E5E3B] text-white px-2.5 py-1 rounded-full">{t('LIVE')}</span>
                 </h3>
                 <p className="text-sm text-[#2E5E3B] leading-relaxed mb-4">
                   {t('dashboard.published_success_desc', 'Profil tenaga ahli Anda sudah aktif dan dapat dilihat oleh publik di direktori website. Pastikan data Anda selalu up-to-date agar mendapat peluang kolaborasi lebih baik.')}

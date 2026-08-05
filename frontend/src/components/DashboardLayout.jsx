@@ -1,23 +1,24 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from '../context/LanguageContext.jsx';
 import logo from "../assets/tenaga ahli 2.png";
 import api from '../api/client.js';
 
-const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: 'space_dashboard' },
-  { to: '/profil-saya', label: 'Profil Saya', icon: 'person' },
-  { to: '/pesan', label: 'Pesan', icon: 'chat' },
-  { to: '/paket', label: 'Paket', icon: 'workspace_premium' },
-  { to: '/invoice', label: 'Invoice', icon: 'receipt_long' },
-  { to: '/pembayaran', label: 'Pembayaran', icon: 'payments' },
-  { to: '/tiket', label: 'Tiket', icon: 'support_agent' },
-  { to: '/ulasan', label: 'Ulasan', icon: 'star' },
-  { to: '/statistik', label: 'Statistik', icon: 'bar_chart' },
-  { to: '/profil-publik', label: 'Profil Publik', icon: 'language' },
-  { to: '/pengaturan', label: 'Pengaturan', icon: 'settings' },
-];
-
 function SidebarContent({ user, onNavigate, onLogout, isExpanded, onToggle }) {
+  const { t } = useTranslation();
+  const NAV_ITEMS = [
+    { to: '/dashboard',    label: t('Dashboard'),       icon: 'space_dashboard' },
+    { to: '/profil-saya',  label: t('Profil Saya'),     icon: 'person' },
+    { to: '/pesan',        label: t('Pesan'),            icon: 'chat' },
+    { to: '/paket',        label: t('Paket'),            icon: 'workspace_premium' },
+    { to: '/invoice',      label: t('Invoice'),          icon: 'receipt_long' },
+    { to: '/pembayaran',   label: t('Pembayaran'),       icon: 'payments' },
+    { to: '/tiket',        label: t('Tiket'),            icon: 'support_agent' },
+    { to: '/ulasan',       label: t('Ulasan'),           icon: 'star' },
+    { to: '/statistik',    label: t('Statistik'),        icon: 'bar_chart' },
+    { to: '/profil-publik',label: t('Profil Publik'),    icon: 'language' },
+    { to: '/pengaturan',   label: t('Pengaturan'),       icon: 'settings' },
+  ];
   return (
     <div className="flex flex-col h-full">
       {/* Header Sidebar */}
@@ -26,7 +27,7 @@ function SidebarContent({ user, onNavigate, onLogout, isExpanded, onToggle }) {
           <>
             <div className="flex flex-col items-start gap-1 overflow-hidden transition-all duration-200">
               <img src={logo} alt="TenagaAhli.com" className="h-10 w-auto shrink-0" />
-              <span className="font-extrabold text-[10px] tracking-widest uppercase text-white/60 ml-0.5">Member</span>
+          <span className="font-extrabold text-[10px] tracking-widest uppercase text-white/60 ml-0.5">{t('Member')}</span>
             </div>
             <button onClick={onToggle} className="text-white/85 hover:text-white p-1 hover:bg-white/10 rounded transition-colors">
               <span className="material-symbols-outlined text-[22px]">menu</span>
@@ -79,21 +80,21 @@ function SidebarContent({ user, onNavigate, onLogout, isExpanded, onToggle }) {
         <Link
           to="/"
           onClick={onNavigate}
-          title="Lihat Web Utama"
+          title={t('Lihat Web Utama')}
           className={`flex items-center gap-4 px-3.5 py-2.5 rounded-lg text-xs font-bold tracking-wider uppercase text-white/70 hover:bg-white/10 hover:text-white transition-colors ${!isExpanded ? 'justify-center px-0' : ''}`}
         >
           <span className="material-symbols-outlined text-[20px]">language</span>
-          {isExpanded && <span>Web Utama</span>}
+          {isExpanded && <span>{t('Web Utama')}</span>}
         </Link>
 
         {/* Tombol Aksi Logout */}
         <button
           onClick={onLogout}
-          title="Logout"
+          title={t('Logout')}
           className={`flex items-center gap-4 px-3.5 py-2.5 rounded-lg text-xs font-bold tracking-wider uppercase text-[#FFB4AB] hover:bg-[#FFB4AB]/10 transition-colors ${!isExpanded ? 'justify-center px-0' : ''}`}
         >
           <span className="material-symbols-outlined text-[20px]">logout</span>
-          {isExpanded && <span>Logout</span>}
+          {isExpanded && <span>{t('Logout')}</span>}
         </button>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
@@ -763,7 +763,7 @@ export default function ProfilAhli() {
                       <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1", color: STAR_GOLD }}>
                         star
                       </span>
-                      {ratingStats.avg.toFixed(1)} ({ratingStats.total} {t('auto_profil_ulasan', 'ulasan')})
+                      {ratingStats.avg.toFixed(1)} ({ratingStats.total} {t('ulasan')})
                     </span>
                   )}
                   {profile.ketersediaan && (
@@ -784,7 +784,7 @@ export default function ProfilAhli() {
                 className="bg-[#0EA5E9] text-white h-10 px-5 rounded-full flex items-center gap-1.5 font-semibold text-sm hover:bg-[#0284C7] transition-colors whitespace-nowrap shadow-lg"
               >
                 <span className="material-symbols-outlined text-[16px]">mail</span>
-                {t('auto_profil_hubungi', 'Hubungi')}
+                {t('Hubungi')}
               </a>
             </div>
           </div>
@@ -816,13 +816,13 @@ export default function ProfilAhli() {
               <button
                 onClick={handleShare}
                 className="h-9 w-9 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                aria-label={t('auto_profil_bagikan_profil', 'Bagikan profil')}
+                aria-label={t('Bagikan profil')}
               >
                 <span className="material-symbols-outlined text-gray-600 text-[16px]">share</span>
               </button>
               {copied && (
                 <span className="absolute top-full mt-2 right-0 z-10 bg-black text-white text-[11px] px-2 py-1 rounded whitespace-nowrap shadow-md">
-                  {t('auto_profil_link_disalin', 'Link disalin')}
+                  {t('Link disalin')}
                 </span>
               )}
             </div>
@@ -835,11 +835,11 @@ export default function ProfilAhli() {
         <div className="border-b border-gray-200 bg-white">
           <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              <StatBlock icon="military_tech" value={`${statistik.tahunPengalaman}+`} label={t('auto_profil_tahun_pengalaman', 'Tahun Pengalaman')} />
-              <StatBlock icon="engineering" value={statistik.jumlahProyek} label={t('auto_profil_proyek', 'Proyek')} />
-              <StatBlock icon="article" value={statistik.jumlahPublikasi} label={t('auto_profil_publikasi', 'Publikasi')} />
-              <StatBlock icon="workspace_premium" value={statistik.jumlahSertifikasi} label={t('auto_profil_sertifikasi', 'Sertifikasi')} />
-              <StatBlock icon="campaign" value={statistik.jumlahKegiatan} label={t('auto_profil_kegiatan', 'Kegiatan')} />
+              <StatBlock icon="military_tech" value={`${statistik.tahunPengalaman}+`} label={t('Tahun Pengalaman')} />
+              <StatBlock icon="engineering" value={statistik.jumlahProyek} label={t('Proyek')} />
+              <StatBlock icon="article" value={statistik.jumlahPublikasi} label={t('Publikasi')} />
+              <StatBlock icon="workspace_premium" value={statistik.jumlahSertifikasi} label={t('Sertifikasi')} />
+              <StatBlock icon="campaign" value={statistik.jumlahKegiatan} label={t('Kegiatan')} />
             </div>
           </div>
         </div>
@@ -866,7 +866,7 @@ export default function ProfilAhli() {
           {/* Catatan */}
           {(profile.catatan || profile.pengalaman || profile.ringkasanPengalaman) && (
             <div className="py-8 border-b border-gray-200">
-              <SectionHeading title={t('auto_profil_catatan', 'Catatan')} />
+              <SectionHeading title={t('Catatan')} />
               <p className="text-sm text-gray-700 leading-relaxed">{t(profile.catatan || profile.pengalaman || profile.ringkasanPengalaman)}</p>
             </div>
           )}
@@ -876,19 +876,19 @@ export default function ProfilAhli() {
             <SectionHeading title={t('expert_profile.expertise.title', 'Bidang Keahlian')} />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{t('auto_profil_keahlian_utama', 'Keahlian Utama')}</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{t('Keahlian Utama')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {profile.keahlian?.map((k) => <Chip key={k}>{t(k)}</Chip>)}
                 </div>
               </div>
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{t('auto_profil_spesialisasi', 'Spesialisasi')}</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{t('Spesialisasi')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {profile.spesialisasi?.map((k) => <Chip key={k} tone="gray">{t(k)}</Chip>)}
                 </div>
               </div>
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{t('auto_profil_kompetensi', 'Kompetensi')}</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2.5">{t('Kompetensi')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {profile.kompetensi?.map((k) => <Chip key={k} tone="gray">{t(k)}</Chip>)}
                 </div>
@@ -901,21 +901,21 @@ export default function ProfilAhli() {
             <SectionHeading title={t('expert_profile.summary.title', 'Ringkasan Profil')} />
             <ul className="flex flex-col gap-2">
               <li className="text-sm text-gray-800">
-                <span className="text-gray-500 font-medium">{t('auto_profil_nama_lengkap', 'Nama Lengkap')} : </span>
+                <span className="text-gray-500 font-medium">{t('Nama Lengkap')} : </span>
                 {profile.name}
               </li>
               <li className="text-sm text-gray-800">
-                <span className="text-gray-500 font-medium">{t('auto_profil_institusi_lembaga', 'Institusi/Lembaga')} : </span>
+                <span className="text-gray-500 font-medium">{t('Institusi/Lembaga')} : </span>
                 {t(profile.institution)}
               </li>
               {yearsActive !== null && (
                 <li className="text-sm text-gray-800">
-                  <span className="text-gray-500 font-medium">{t('auto_profil_aktif_sejak', 'Aktif Sejak')} : </span>
-                  {profile.activeSince} ({yearsActive}+ {t('auto_profil_tahun', 'tahun')})
+                  <span className="text-gray-500 font-medium">{t('Aktif Sejak')} : </span>
+                  {profile.activeSince} ({yearsActive}+ {t('tahun')})
                 </li>
               )}
               <li className="text-sm text-gray-800">
-                <span className="text-gray-500 font-medium">{t('auto_profil_bidang_utama', 'Bidang Utama')} : </span>
+                <span className="text-gray-500 font-medium">{t('Bidang Utama')} : </span>
                 {(profile.bidang_utama || profile.bidangUtama)?.map(item => t(item)).join(' · ')}
               </li>
             </ul>
@@ -925,7 +925,7 @@ export default function ProfilAhli() {
         {/* SIDEBAR */}
         <aside className="flex flex-col gap-5 lg:sticky lg:top-24 self-start">
           <Card>
-            <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">{t('auto_profil_alamat_email', 'Alamat Email')}</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">{t('Alamat Email')}</h3>
             <a href={`mailto:${profile.email}`} className="text-[#0EA5E9] text-sm font-medium hover:underline break-all">
               {profile.email}
             </a>
@@ -935,7 +935,7 @@ export default function ProfilAhli() {
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
               <div id="profil-ahli-map" className="h-40 w-full" />
               <div className="p-5">
-                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">{t('auto_profil_lokasi', 'Lokasi')}</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">{t('Lokasi')}</h3>
                 <p className="text-sm text-gray-800 mb-3 leading-snug">{t(profile.lokasi.label)}</p>
                 <a
                   href={`https://maps.google.com/?q=${encodeURIComponent(profile.lokasi.label)}`}
@@ -944,7 +944,7 @@ export default function ProfilAhli() {
                   className="text-[#0EA5E9] text-sm font-medium hover:underline flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[16px]">directions</span>
-                  {t('auto_profil_get_directions', 'Get Directions')}
+                  {t('Get Directions')}
                 </a>
               </div>
             </div>
@@ -952,7 +952,7 @@ export default function ProfilAhli() {
 
           {profile.sosial?.length > 0 && (
             <Card>
-              <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">{t('auto_profil_sosial_media', 'Sosial Media')}</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">{t('Sosial Media')}</h3>
               <div className="flex gap-2.5">
                 {profile.sosial.map((s) => (
                   <a
@@ -971,7 +971,7 @@ export default function ProfilAhli() {
           )}
 
           <Card>
-            <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">{t('auto_profil_kriteria_keanggotaan', 'Kriteria Keanggotaan')}</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-3">{t('Kriteria Keanggotaan')}</h3>
             <div className="flex flex-wrap gap-2">
               {profile.kriteria?.map((k) => (
                 <Link
@@ -1041,20 +1041,20 @@ export default function ProfilAhli() {
                 <h4 className="text-sm font-bold text-gray-900 leading-snug">{t(s.nama || s.nama_sertifikat)}</h4>
                 <p className="text-xs text-gray-500">{t(s.lembaga || s.penerbit)}</p>
                 <div className="flex items-center justify-between text-xs text-gray-400 pt-2 mt-auto border-t border-gray-100">
-                  <span>{s.nomor ? `${t('auto_profil_no', 'No.')} ${s.nomor}` : (s.tahun ? `${t('auto_profil_tahun_label', 'Tahun')} ${s.tahun}` : '')}</span>
-                  {s.berlakuHingga && <span>{t('auto_profil_berlaku_sd', 'Berlaku s.d.')} {s.berlakuHingga}</span>}
+                  <span>{s.nomor ? `${t('No.')} ${s.nomor}` : (s.tahun ? `${t('Tahun')} ${s.tahun}` : '')}</span>
+                  {s.berlakuHingga && <span>{t('Berlaku s.d.')} {s.berlakuHingga}</span>}
                 </div>
                 {(s.dokumen && s.dokumen !== '#') || s.file_url ? (
                   <a href={s.dokumen && s.dokumen !== '#' ? s.dokumen : s.file_url} target="_blank" rel="noreferrer" className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 mt-1">
                     <span className="material-symbols-outlined text-[14px]">description</span>
-                    {t('auto_profil_lihat_dokumen', 'Lihat dokumen')}
+                    {t('Lihat dokumen')}
                   </a>
                 ) : null}
               </Card>
             ))}
           </div>
 
-          <SectionHeading title={t('auto_profil_riwayat_pendidikan', 'Riwayat Pendidikan')} />
+          <SectionHeading title={t('Riwayat Pendidikan')} />
           <div className="flex flex-col gap-6 max-w-2xl">
             {profile.pendidikan?.map((p, i) => (
               <TimelineItem
@@ -1062,7 +1062,7 @@ export default function ProfilAhli() {
                 isLast={i === profile.pendidikan.length - 1}
                 period={p.tahun || p.tahun_lulus}
                 title={p.prodi || p.jurusan ? `${t(p.jenjang)} — ${t(p.prodi || p.jurusan)}` : t(p.jenjang)}
-                subtitle={p.gelar ? `${t(p.institusi)} · ${t('auto_profil_gelar', 'Gelar')} ${t(p.gelar)}` : t(p.institusi)}
+                subtitle={p.gelar ? `${t(p.institusi)} · ${t('Gelar')} ${t(p.gelar)}` : t(p.institusi)}
               />
             ))}
           </div>
@@ -1074,7 +1074,7 @@ export default function ProfilAhli() {
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 flex flex-col gap-12">
           {/* Profil Akademik - Link Scopus, Google Scholar, SINTA, dll */}
           <div>
-            <SectionHeading title={t('auto_profil_profil_akademik', 'Profil Akademik')} eyebrow={t('auto_profil_rekam_jejak_riset', 'Rekam jejak riset')} />
+            <SectionHeading title={t('Profil Akademik')} eyebrow={t('Rekam jejak riset')} />
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {profile.scopus_url && (
                 <a
@@ -1084,7 +1084,7 @@ export default function ProfilAhli() {
                   className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
                 >
                   <span className="text-sm font-bold text-gray-900">Scopus</span>
-                  <span className="text-xs text-gray-500">{t(profile.scopus_metrics) || t('auto_profil_lihat_profil', 'Lihat Profil')}</span>
+                  <span className="text-xs text-gray-500">{t(profile.scopus_metrics) || t('Lihat Profil')}</span>
                 </a>
               )}
               {profile.google_scholar_url && (
@@ -1095,7 +1095,7 @@ export default function ProfilAhli() {
                   className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
                 >
                   <span className="text-sm font-bold text-gray-900">Google Scholar</span>
-                  <span className="text-xs text-gray-500">{t(profile.google_scholar_metrics) || t('auto_profil_lihat_profil', 'Lihat Profil')}</span>
+                  <span className="text-xs text-gray-500">{t(profile.google_scholar_metrics) || t('Lihat Profil')}</span>
                 </a>
               )}
               {profile.sinta_url && (
@@ -1106,7 +1106,7 @@ export default function ProfilAhli() {
                   className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
                 >
                   <span className="text-sm font-bold text-gray-900">SINTA</span>
-                  <span className="text-xs text-gray-500">{t(profile.sinta_metrics) || t('auto_profil_lihat_profil', 'Lihat Profil')}</span>
+                  <span className="text-xs text-gray-500">{t(profile.sinta_metrics) || t('Lihat Profil')}</span>
                 </a>
               )}
               {profile.orcid_url && (
@@ -1117,7 +1117,7 @@ export default function ProfilAhli() {
                   className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
                 >
                   <span className="text-sm font-bold text-gray-900">ORCID</span>
-                  <span className="text-xs text-gray-500">{t(profile.orcid_metrics) || t('auto_profil_lihat_profil', 'Lihat Profil')}</span>
+                  <span className="text-xs text-gray-500">{t(profile.orcid_metrics) || t('Lihat Profil')}</span>
                 </a>
               )}
               {profile.researchgate_url && (
@@ -1128,7 +1128,7 @@ export default function ProfilAhli() {
                   className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-1 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all"
                 >
                   <span className="text-sm font-bold text-gray-900">ResearchGate</span>
-                  <span className="text-xs text-gray-500">{t(profile.researchgate_metrics) || t('auto_profil_lihat_profil', 'Lihat Profil')}</span>
+                  <span className="text-xs text-gray-500">{t(profile.researchgate_metrics) || t('Lihat Profil')}</span>
                 </a>
               )}
               {/* Fallback ke profilAkademik jika ada */}
@@ -1151,7 +1151,7 @@ export default function ProfilAhli() {
             {/* Organisasi */}
             {((profile.organisasi && profile.organisasi.length > 0) || profile.organisasi) && (
               <div>
-                <SectionHeading title={t('auto_profil_organisasi', 'Organisasi')} />
+                <SectionHeading title={t('Organisasi')} />
                 <div className="flex flex-col gap-5">
                   {(profile.organisasi || []).map((o, i) => (
                     <Card key={i}>
@@ -1170,7 +1170,7 @@ export default function ProfilAhli() {
             {/* Reviewer Jurnal */}
             {((profile.reviewer_jurnal && profile.reviewer_jurnal.length > 0) || profile.reviewerJurnal) && (
               <div>
-                <SectionHeading title={t('auto_profil_reviewer_jurnal', 'Reviewer Jurnal')} />
+                <SectionHeading title={t('Reviewer Jurnal')} />
                 <div className="flex flex-col gap-5">
                   {(profile.reviewer_jurnal || profile.reviewerJurnal || []).map((r, i) => (
                     <Card key={i}>
@@ -1190,7 +1190,7 @@ export default function ProfilAhli() {
           {/* Publikasi */}
           {((profile.publikasi && profile.publikasi.length > 0) || profile.publikasi) && (
             <div>
-              <SectionHeading title={t('auto_profil_publikasi_title', 'Publikasi')} eyebrow={`${(profile.publikasi || []).length} ${t('auto_profil_karya', 'karya')}`} />
+              <SectionHeading title={t('Publikasi')} eyebrow={`${(profile.publikasi || []).length} ${t('karya')}`} />
               <ol className="flex flex-col gap-3">
                 {(profile.publikasi || []).map((p, i) => (
                   <li key={i} className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
@@ -1204,7 +1204,7 @@ export default function ProfilAhli() {
                     </div>
                     {p.link && p.link !== '#' && (
                       <a href={p.link} target="_blank" rel="noreferrer" className="text-[#0EA5E9] text-xs font-semibold hover:underline flex items-center gap-1 shrink-0">
-                        {t('auto_profil_lihat_publikasi', 'Lihat publikasi')}
+                        {t('Lihat publikasi')}
                         <span className="material-symbols-outlined text-[14px]">arrow_outward</span>
                       </a>
                     )}
@@ -1218,7 +1218,7 @@ export default function ProfilAhli() {
             {/* Narasumber */}
             {profile.narasumber?.length > 0 && (
               <div>
-                <SectionHeading title={t('auto_profil_narasumber', 'Narasumber')} />
+                <SectionHeading title={t('Narasumber')} />
                 <ol className="list-decimal list-outside pl-5 flex flex-col gap-2.5">
                   {profile.narasumber.map((item, i) => (
                     <li key={i} className="text-sm text-gray-600 leading-relaxed">
@@ -1232,7 +1232,7 @@ export default function ProfilAhli() {
             {/* Instruktur / Trainer */}
             {((profile.instruktur && profile.instruktur.length > 0) || profile.instruktur) && (
               <div>
-                <SectionHeading title={t('auto_profil_instruktur_trainer', 'Instruktur / Trainer')} />
+                <SectionHeading title={t('Instruktur / Trainer')} />
                 <div className="flex flex-col gap-5">
                   {(profile.instruktur || []).map((it, i) => (
                     <Card key={i}>
@@ -1260,7 +1260,7 @@ export default function ProfilAhli() {
           right — keeps the section short even with many reviews. */}
       <section id="ulasan" className="scroll-mt-16 border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
-          <SectionHeading title={t('auto_profil_ulasan_title', 'Ulasan')} eyebrow={`${ratingStats.total} ${t('auto_profil_ulasan', 'ulasan')}`} />
+          <SectionHeading title={t('Ulasan')} eyebrow={`${ratingStats.total} ${t('ulasan')}`} />
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
             {/* Ringkasan rating */}
             <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm lg:sticky lg:top-24 self-start">
@@ -1269,7 +1269,7 @@ export default function ProfilAhli() {
                 <span className="text-sm text-gray-400 mb-1">/ 5.0</span>
               </div>
               <StarRow rating={Math.round(ratingStats.avg)} size={18} />
-              <p className="text-xs text-gray-400 mt-1.5 mb-4">{t('auto_profil_berdasarkan', 'Berdasarkan')} {ratingStats.total} {t('auto_profil_ulasan', 'ulasan')}</p>
+              <p className="text-xs text-gray-400 mt-1.5 mb-4">{t('Berdasarkan')} {ratingStats.total} {t('ulasan')}</p>
 
               <div className="flex flex-col gap-1.5 mb-5">
                 {ratingStats.dist.map((d) => (
@@ -1284,7 +1284,7 @@ export default function ProfilAhli() {
                   className="w-full bg-[#0EA5E9] text-white text-sm font-semibold py-2.5 rounded-full hover:bg-[#0284C7] transition-colors flex items-center justify-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-[16px]">rate_review</span>
-                  {t('auto_profil_tulis_ulasan', 'Tulis Ulasan')}
+                  {t('Tulis Ulasan')}
                 </button>
               )}
             </div>
@@ -1297,7 +1297,7 @@ export default function ProfilAhli() {
 
               {reviews.length === 0 ? (
                 <div className="text-center py-10 text-sm text-gray-400">
-                  {t('auto_profil_belum_ada_ulasan', 'Belum ada ulasan. Jadilah yang pertama memberikan ulasan untuk tenaga ahli ini.')}
+                  {t('Belum ada ulasan. Jadilah yang pertama memberikan ulasan untuk tenaga ahli ini.')}
                 </div>
               ) : (
                 <>
@@ -1312,7 +1312,7 @@ export default function ProfilAhli() {
                       onClick={() => setShowAllReviews((v) => !v)}
                       className="text-sm font-semibold text-[#0EA5E9] hover:underline mt-3"
                     >
-                      {showAllReviews ? t('auto_profil_sembunyikan_ulasan', 'Sembunyikan ulasan') : `${t('auto_profil_lihat_semua', 'Lihat semua')} ${reviews.length} ${t('auto_profil_ulasan', 'ulasan')}`}
+                      {showAllReviews ? t('Sembunyikan ulasan') : `${t('Lihat semua')} ${reviews.length} ${t('ulasan')}`}
                     </button>
                   )}
                 </>
@@ -1325,24 +1325,24 @@ export default function ProfilAhli() {
       {/* ---------- 15 & 16. PORTOFOLIO ---------- */}
       <section id="portofolio" className="scroll-mt-16 bg-[#FAFBF9] border-t border-gray-200">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
-          <SectionHeading title={t('auto_profil_portofolio', 'Portofolio')} eyebrow={t('auto_profil_dokumen_pendukung', 'Dokumen pendukung')} />
+          <SectionHeading title={t('Portofolio')} eyebrow={t('Dokumen pendukung')} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {profile.portofolio?.cv && (
               <a href={profile.portofolio.cv} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">description</span>
-                <span className="text-sm font-semibold text-gray-900">{t('auto_profil_unduh_cv', 'Unduh CV')}</span>
+                <span className="text-sm font-semibold text-gray-900">{t('Unduh CV')}</span>
               </a>
             )}
             {profile.portofolio?.video && (
               <a href={profile.portofolio.video} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2 hover:border-[#0EA5E9]/40 hover:shadow-sm transition-all">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">play_circle</span>
-                <span className="text-sm font-semibold text-gray-900">{t('auto_profil_video_perkenalan', 'Video Perkenalan')}</span>
+                <span className="text-sm font-semibold text-gray-900">{t('Video Perkenalan')}</span>
               </a>
             )}
             {profile.portofolio?.sertifikat?.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">workspace_premium</span>
-                <span className="text-sm font-semibold text-gray-900 mb-1">{t('auto_profil_sertifikat', 'Sertifikat')}</span>
+                <span className="text-sm font-semibold text-gray-900 mb-1">{t('Sertifikat')}</span>
                 {profile.portofolio.sertifikat.map((f, i) => (
                   <a key={i} href="#" className="text-xs text-gray-500 hover:text-[#0EA5E9] hover:underline truncate">{t(f)}</a>
                 ))}
@@ -1351,7 +1351,7 @@ export default function ProfilAhli() {
             {profile.portofolio?.dokumentasi?.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">photo_library</span>
-                <span className="text-sm font-semibold text-gray-900 mb-1">{t('auto_profil_dokumentasi_kegiatan', 'Dokumentasi Kegiatan')}</span>
+                <span className="text-sm font-semibold text-gray-900 mb-1">{t('Dokumentasi Kegiatan')}</span>
                 {profile.portofolio.dokumentasi.map((f, i) => (
                   <a key={i} href="#" className="text-xs text-gray-500 hover:text-[#0EA5E9] hover:underline truncate">{t(f)}</a>
                 ))}
@@ -1364,9 +1364,9 @@ export default function ProfilAhli() {
       {/* ---------- 17. HUBUNGI TENAGA AHLI ---------- */}
       <section className="border-t border-gray-200" style={{ backgroundColor: NAVY_DARK }}>
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center">
-          <h2 className="font-headline-lg text-xl md:text-2xl font-bold text-white mb-2">{t('auto_profil_hubungi_nama', 'Hubungi')} {profile.name.split(',')[0]}</h2>
+          <h2 className="font-headline-lg text-xl md:text-2xl font-bold text-white mb-2">{t('Hubungi')} {profile.name.split(',')[0]}</h2>
           <p className="text-white/70 text-sm mb-8 max-w-xl mx-auto">
-            {t('auto_profil_tertarik_berkolaborasi', 'Tertarik berkolaborasi atau membutuhkan konsultasi lebih lanjut? Pilih cara terbaik untuk terhubung.')}
+            {t('Tertarik berkolaborasi atau membutuhkan konsultasi lebih lanjut? Pilih cara terbaik untuk terhubung.')}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
@@ -1374,21 +1374,21 @@ export default function ProfilAhli() {
               className="bg-white text-[#0EA5E9] h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/90 transition-colors shadow-lg"
             >
               <span className="material-symbols-outlined text-[18px]">chat</span>
-              {t('auto_profil_kirim_pesan', 'Kirim Pesan')}
+              {t('Kirim Pesan')}
             </a>
             <a
               href={`mailto:${profile.email}?subject=Ajukan%20Kerja%20Sama`}
               className="bg-white/10 text-white border border-white/25 h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/20 transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">handshake</span>
-              {t('auto_profil_ajukan_kerja_sama', 'Ajukan Kerja Sama')}
+              {t('Ajukan Kerja Sama')}
             </a>
             <a
               href={`mailto:${profile.email}?subject=Minta%20Konsultasi`}
               className="bg-white/10 text-white border border-white/25 h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/20 transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">support_agent</span>
-              {t('auto_profil_minta_konsultasi', 'Minta Konsultasi')}
+              {t('Minta Konsultasi')}
             </a>
           </div>
         </div>

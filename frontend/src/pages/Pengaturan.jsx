@@ -100,11 +100,11 @@ export default function Pengaturan() {
   }
 
   return (
-    <DashboardLayout title="Pengaturan" subtitle="Keamanan akun dan sesi login Anda.">
+    <DashboardLayout title={t('Pengaturan')} subtitle={t('Keamanan akun dan sesi login Anda.')}>
       <div className="w-full max-w-2xl space-y-6">
 
         <Card>
-          <SectionTitle icon="manage_accounts">Informasi Akun</SectionTitle>
+          <SectionTitle icon="manage_accounts">{t('Informasi Akun')}</SectionTitle>
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2E5E3B] to-[#1C3822] text-white flex items-center justify-center font-bold text-xl shadow-sm shrink-0">
               {initials}
@@ -120,7 +120,7 @@ export default function Pengaturan() {
         </Card>
 
         <Card>
-          <SectionTitle icon="lock_reset">Ubah Kata Sandi</SectionTitle>
+          <SectionTitle icon="lock_reset">{t('Ubah Kata Sandi')}</SectionTitle>
           {pwError && (
             <div className="flex items-start gap-2 bg-[#FFDAD6] text-[#93000A] text-sm rounded-xl p-3 mb-4">
               <span className="material-symbols-outlined text-[16px] mt-0.5 shrink-0">error</span>
@@ -135,7 +135,7 @@ export default function Pengaturan() {
           )}
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
-              <Label>Kata Sandi Lama *</Label>
+              <Label>{t('Kata Sandi Lama *')}</Label>
               <div className="relative">
                 <input type={showPw ? 'text' : 'password'} required value={currentPw}
                   onChange={(e) => setCurrentPw(e.target.value)}
@@ -147,12 +147,12 @@ export default function Pengaturan() {
               </div>
             </div>
             <div>
-              <Label>Kata Sandi Baru * (min. 8 karakter)</Label>
+              <Label>{t('Kata Sandi Baru * (min. 8 karakter)')}</Label>
               <input type={showPw ? 'text' : 'password'} required minLength={8} value={newPw}
                 onChange={(e) => setNewPw(e.target.value)} className={INPUT} placeholder="••••••••" />
             </div>
             <div>
-              <Label>Konfirmasi Kata Sandi Baru *</Label>
+              <Label>{t('Konfirmasi Kata Sandi Baru *')}</Label>
               <input type={showPw ? 'text' : 'password'} required minLength={8} value={confirmPw}
                 onChange={(e) => setConfirmPw(e.target.value)} className={INPUT} placeholder="••••••••" />
               {confirmPw.length > 0 && (
@@ -160,29 +160,29 @@ export default function Pengaturan() {
                   <span className="material-symbols-outlined text-[14px]">
                     {newPw === confirmPw ? 'check_circle' : 'error'}
                   </span>
-                  {newPw === confirmPw ? 'Kata sandi cocok' : 'Kata sandi tidak cocok'}
+                  {newPw === confirmPw ? t('Kata sandi cocok') : t('Kata sandi tidak cocok')}
                 </p>
               )}
             </div>
             <button type="submit" disabled={pwSaving}
               className="bg-[#2E5E3B] text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:bg-[#244B2F] disabled:opacity-50 transition-colors flex items-center gap-2">
               <span className="material-symbols-outlined text-[16px]">{pwSaving ? 'sync' : 'lock_reset'}</span>
-              {pwSaving ? 'Menyimpan...' : 'Perbarui Kata Sandi'}
+              {pwSaving ? t('Menyimpan...') : t('Perbarui Kata Sandi')}
             </button>
           </form>
         </Card>
 
         <Card>
-          <SectionTitle icon="security">Sesi & Keamanan</SectionTitle>
+          <SectionTitle icon="security">{t('Sesi & Keamanan')}</SectionTitle>
           <p className="text-sm text-[#5B6660] mb-4">
-            Keluar dari akun ini di perangkat yang sedang Anda gunakan. Semua sesi aktif akan dihapus.
+            {t('Keluar dari akun ini di perangkat yang sedang Anda gunakan. Semua sesi aktif akan dihapus.')}
           </p>
           <button onClick={handleLogout} disabled={loggingOut}
             className="border-2 border-[#B3261E]/40 text-[#B3261E] py-2.5 px-6 rounded-xl font-bold text-sm hover:bg-[#B3261E]/10 disabled:opacity-50 transition-all flex items-center gap-2">
             {loggingOut
               ? <span className="w-4 h-4 border-2 border-[#B3261E]/30 border-t-[#B3261E] rounded-full animate-spin" />
               : <span className="material-symbols-outlined text-[18px]">logout</span>}
-            {loggingOut ? 'Keluar...' : 'Logout dari Akun Ini'}
+            {loggingOut ? t('Keluar...') : t('Logout dari Akun Ini')}
           </button>
         </Card>
 

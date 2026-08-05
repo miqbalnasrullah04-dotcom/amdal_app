@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext.jsx';
-import logo from '../assets/logo-tenaga-ahli.png';
+import logo from '../assets/tenaga ahli 2.png';
 import api from '../api/client.js';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
 
@@ -11,7 +11,6 @@ const BRAND_BLUE_HOVER = '#0F63B0';
 
 export default function Navbar() {
   const { t } = useTranslation();
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -25,7 +24,7 @@ export default function Navbar() {
     { to: '/', label: t('Beranda') },
     { to: '/tentang-kami', label: t('Tentang Kami') },
     { to: '/member', label: t('Anggota') },
-    { to: '/peraturan-amdal', label: t('Peraturan AMDAL') },
+    { to: '/peraturan-amdal', label: t('Syarat') },
     { to: '/pamflet', label: t('Pamflet') },
   ];
 
@@ -46,13 +45,6 @@ export default function Navbar() {
     const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
     return `${baseUrl}/storage/${photoUrl}?t=${Date.now()}`;
   };
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   // Cek status login & ambil data user dari localStorage
   useEffect(() => {
@@ -133,27 +125,17 @@ export default function Navbar() {
     navigate('/', { replace: true });
   };
 
-  // Neutral frosted glass: backdrop-blur only, no tinted/colored glow and
-  // no box-shadow. Separation from content below comes from a hairline
-  // border, not a shadow.
-  const isDark = !scrolled;
-  const textColor = isDark ? 'text-white' : 'text-gray-800';
-  const mutedColor = isDark ? 'text-white/75' : 'text-gray-500';
-
+  // Navbar selalu putih solid, teks gelap — tidak lagi berubah saat scroll.
   return (
-    <nav
-      className={`fixed top-0 left-0 z-50 w-full transition-colors duration-300 ${
-        scrolled ? 'bg-white border-b border-gray-100' : 'bg-black/20 border-b border-white/10'
-      }`}
-    >
-      <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3">
-        <Link to="/" className="flex items-center shrink-0">
-          <img src={logo} alt="TenagaAhli.com" className="h-12 md:h-14 w-auto transition-all duration-300" />
-        </Link>
+    <nav className="fixed top-0 left-0 z-50 w-full bg-white border-b border-gray-100">
+      <div className="flex items-center w-full px-margin-mobile md:px-margin-desktop py-3">
+        {/* Logo + nav links dikelompokkan di kiri, seperti Upwork */}
+        <div className="flex items-center gap-10 shrink-0">
+          <Link to="/" className="flex items-center shrink-0">
+            <img src={logo} alt="TenagaAhli.com" className="h-7 md:h-8 w-auto" />
+          </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-10">
-          <div className="flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
@@ -161,7 +143,7 @@ export default function Navbar() {
                 end={link.to === '/'}
                 className={({ isActive }) =>
                   `relative font-label-md text-label-md py-1.5 transition-colors ${
-                    isActive ? textColor + ' font-semibold' : `${mutedColor} hover:${textColor}`
+                    isActive ? 'text-gray-800 font-semibold' : 'text-gray-500 hover:text-gray-800'
                   }`
                 }
               >
@@ -172,7 +154,7 @@ export default function Navbar() {
                       className="absolute left-0 -bottom-0.5 h-[2px] rounded-full transition-all duration-200"
                       style={{
                         width: isActive ? '100%' : '0%',
-                        backgroundColor: isDark ? '#FFFFFF' : BRAND_BLUE,
+                        backgroundColor: BRAND_BLUE,
                       }}
                     />
                   </>
@@ -180,86 +162,86 @@ export default function Navbar() {
               </NavLink>
             ))}
           </div>
+        </div>
 
-          <div className="flex items-center gap-3 pl-4 border-l" style={{ borderColor: isDark ? 'rgba(255,255,255,0.25)' : '#E5E7EB' }}>
-            {/* LANGUAGE SWITCHER */}
-            <LanguageSwitcher />
+        {/* Bahasa + akun dipin ke kanan jauh, seperti Upwork */}
+        <div className="hidden md:flex items-center gap-3 ml-auto pl-4 border-l border-gray-200">
+          <LanguageSwitcher />
 
-            {isLoggedIn ? (
-              /* FOTO PROFIL DROPDOWN (DESKTOP) */
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setProfileOpen((v) => !v)}
-                  className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                  style={{ '--tw-ring-color': BRAND_BLUE }}
-                >
-                  <img
-                    src={getPhotoUrl(userData)}
-                    alt="Profile"
-                    className={`w-10 h-10 rounded-full object-cover border-2 ${isDark ? 'border-white/80' : 'border-gray-200'}`}
-                  />
-                </button>
-
-                {/* Box Dropdown — solid card, hairline border, no blur/glow */}
-                {profileOpen && (
-                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl border border-gray-100 py-2 z-50 text-gray-800">
-                    <div className="px-4 py-2.5 border-b border-gray-100">
-                      <p className="font-label-md text-sm font-semibold truncate">
-                        {userData?.name || userData?.nama || 'User TenagaAhli'}
-                      </p>
-                      <p className="text-xs text-gray-400 truncate">{userData?.email || ''}</p>
-                    </div>
-
-                    <Link
-                      to="/dashboard"
-                      onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-gray-400">dashboard</span>
-                      {t('Dashboard')}
-                    </Link>
-
-                    <Link
-                      to="/profil-saya"
-                      onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-gray-400">person</span>
-                      {t('Profil Saya')}
-                    </Link>
-
-                    <hr className="border-gray-100 my-1" />
-
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#B3261E] hover:bg-red-50 transition-colors text-left font-medium"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">logout</span>
-                      {t('Keluar')}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Satu tombol "Daftar" saja — Sign in tersedia di halaman
-                 pendaftaran ("Sudah punya akun? Masuk di sini"). */
-              <Link
-                to="/daftar"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-label-md text-label-md text-white transition-colors"
-                style={{ backgroundColor: BRAND_BLUE }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE_HOVER)}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE)}
+          {isLoggedIn ? (
+            /* FOTO PROFIL DROPDOWN (DESKTOP) */
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setProfileOpen((v) => !v)}
+                className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                style={{ '--tw-ring-color': BRAND_BLUE }}
               >
-                <span className="material-symbols-outlined text-[18px]">person_add</span>
-                {t('Daftar')}
-              </Link>
-            )}
-          </div>
+                <img
+                  src={getPhotoUrl(userData)}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                />
+              </button>
+
+              {/* Box Dropdown — solid card, hairline border, no blur/glow */}
+              {profileOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl border border-gray-100 py-2 z-50 text-gray-800">
+                  <div className="px-4 py-2.5 border-b border-gray-100">
+                    <p className="font-label-md text-sm font-semibold truncate">
+                      {userData?.name || userData?.nama || 'User TenagaAhli'}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">{userData?.email || ''}</p>
+                  </div>
+
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-gray-400">dashboard</span>
+                    {t('Dashboard')}
+                  </Link>
+
+                  <Link
+                    to="/profil-saya"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-gray-400">person</span>
+                    {t('Profil Saya')}
+                  </Link>
+
+                  <hr className="border-gray-100 my-1" />
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#B3261E] hover:bg-red-50 transition-colors text-left font-medium"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">logout</span>
+                    {t('Keluar')}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Satu tombol "Daftar" saja — Sign in tersedia di halaman
+               pendaftaran ("Sudah punya akun? Masuk di sini"). */
+            <Link
+              to="/daftar"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-label-md text-label-md text-white transition-colors"
+              style={{ backgroundColor: BRAND_BLUE }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE_HOVER)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE)}
+            >
+              <span className="material-symbols-outlined text-[18px]">person_add</span>
+              {t('Daftar')}
+            </Link>
+          )}
         </div>
 
         {/* Mobile Toggle Button */}
         <button
-          className={`md:hidden ${textColor} w-9 h-9 flex items-center justify-center rounded-lg`}
+          className="md:hidden ml-auto text-gray-800 w-9 h-9 flex items-center justify-center rounded-lg"
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="Buka menu"
           aria-expanded={menuOpen}

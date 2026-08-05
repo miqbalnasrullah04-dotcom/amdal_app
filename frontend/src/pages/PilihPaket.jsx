@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
@@ -244,7 +244,7 @@ export default function PilihPaket() {
             <div className="bg-[#F5F4F0] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">qr_code_2</span>
-                <p className="font-bold text-sm text-[#1F2A22]">{t('auto_qris', 'QRIS')}</p>
+                <p className="font-bold text-sm text-[#1F2A22]">{t('QRIS')}</p>
               </div>
               <p className="text-xs text-[#5B6660]">{t('Bayar langsung dengan scan QR dari semua e-wallet dan mobile banking')}</p>
             </div>
@@ -256,10 +256,10 @@ export default function PilihPaket() {
                 <p className="font-bold text-sm text-[#1F2A22]">{t('Transfer Bank')}</p>
               </div>
               <ul className="text-xs text-[#5B6660] space-y-1">
-                <li>{t('auto__bca_virtual_account', '• BCA Virtual Account')}</li>
-                <li>{t('auto__bni_virtual_account', '• BNI Virtual Account')}</li>
-                <li>{t('auto__mandiri_virtual_acc', '• Mandiri Virtual Account')}</li>
-                <li>{t('auto__bri_virtual_account', '• BRI Virtual Account')}</li>
+                <li>{t('• BCA Virtual Account')}</li>
+                <li>{t('• BNI Virtual Account')}</li>
+                <li>{t('• Mandiri Virtual Account')}</li>
+                <li>{t('• BRI Virtual Account')}</li>
               </ul>
             </div>
 
@@ -267,13 +267,13 @@ export default function PilihPaket() {
             <div className="bg-[#F5F4F0] rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-[#0EA5E9] text-[20px]">wallet</span>
-                <p className="font-bold text-sm text-[#1F2A22]">{t('auto_e_wallet', 'E-Wallet')}</p>
+                <p className="font-bold text-sm text-[#1F2A22]">{t('E-Wallet')}</p>
               </div>
               <ul className="text-xs text-[#5B6660] space-y-1">
-                <li>{t('auto__gopay', '• GoPay')}</li>
-                <li>{t('auto__shopeepay', '• ShopeePay')}</li>
-                <li>{t('auto__dana', '• DANA')}</li>
-                <li>{t('auto__ovo', '• OVO')}</li>
+                <li>{t('• GoPay')}</li>
+                <li>{t('• ShopeePay')}</li>
+                <li>{t('• DANA')}</li>
+                <li>{t('• OVO')}</li>
               </ul>
             </div>
 
@@ -284,9 +284,9 @@ export default function PilihPaket() {
                 <p className="font-bold text-sm text-[#1F2A22]">{t('Kartu Kredit/Debit')}</p>
               </div>
               <ul className="text-xs text-[#5B6660] space-y-1">
-                <li>{t('auto__visa', '• Visa')}</li>
-                <li>{t('auto__mastercard', '• Mastercard')}</li>
-                <li>{t('auto__jcb', '• JCB')}</li>
+                <li>{t('• Visa')}</li>
+                <li>{t('• Mastercard')}</li>
+                <li>{t('• JCB')}</li>
               </ul>
             </div>
           </div>

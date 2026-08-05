@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
@@ -6,6 +6,7 @@ import LevelBadge from '../components/LevelBadge.jsx';
 import { useTranslation } from '../context/LanguageContext.jsx';
 
 export default function ProfilPublik() {
+  const { t } = useTranslation();
   const [expert, setExpert] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -28,12 +29,11 @@ export default function ProfilPublik() {
 
   if (loading) {
     return (
-      <DashboardLayout title={t('auto_profil_publik', 'Profil Publik')}>
+      <DashboardLayout title={t('Profil Publik')}>
         <div className="flex items-center gap-3 text-[#5B6660]">
           <span className="w-5 h-5 rounded-full border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B] animate-spin" />
-          
-                          {t('auto_memuat_data', 'Memuat data...')}
-                        </div>
+          {t('Memuat data...')}
+        </div>
       </DashboardLayout>
     );
   }
@@ -46,7 +46,7 @@ export default function ProfilPublik() {
 
   return (
     <DashboardLayout
-      title={t('auto_profil_publik', 'Profil Publik')}
+      title={t('Profil Publik')}
       subtitle={t('Pratinjau tampilan profil Anda pada halaman pencarian Tenaga Ahli.')}
     >
       {error && (
@@ -57,17 +57,15 @@ export default function ProfilPublik() {
         <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-6 max-w-2xl">
           <h3 className="font-bold text-[#1F2A22] mb-2 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#2E5E3B] text-[20px]">language</span>
-            
-                                  {t('auto_tampilan_direktori_p', 'Tampilan Direktori Publik')}
-                                </h3>
+            {t('Tampilan Direktori Publik')}
+          </h3>
           <p className="text-sm text-on-surface-variant mb-6">
-            
-                                  {t('auto_berikut_adalah_prati', 'Berikut adalah pratinjau status tampilan profil Anda di website pencarian Tenaga Ahli nasional.')}
-                                </p>
+            {t('Berikut adalah pratinjau status tampilan profil Anda di website pencarian Tenaga Ahli nasional.')}
+          </p>
 
           <div className="bg-[#F5F4EF] rounded-xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <p className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">{t('auto_status_tampil_websit', 'Status Tampil Website')}</p>
+              <p className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">{t('Status Tampil Website')}</p>
               <div className="flex items-center gap-2">
                 <span className={`w-3 h-3 rounded-full ${isProfileLive ? 'bg-[#2E5E3B]' : 'bg-[#B3261E]'}`}></span>
                 <span className="font-bold text-base text-on-background">
@@ -83,20 +81,17 @@ export default function ProfilPublik() {
                   className="bg-[#2E5E3B] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-[#1E3E26] shadow-sm flex items-center gap-1.5 transition-colors w-fit"
                 >
                   <span className="material-symbols-outlined text-base">visibility</span>
-                  
-                                                    {t('auto_lihat_profil_asli', 'Lihat Profil Asli')}
-                                                  </Link>
+                  {t('Lihat Profil Asli')}
+                </Link>
                 <div className="text-xs text-[#2E5E3B] flex items-center gap-1 bg-[#2E5E3B]/10 px-3 py-1.5 rounded-lg border border-[#2E5E3B]/20 font-medium">
                   <span className="material-symbols-outlined text-[14px]">link</span>
-                  
-                                                    {t('auto_amdal_id_profil', 'amdal.id/profil/')}{expert.slug}
+                  {t('amdal.id/profil/')}{expert.slug}
                 </div>
               </div>
             ) : (
               <div className="text-xs text-on-surface-variant font-medium max-w-xs text-center sm:text-right">
-                
-                                                  {t('auto_profil_tidak_tampil', 'Profil tidak tampil karena Anda belum diverifikasi admin atau belum memilih paket berlangganan.')}
-                                                </div>
+                {t('Profil tidak tampil karena Anda belum diverifikasi admin atau belum memilih paket berlangganan.')}
+              </div>
             )}
           </div>
 
@@ -104,9 +99,8 @@ export default function ProfilPublik() {
           <div className="border border-outline-variant/30 rounded-2xl p-5 max-w-md mx-auto bg-white shadow-md relative overflow-hidden">
             <div className="absolute top-3 right-3 bg-[#E3F2E7]/80 backdrop-blur-sm border border-[#2E5E3B]/20 rounded-full px-2 py-0.5 flex items-center gap-1 text-[10px] text-[#2E5E3B] font-bold">
               <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: '"FILL" 1' }}>verified</span>
-              
-                                        {t('auto_verified_member', 'Verified Member')}
-                                      </div>
+              {t('Verified Member')}
+            </div>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 rounded-full overflow-hidden border bg-[#F5F4EF] shrink-0">
                 {expert?.photo ? (
@@ -129,8 +123,8 @@ export default function ProfilPublik() {
               </div>
             </div>
             <div className="text-xs text-on-surface-variant border-t border-outline-variant/20 pt-3 flex justify-between">
-              <span>{t('auto_lokasi', 'Lokasi:')} <strong>{t(expert?.alamat_kota) || t('Belum Diisi')}</strong></span>
-              <span>{t('auto_pendidikan', 'Pendidikan:')} <strong>{t(expert?.pendidikan) || '-'}</strong></span>
+              <span>{t('Lokasi:')} <strong>{t(expert?.alamat_kota) || t('Belum Diisi')}</strong></span>
+              <span>{t('Pendidikan:')} <strong>{t(expert?.pendidikan) || '-'}</strong></span>
             </div>
           </div>
         </div>

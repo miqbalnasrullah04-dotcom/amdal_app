@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
-import Background from '../assets/world.jpg';
+import Background from '../assets/world.jpg'; // ✅ tetap dipakai sebagai poster/fallback video
 import ShinyText from '../components/ShinyText';
 import { usePageLoading } from '../context/LoadingContext.jsx';
 
@@ -11,7 +11,11 @@ import {
   Cog6ToothIcon,
   CheckIcon,
   BookOpenIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/solid';
+
+// ✅ path video di folder public (root project) -> frontend/public/images/map-world.mp4
+const HeroVideo = '/images/map-world.mp4';
 
 const categories = [
   {
@@ -52,10 +56,49 @@ const categories = [
   },
 ];
 
-const SEARCH_CATEGORIES = categories.map((c) => ({
-  icon: c.MainIcon,
-  title: c.title,
-}));
+const SEARCH_CATEGORIES = [
+  { icon: categories.find(c => c.title === 'Tenaga Ahli').MainIcon, title: 'Tenaga Ahli' },
+  ...categories.filter(c => c.title !== 'Tenaga Ahli').map(c => ({ icon: c.MainIcon, title: c.title })),
+];
+
+// Label singkat untuk tag populer di hero (mengikuti tata letak referensi),
+// tetap terhubung ke nilai kriteria yang sesungguhnya untuk pencarian.
+const QUICK_TAGS = [
+  { label: 'Narasumber', kriteria: 'Narasumber/Pembicara' },
+  { label: 'PenelitiArtikel', kriteria: 'Peneliti Artikel/Jurnal' },
+  { label: 'InstrukturPengajar', kriteria: 'Instruktur Pengajar' },
+  { label: 'TenagaAhli', kriteria: 'Tenaga Ahli' },
+];
+
+// Mode-mode pencarian yang bisa dipilih lewat toggle di atas kolom pencarian.
+// Setiap mode punya field-nya sendiri (keyword/location/kategori) sehingga
+// nilai yang sudah diketik tidak hilang saat berpindah mode.
+const SEARCH_MODES = [
+  { key: 'keyword', label: 'Kata Kunci', placeholder: 'Cari nama, keahlian, atau bidang...' },
+  { key: 'location', label: 'Lokasi', placeholder: 'Kota, Kabupaten, atau Provinsi...' },
+  { key: 'kategori', label: 'Kategori', placeholder: 'Tenaga Ahli, Narasumber, Instruktur...' },
+];
+
+const POPULAR_KEYWORDS = [
+  'Ahli Kehutanan',
+  'Peneliti Lingkungan',
+  'Instruktur AMDAL',
+  'Konsultan Tata Ruang',
+  'Ahli Hidrologi'
+];
+
+const LOCATION_SUGGESTIONS = [
+  'Jakarta',
+  'Bogor',
+  'Depok',
+  'Tangerang',
+  'Bekasi',
+  'Bandung',
+  'Surabaya',
+  'Semarang',
+  'Yogyakarta',
+  'Medan',
+];
 
 // Data ahli unggulan cadangan (Telah Diperbarui ke Dr. Irman Firmansyah)
 const FALLBACK_FEATURED_EXPERTS = [
@@ -73,24 +116,44 @@ export default function Home() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { reportReady } = usePageLoading();
+
+  // Nilai masing-masing field pencarian, dijaga terpisah per mode.
   const [keyword, setKeyword] = useState('');
   const [location, setLocation] = useState('');
   const [kategori, setKategori] = useState('');
+
+  // Mode toggle yang sedang aktif: 'keyword' | 'location' | 'kategori'
+  const [activeMode, setActiveMode] = useState('keyword');
   const [kategoriOpen, setKategoriOpen] = useState(false);
+  const [keywordOpen, setKeywordOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
   const [experts, setExperts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalExperts, setTotalExperts] = useState(0);
   const [showAll, setShowAll] = useState(false);
-  
+
   const displayLimit = 6;
   const displayedExperts = showAll ? experts : experts.slice(0, displayLimit);
 
   const kategoriBoxRef = useRef(null);
+  const toggleContainerRef = useRef(null);
+  const modeButtonRefs = useRef({});
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+
+  const fieldValues = { keyword, location, kategori };
+  const fieldSetters = { keyword: setKeyword, location: setLocation, kategori: setKategori };
+  const activeModeConfig = SEARCH_MODES.find((m) => m.key === activeMode);
 
   useEffect(() => {
     function handleOutsideClick(e) {
-      if (kategoriBoxRef.current && !kategoriBoxRef.current.contains(e.target)) {
+      if (kategoriBoxRef.current && !kategoriBoxRef.current.contains(e.target) &&
+          toggleContainerRef.current && !toggleContainerRef.current.contains(e.target)) {
         setKategoriOpen(false);
+        setKeywordOpen(false);
+        setLocationOpen(false);
+        setIsSearchFocused(false);
       }
     }
     document.addEventListener('mousedown', handleOutsideClick);
@@ -101,8 +164,25 @@ export default function Home() {
     };
   }, []);
 
+  // Geser & sesuaikan lebar pill background mengikuti tombol mode yang aktif
+  useLayoutEffect(() => {
+    function measure() {
+      const btn = modeButtonRefs.current[activeMode];
+      if (btn) {
+        setSliderStyle({ left: btn.offsetLeft, width: btn.offsetWidth });
+      }
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [activeMode]);
+
   const kategoriMatches = SEARCH_CATEGORIES.filter((c) =>
     c.title.toLowerCase().includes(kategori.trim().toLowerCase())
+  );
+  
+  const locationMatches = LOCATION_SUGGESTIONS.filter((s) =>
+    s.toLowerCase().includes(location.trim().toLowerCase())
   );
 
   useEffect(() => {
@@ -136,96 +216,141 @@ export default function Home() {
   const handleSearch = (e) => {
     e.preventDefault();
     setKategoriOpen(false);
+    setKeywordOpen(false);
+    setLocationOpen(false);
+    setIsSearchFocused(false);
     navigate(`/search?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}&kriteria=${encodeURIComponent(kategori)}`);
+  };
+
+  const handleActiveFieldChange = (value) => {
+    fieldSetters[activeMode](value);
+  };
+
+  const handleTagClick = (kriteriaValue) => {
+    setActiveMode('kategori');
+    setKategori(kriteriaValue);
+    setKategoriOpen(false);
+    setKeywordOpen(false);
+    setLocationOpen(false);
+    setIsSearchFocused(false);
+    navigate(`/search?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}&kriteria=${encodeURIComponent(kriteriaValue)}`);
   };
 
   return (
     <>
       {/* Hero Section */}
-      <header className="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-40 overflow-hidden">
-        <div
-          className="absolute inset-0 z-0 w-full h-full bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${Background})` }}
-        />
-        <div className="absolute inset-0 bg-black/40 z-10" />
+      <header className="px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 2xl:px-32 py-4 pt-24" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+        <section
+          className="relative w-full h-[600px] rounded-[32px] overflow-hidden flex flex-col justify-center px-12 lg:px-24 transition-all duration-700"
+        >
+          {/* ✅ Video Background — menggantikan bg-cover bg-center image sebelumnya */}
+          <video
+            className="absolute inset-0 w-full h-full object-cover z-0"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={Background}
+          >
+            <source src={HeroVideo} type="video/mp4" />
+          </video>
 
-        <div className="relative z-20 text-center px-margin-mobile max-w-4xl mx-auto">
-          {/* FIX: leading-[1.25] + pb-2 mencegah descender huruf "g" pada "TenagaAhli.com"
-              terpotong akibat line-height yang terlalu ketat pada teks berukuran besar
-              yang memakai background-clip: text (efek shiny). */}
-          <h1 className="font-display-lg text-display-lg md:text-[80px] mb-4 drop-shadow-lg leading-[1.25] pb-2">
-            <ShinyText
-              text="TenagaAhli.com"
-              speed={2.5}
-              delay={0.5}
-              color="#ffffff"
-              shineColor="#0EA5E9"
-              spread={120}
-              direction="left"
-              pauseOnHover={false}
-              yoyo={false}
-              className="font-display-lg text-display-lg md:text-[80px] leading-[1.25]"
-            />
-          </h1>
-          <p className="font-headline-lg text-white/90 max-w-2xl mx-auto uppercase tracking-widest text-sm md:text-base font-semibold">
-            {t('Platform pencarian tenaga ahli profesional untuk mendukung kebutuhan konsultasi, penelitian, pelatihan, dan kolaborasi di berbagai bidang.')}
-          </p>
-        </div>
+          {/* Overlay gelap agar teks tetap terbaca di atas video */}
+          <div
+            className={`absolute inset-0 z-[1] transition-opacity duration-700 ${isSearchFocused ? 'opacity-100' : 'opacity-80'}`}
+            style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.3) 100%)' }}
+          />
+          {/* Ekstra dark overlay saat search aktif */}
+          <div className={`absolute inset-0 z-[1] bg-black/40 transition-opacity duration-700 ${isSearchFocused ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
 
-        {/* Search Component */}
-        <form onSubmit={handleSearch} className="relative z-30 w-full max-w-[1200px] mt-12 px-margin-mobile">
-          {/* FIX: rounded-full membuat bentuk jadi blob tidak rapi saat flex-col (mobile).
-              Sekarang mobile pakai rounded-3xl, desktop (md:) tetap rounded-full seperti semula. */}
-          <div className="bg-white/95 backdrop-blur-sm p-2 rounded-3xl md:rounded-full shadow-2xl flex flex-col md:flex-row items-center gap-2 border border-white/20">
-            <div className="flex-1 flex items-center px-6 py-2 gap-3 border-r border-outline-variant/30 w-full">
-              <span className="material-symbols-outlined text-[#0EA5E9]">search</span>
-              <div className="flex flex-col flex-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant leading-none mb-1">
-                  {t('home.search_keyword', 'Masukan Kata Kunci')}
-                </label>
-                <input
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder:text-surface-dim text-sm"
-                  placeholder={t('home.search_keyword_placeholder', 'Ahli Kehutanan, Tata Ruang')}
-                  type="text"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
+          <div className="relative z-10 max-w-3xl text-white">
+            {/* Teks Judul & Deskripsi */}
+            <div className={`transition-all duration-700 ease-out transform ${isSearchFocused ? '-translate-y-8 opacity-0 pointer-events-none scale-95' : 'translate-y-0 opacity-100 scale-100'}`}>
+              <h1 className="text-6xl md:text-7xl font-extrabold mb-6 drop-shadow-lg leading-[0.95] tracking-tight pb-2 max-w-2xl">
+                <ShinyText
+                  text={t('Temukan Tenaga Ahli Terpercaya')}
+                  speed={2.5}
+                  delay={0.5}
+                  color="#ffffff"
+                  shineColor="#0EA5E9"
+                  spread={120}
+                  direction="left"
+                  pauseOnHover={false}
+                  yoyo={false}
+                  className="text-6xl md:text-7xl font-extrabold leading-[0.95] tracking-tight"
                 />
-              </div>
-            </div>
-            <div className="flex-1 flex items-center px-6 py-2 gap-3 border-r border-outline-variant/30 w-full">
-              <span className="material-symbols-outlined text-[#0EA5E9]">location_on</span>
-              <div className="flex flex-col flex-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant leading-none mb-1">
-                  {t('home.search_location_label', 'Kota/Kabupaten/Provinsi')}
-                </label>
-                <input
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder:text-surface-dim text-sm"
-                  placeholder={t('Lokasi')}
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
-              </div>
+              </h1>
+              <p className="text-xl md:text-2xl font-medium mb-10 text-gray-200 leading-relaxed max-w-xl">
+                {t('Platform pencarian tenaga ahli yang memudahkan Anda menemukan profesional berdasarkan keahlian, lokasi, sertifikasi, dan pengalaman.')}
+              </p>
             </div>
 
-            <div className="flex-1 relative flex items-center px-6 py-2 gap-3 w-full" ref={kategoriBoxRef}>
-              <span className="material-symbols-outlined text-[#0EA5E9]">category</span>
-              <div className="flex flex-col flex-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant leading-none mb-1">
-                  {t('home.search_category_label', 'Kriteria Keanggotaan')}
-                </label>
+            {/* Container Search Bar (Naik saat fokus) */}
+            <div className={`transition-all duration-700 ease-out transform w-full max-w-2xl ${isSearchFocused ? '-translate-y-48' : 'translate-y-0'}`}>
+              {/* Toggle mode pencarian */}
+              <div
+                ref={toggleContainerRef}
+                className="flex items-center mb-4 p-1 rounded-full relative w-full justify-between"
+                style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }}
+            >
+              <div
+                className="absolute top-1 bottom-1 bg-white/90 rounded-full transition-all duration-300 ease-out z-0"
+                style={{ left: sliderStyle.left, width: sliderStyle.width }}
+              />
+              {SEARCH_MODES.map((mode) => (
+                <button
+                  key={mode.key}
+                  type="button"
+                  ref={(el) => (modeButtonRefs.current[mode.key] = el)}
+                  onClick={() => {
+                    setActiveMode(mode.key);
+                    setKategoriOpen(mode.key === 'kategori');
+                    setKeywordOpen(mode.key === 'keyword');
+                    setLocationOpen(mode.key === 'location');
+                    setIsSearchFocused(true);
+                  }}
+                  className={`relative z-10 flex-1 px-6 py-2.5 rounded-full font-semibold text-sm text-center transition-colors ${
+                    activeMode === mode.key ? 'text-on-background' : 'text-white hover:bg-white/5'
+                  }`}
+                >
+                  {t(mode.label)}
+                </button>
+              ))}
+            </div>
+
+            {/* Kolom pencarian tunggal — isinya berganti mengikuti mode yang aktif */}
+            <form onSubmit={handleSearch} className="relative max-w-2xl mb-8" ref={kategoriBoxRef}>
+              <div className="flex items-center bg-white rounded-full p-1.5 pr-1.5 shadow-xl">
                 <input
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder:text-surface-dim text-sm"
-                  placeholder={t('home.search_category_placeholder', 'Tenaga Ahli, Narasumber...')}
+                  className="w-full bg-transparent border-none focus:ring-0 text-on-background text-base px-6 py-1.5 placeholder-gray-400"
+                  placeholder={t(activeModeConfig.placeholder)}
                   type="text"
-                  value={kategori}
-                  onChange={(e) => setKategori(e.target.value)}
-                  onFocus={() => setKategoriOpen(true)}
+                  value={fieldValues[activeMode]}
+                  onChange={(e) => handleActiveFieldChange(e.target.value)}
+                  onFocus={() => {
+                    setKategoriOpen(activeMode === 'kategori');
+                    setKeywordOpen(activeMode === 'keyword');
+                    setLocationOpen(activeMode === 'location');
+                    setIsSearchFocused(true);
+                  }}
                 />
+                <button
+                  type="submit"
+                  className="bg-black hover:bg-gray-900 text-white flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-colors shrink-0"
+                >
+                  <MagnifyingGlassIcon className="w-4 h-4 text-[#0EA5E9]" />
+                  <span>{t('Search')}</span>
+                </button>
               </div>
 
-              {kategoriOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-40 overflow-hidden border border-outline-variant/20">
+              {/* Saran kategori muncul hanya saat mode Kategori aktif */}
+              {activeMode === 'kategori' && kategoriOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-black/20 backdrop-blur-xl rounded-xl shadow-2xl z-40 overflow-hidden border border-white/20 text-white">
+                  <div className="px-4 py-3 border-b border-white/10">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-300">
+                      {t('Kategori')}
+                    </h4>
+                  </div>
                   {kategoriMatches.length > 0 ? (
                     kategoriMatches.map((c, i, arr) => (
                       <button
@@ -235,31 +360,99 @@ export default function Home() {
                           setKategori(c.title);
                           setKategoriOpen(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-surface-container-low active:bg-surface-container-low transition-colors ${
-                          i !== arr.length - 1 ? 'border-b border-outline-variant/20' : ''
-                        } ${c.title === kategori ? 'font-semibold text-[#0EA5E9]' : 'text-on-surface'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-white/10 active:bg-white/10 transition-colors ${
+                          i !== arr.length - 1 ? 'border-b border-white/10' : ''
+                        } ${c.title === kategori ? 'font-semibold text-[#0EA5E9]' : ''}`}
                       >
-                        <c.icon className="w-[18px] h-[18px] text-[#0EA5E9] shrink-0" />
-                        {c.title}
+                        <c.icon className="w-[18px] h-[18px] text-gray-400 shrink-0" />
+                        {t(c.title)}
                       </button>
                     ))
                   ) : (
-                    <div className="px-4 py-3 text-xs text-on-surface-variant/60 text-center">
-                      Tidak ada saran untuk "{kategori}"
+                    <div className="px-4 py-3 text-xs text-gray-400 text-center">
+                      {t('Tidak ada saran untuk')} "{kategori}"
                     </div>
                   )}
                 </div>
               )}
-            </div>
 
-            <button
-              type="submit"
-              className="bg-[#0EA5E9] text-white h-14 px-10 rounded-full flex items-center justify-center gap-2 hover:bg-[#0284C7] transition-all active:scale-95 shadow-lg shadow-[#0EA5E9]/20 font-label-md"
-            >
-              {t('Cari')}
-            </button>
+              {/* Saran lokasi muncul saat mode Lokasi aktif */}
+              {activeMode === 'location' && locationOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-black/20 backdrop-blur-xl rounded-xl shadow-2xl z-40 overflow-hidden border border-white/20 text-white">
+                  <div className="px-4 py-3 border-b border-white/10">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-300">
+                      {t('Lokasi')}
+                    </h4>
+                  </div>
+                  {locationMatches.length > 0 ? (
+                    locationMatches.map((loc, i, arr) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => {
+                          setLocation(loc);
+                          setLocationOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-white/10 active:bg-white/10 transition-colors ${
+                          i !== arr.length - 1 ? 'border-b border-white/10' : ''
+                        }`}
+                      >
+                        <MagnifyingGlassIcon className="w-[18px] h-[18px] text-gray-400 shrink-0" />
+                        {loc}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-xs text-gray-400 text-center">
+                      {t('Tidak ada saran untuk')} "{location}"
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Pencarian Populer muncul saat mode Kata Kunci aktif */}
+              {activeMode === 'keyword' && keywordOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-black/20 backdrop-blur-xl rounded-xl shadow-2xl z-40 overflow-hidden border border-white/20 text-white">
+                  <div className="px-4 py-3 border-b border-white/10">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-gray-300">
+                      {t('Pencarian Populer')}
+                    </h4>
+                  </div>
+                  {POPULAR_KEYWORDS.map((kw, i, arr) => (
+                    <button
+                      key={kw}
+                      type="button"
+                      onClick={() => {
+                        setKeyword(kw);
+                        setKeywordOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-white/10 active:bg-white/10 transition-colors ${
+                        i !== arr.length - 1 ? 'border-b border-white/10' : ''
+                      }`}
+                    >
+                      <MagnifyingGlassIcon className="w-[18px] h-[18px] text-gray-400 shrink-0" />
+                      {t(kw)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </form>
+
+            {/* Tag populer */}
+            <div className="flex flex-wrap items-center gap-3 max-w-2xl">
+              {QUICK_TAGS.map((tag) => (
+                <button
+                  key={tag.label}
+                  type="button"
+                  onClick={() => handleTagClick(tag.kriteria)}
+                  className="px-5 py-2.5 rounded-full border border-white/50 bg-transparent hover:bg-[#0EA5E9] hover:border-[#0EA5E9] transition-all text-sm font-semibold text-white"
+                >
+                  {tag.label}
+                </button>
+              ))}
+            </div>
+            </div> {/* Closing for Container Search Bar */}
           </div>
-        </form>
+        </section>
       </header>
 
       {/* Kategori Section */}
@@ -319,7 +512,7 @@ export default function Home() {
                   <div key={expert.id} className="relative group rounded-xl overflow-hidden shadow-lg bg-white border border-outline-variant/30 hover:shadow-xl transition-shadow">
                     <div className="relative h-64">
                       <img src={expert.cover} alt={expert.name} className="w-full h-full object-cover" />
-                      
+
                       {/* Premium Badge */}
                       <div className="absolute top-4 left-4 bg-gradient-to-r from-[#FFD700] to-[#FFA500] p-1.5 rounded-lg shadow-lg">
                         <span className="material-symbols-outlined text-white text-base" style={{ fontVariationSettings: '"FILL" 1' }}>workspace_premium</span>
@@ -327,9 +520,9 @@ export default function Home() {
 
                       {/* Lihat Profil Button */}
                       {expert.slug && (
-                        <Link 
-                          to={`/profil/${expert.slug}`} 
-                          onClick={(e) => e.stopPropagation()} 
+                        <Link
+                          to={`/profil/${expert.slug}`}
+                          onClick={(e) => e.stopPropagation()}
                           className="absolute top-4 right-4 bg-[#0EA5E9] hover:bg-[#0284C7] text-xs font-semibold text-white rounded-full px-3 py-1.5 shadow-lg transition-colors"
                         >
                           {t('Lihat Profil')}

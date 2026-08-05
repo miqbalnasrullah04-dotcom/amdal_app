@@ -295,7 +295,7 @@ export default function InstrukturPengajar() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-[72px] md:pt-20">
+    <div className="min-h-screen bg-white pt-[52px] md:pt-[56px]">
       <NavbarBackground />
 
 

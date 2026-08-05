@@ -66,7 +66,7 @@ export default function PeraturanAMDAL() {
           <span className="material-symbols-outlined text-[16px]">balance</span>
           {t('regulations.badge', 'Dasar Hukum')}
         </span>
-        <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('regulations.title', 'Peraturan AMDAL')}</h1>
+        <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('regulations.title', 'Syarat')}</h1>
         <p className="text-on-surface-variant">
           {t('regulations.subtitle', 'Kumpulan dasar hukum dan peraturan terkait Kajian Lingkungan Hidup Strategis yang berlaku di Indonesia.')}
         </p>

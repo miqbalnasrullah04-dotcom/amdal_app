@@ -193,9 +193,28 @@ export default function Search() {
 
   useEffect(() => {
     setLoading(true);
-    setExperts(FALLBACK_EXPERTS);
-    setLoading(false);
-    reportReady();
+    const params = {};
+    if (searchParams.get('keyword')) params.keyword = searchParams.get('keyword');
+    if (searchParams.get('location')) params.location = searchParams.get('location');
+    if (searchParams.get('kriteria')) params.kriteria = searchParams.get('kriteria');
+    if (searchParams.get('order')) params.order = searchParams.get('order');
+
+    api.get('/experts', { params })
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : (res.data.data || []);
+        if (data.length === 0) {
+          setExperts(FALLBACK_EXPERTS);
+        } else {
+          setExperts(data);
+        }
+      })
+      .catch(() => {
+        setExperts(FALLBACK_EXPERTS);
+      })
+      .finally(() => {
+        setLoading(false);
+        reportReady();
+      });
   }, [searchParams]);
 
   useEffect(() => {
@@ -223,7 +242,9 @@ export default function Search() {
         !loc || e.location?.toLowerCase().includes(loc);
 
       const matchKriteria =
-        !krit || e.kriteria?.toLowerCase().includes(krit);
+        !krit || 
+        e.kriteria?.toLowerCase().includes(krit) ||
+        (Array.isArray(e.kriteria_list) && e.kriteria_list.some(k => k.toLowerCase().includes(krit)));
 
       const matchBounds =
         !searchAsMove || !visibleBounds || (e.lat && e.lng && visibleBounds.contains([e.lat, e.lng]));
