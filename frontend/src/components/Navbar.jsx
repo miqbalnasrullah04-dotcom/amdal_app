@@ -224,17 +224,16 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            /* Satu tombol "Daftar" saja — Sign in tersedia di halaman
-               pendaftaran ("Sudah punya akun? Masuk di sini"). */
+            /* Tombol "Login" — mengarah ke halaman login */
             <Link
-              to="/daftar"
+              to="/sign-in"
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-label-md text-label-md text-white transition-colors"
               style={{ backgroundColor: BRAND_BLUE }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE_HOVER)}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = BRAND_BLUE)}
             >
-              <span className="material-symbols-outlined text-[18px]">person_add</span>
-              {t('Daftar')}
+              <span className="material-symbols-outlined text-[18px]">login</span>
+              {t('Masuk')}
             </Link>
           )}
         </div>
@@ -314,15 +313,15 @@ export default function Navbar() {
             </>
           ) : (
             <div className="flex flex-col gap-3 pt-4">
-              {/* Satu tombol "Daftar" saja — Sign in ada di halaman /daftar */}
+              {/* Tombol "Login" — mengarah ke halaman login */}
               <Link
-                to="/daftar"
+                to="/sign-in"
                 onClick={() => setMenuOpen(false)}
                 className="w-full flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-lg font-label-md text-label-md text-white"
                 style={{ backgroundColor: BRAND_BLUE }}
               >
-                <span className="material-symbols-outlined text-[18px]">person_add</span>
-                Daftar
+                <span className="material-symbols-outlined text-[18px]">login</span>
+                {t('Masuk')}
               </Link>
 
               {/* Language Switcher Mobile */}

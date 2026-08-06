@@ -446,7 +446,7 @@ export default function Home() {
                   onClick={() => handleTagClick(tag.kriteria)}
                   className="px-5 py-2.5 rounded-full border border-white/50 bg-transparent hover:bg-[#0EA5E9] hover:border-[#0EA5E9] transition-all text-sm font-semibold text-white"
                 >
-                  {tag.label}
+                  {t(tag.label)}
                 </button>
               ))}
             </div>
@@ -476,7 +476,7 @@ export default function Home() {
                 ) : (
                   <cat.MainIcon className="w-14 h-14 mb-4 drop-shadow-lg" />
                 )}
-                <h3 className="font-headline-md text-xl text-center">{cat.title}</h3>
+                <h3 className="font-headline-md text-xl text-center">{t(cat.title)}</h3>
               </div>
             </Link>
           ))}

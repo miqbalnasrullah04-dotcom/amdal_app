@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ExpertController;
+use App\Http\Controllers\Admin\PamfletController;
 use App\Http\Controllers\Admin\PartnerController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +27,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('experts', ExpertController::class)->except('show');
         Route::resource('partners', PartnerController::class)->except('show');
         Route::resource('articles', ArticleController::class)->except('show');
+        Route::resource('pamflets', PamfletController::class)->except('show');
     });
 });

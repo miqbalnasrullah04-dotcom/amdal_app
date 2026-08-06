@@ -227,7 +227,7 @@ export default function TenagaAhli() {
           <a href="https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lng}" 
              target="_blank" 
              style="color:#0EA5E9;text-decoration:none;font-size:12px;display:inline-flex;align-items:center;gap:4px;margin-top:8px">
-            <span style="font-size:14px">📍</span> Buka di Google Maps
+            <span style="font-size:14px">📍</span> ${t('Buka di Google Maps')}
           </a>
         </div>
       `;

@@ -10,6 +10,7 @@ const menuItems = [
   { to: '/admin/pembayaran', label: 'Pembayaran', icon: 'payments' },
   { to: '/admin/tenaga-ahli', label: 'Tenaga Ahli', icon: 'people' },
   { to: '/admin/paket', label: 'Paket', icon: 'workspace_premium' },
+  { to: '/admin/pamflet', label: 'Pamflet', icon: 'campaign' },
   { to: '/admin/laporan', label: 'Laporan', icon: 'bar_chart' },
   { to: '/admin/pengaturan', label: 'Pengaturan', icon: 'settings' },
 ];

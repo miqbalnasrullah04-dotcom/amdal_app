@@ -10,6 +10,7 @@ import Member from './pages/Member.jsx';
 import PeraturanAMDAL from './pages/PeraturanAMDAL';
 import Pamflet from './pages/Pamflet.jsx';
 import SignIn from './pages/SignIn.jsx';
+import LupaPassword from './pages/LupaPassword.jsx';
 import Daftar from './pages/Daftar.jsx';
 import VerifikasiEmail from './pages/VerifikasiEmail.jsx';
 import NotFound from './pages/NotFound.jsx';
@@ -48,6 +49,8 @@ import AdminPackageForm from './pages/admin/AdminPackageForm.jsx';
 import AdminInvoices from './pages/admin/AdminInvoices.jsx';
 import AdminPublicProfile from './pages/admin/AdminPublicProfile.jsx';
 import AdminUsers from './pages/admin/AdminUsers.jsx';
+import AdminPamflets from './pages/admin/AdminPamflets.jsx';
+import AdminPamfletForm from './pages/admin/AdminPamfletForm.jsx';
 
 export default function App() {
   return (
@@ -68,6 +71,9 @@ export default function App() {
         <Route path="paket/harga" element={<AdminPackages />} />
         <Route path="paket/tambah" element={<AdminPackageForm />} />
         <Route path="paket/:id/edit" element={<AdminPackageForm />} />
+        <Route path="pamflet" element={<AdminPamflets />} />
+        <Route path="pamflet/tambah" element={<AdminPamfletForm />} />
+        <Route path="pamflet/:id/edit" element={<AdminPamfletForm />} />
         <Route path="tenaga-ahli" element={<AdminExperts />} />
         <Route path="tenaga-ahli/tambah" element={<AdminExpertForm />} />
         <Route path="tenaga-ahli/:id/edit" element={<AdminExpertForm />} />
@@ -77,6 +83,12 @@ export default function App() {
         <Route path="laporan" element={<AdminReports />} />
         <Route path="pengaturan" element={<AdminSettings />} />
       </Route>
+
+      {/* ── AUTH PAGES (No Navbar/Footer) ── */}
+      <Route path="/sign-in" element={<SignIn />} />
+      <Route path="/lupa-password" element={<LupaPassword />} />
+      <Route path="/daftar" element={<Daftar />} />
+      <Route path="/verifikasi-email" element={<VerifikasiEmail />} />
 
       {/* ── PUBLIC + USER ── */}
       <Route
@@ -91,9 +103,6 @@ export default function App() {
                 <Route path="/member" element={<Member />} />
                 <Route path="/peraturan-amdal" element={<PeraturanAMDAL />} />
                 <Route path="/pamflet" element={<Pamflet />} />
-                <Route path="/sign-in" element={<SignIn />} />
-                <Route path="/daftar" element={<Daftar />} />
-                <Route path="/verifikasi-email" element={<VerifikasiEmail />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/narasumber" element={<Narasumber />} />
                 <Route path="/tenaga-ahli" element={<TenagaAhli />} />

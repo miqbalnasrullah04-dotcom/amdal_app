@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\HealthCheckController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackageController;
+use App\Http\Controllers\Api\PamfletApiController;
 use App\Http\Controllers\Api\PartnerApiController;
 use App\Http\Controllers\Api\PointController;
 use App\Http\Controllers\Api\ReviewController;
@@ -32,6 +33,11 @@ Route::post('/resend-otp', [AuthController::class, 'resendOTP']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register/status', [AuthController::class, 'registrationStatus']);
 
+// Password Reset (Lupa Password)
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/verify-reset-token', [AuthController::class, 'verifyResetToken']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
 // Midtrans Webhook (no auth required, verified by Midtrans signature)
 Route::post('/midtrans/notification', [OrderController::class, 'notification']);
 
@@ -47,6 +53,8 @@ Route::get('/articles', [ArticleApiController::class, 'index']);
 Route::get('/articles/{slug}', [ArticleApiController::class, 'show']);
 Route::get('/categories', [CategoryApiController::class, 'index']);
 Route::get('/packages', [PackageController::class, 'index']);
+Route::get('/pamflets', [PamfletApiController::class, 'index']);
+Route::get('/pamflets/{id}', [PamfletApiController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

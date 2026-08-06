@@ -242,6 +242,11 @@ export default function SignIn() {
                   </span>
                 </button>
               </div>
+              <div className="text-right mt-2">
+                <Link to="/lupa-password" className="text-xs font-semibold text-[#0EA5E9] hover:underline">
+                  {t('Lupa Password?')}
+                </Link>
+              </div>
             </div>
 
             <button

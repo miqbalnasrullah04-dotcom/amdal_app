@@ -25,26 +25,33 @@ export default function Pamflet() {
   const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [selectedImg, setSelectedImg] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
 
   useEffect(() => {
+    setLoading(true);
     api
-      .get('/pamflet')
+      .get('/pamflets')
       .then((res) => {
-        // Backend bisa mengembalikan array langsung, atau membungkusnya
-        // dalam { data: [...] } / { items: [...] }. Validasi dulu supaya
-        // .map() di bawah tidak crash kalau bentuknya beda.
         const raw = res.data;
         const data = Array.isArray(raw)
           ? raw
           : Array.isArray(raw?.data)
           ? raw.data
-          : Array.isArray(raw?.items)
-          ? raw.items
           : [];
-        setItems(data.length > 0 ? data : dummyItems);
+        
+        // Map data dengan image URL
+        const mappedData = data.map(item => ({
+          ...item,
+          img: item.image ? `${BACKEND_URL}/storage/${item.image}` : dummyItems[0].img,
+        }));
+        
+        setItems(mappedData.length > 0 ? mappedData : dummyItems);
       })
-      .catch(() => setItems(dummyItems));
-  }, []);
+      .catch(() => setItems(dummyItems))
+      .finally(() => setLoading(false));
+  }, [BACKEND_URL]);
 
   const safeItems = Array.isArray(items) ? items : [];
 
@@ -68,7 +75,11 @@ export default function Pamflet() {
 
       {/* Galeri Pamflet */}
       <section className="max-w-7xl mx-auto px-6 py-16">
-        {safeItems.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16 text-slate-500">
+            {t('pamphlets.loading', 'Memuat pamflet...')}
+          </div>
+        ) : safeItems.length === 0 ? (
           <div className="text-center py-16 text-slate-500">
             {t('pamphlets.no_data', 'Belum ada data pamflet.')}
           </div>
