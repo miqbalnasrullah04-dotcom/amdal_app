@@ -24,6 +24,7 @@ import ProfilAhli from './pages/ProfilAhli';
 // Dashboard user (protected)
 import Dashboard from './pages/Dashboard.jsx';
 import ProfilSaya from './pages/ProfilSaya.jsx';
+import Membership from './pages/Membership.jsx';
 import PilihPaket from './pages/PilihPaket.jsx';
 import Pembayaran from './pages/Pembayaran.jsx';
 import Invoice from './pages/Invoice.jsx';
@@ -40,6 +41,8 @@ import AdminLayout from './layouts/AdminLayout.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminExperts from './pages/admin/AdminExperts.jsx';
 import AdminPayments from './pages/admin/AdminPayments.jsx';
+import AdminMembership from './pages/admin/AdminMembership.jsx';
+import AdminTickets from './pages/admin/AdminTickets.jsx';
 import AdminUserVerification from './pages/admin/AdminUserVerification.jsx';
 import AdminPackages from './pages/admin/AdminPackages.jsx';
 import AdminReports from './pages/admin/AdminReports.jsx';
@@ -67,6 +70,8 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="verifikasi" element={<AdminUserVerification />} />
         <Route path="pembayaran" element={<AdminPayments />} />
+        <Route path="membership" element={<AdminMembership />} />
+        <Route path="tiket" element={<AdminTickets />} />
         <Route path="paket" element={<AdminPackages />} />
         <Route path="paket/harga" element={<AdminPackages />} />
         <Route path="paket/tambah" element={<AdminPackageForm />} />
@@ -90,6 +95,21 @@ export default function App() {
       <Route path="/daftar" element={<Daftar />} />
       <Route path="/verifikasi-email" element={<VerifikasiEmail />} />
 
+      {/* ── USER MEMBERSHIP & DASHBOARD (No Navbar/Footer, No RouteLoader) ── */}
+      <Route path="/membership" element={<ProtectedRoute requiredRole="user"><Membership /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute requiredRole="user"><Dashboard /></ProtectedRoute>} />
+      <Route path="/profil-saya" element={<ProtectedRoute requiredRole="user"><ProfilSaya /></ProtectedRoute>} />
+      <Route path="/paket" element={<ProtectedRoute requiredRole="user"><PilihPaket /></ProtectedRoute>} />
+      <Route path="/pembayaran" element={<ProtectedRoute requiredRole="user"><Pembayaran /></ProtectedRoute>} />
+      <Route path="/invoice" element={<ProtectedRoute requiredRole="user"><DaftarInvoice /></ProtectedRoute>} />
+      <Route path="/invoice/:id" element={<ProtectedRoute requiredRole="user"><Invoice /></ProtectedRoute>} />
+      <Route path="/pesan" element={<ProtectedRoute requiredRole="user"><Pesan /></ProtectedRoute>} />
+      <Route path="/tiket" element={<ProtectedRoute requiredRole="user"><Tiket /></ProtectedRoute>} />
+      <Route path="/ulasan" element={<ProtectedRoute requiredRole="user"><Ulasan /></ProtectedRoute>} />
+      <Route path="/statistik" element={<ProtectedRoute requiredRole="user"><Statistik /></ProtectedRoute>} />
+      <Route path="/profil-publik" element={<ProtectedRoute requiredRole="user"><ProfilPublik /></ProtectedRoute>} />
+      <Route path="/pengaturan" element={<ProtectedRoute requiredRole="user"><Pengaturan /></ProtectedRoute>} />
+
       {/* ── PUBLIC + USER ── */}
       <Route
         path="/*"
@@ -109,20 +129,6 @@ export default function App() {
                 <Route path="/instruktur-pengajar" element={<InstrukturPengajar />} />
                 <Route path="/peneliti-artikel-jurnal" element={<PenelitiArtikelJurnal />} />
                 <Route path="/profil/:slug" element={<ProfilAhli />} />
-
-                {/* Dashboard user (protected) */}
-                <Route path="/dashboard" element={<ProtectedRoute requiredRole="user"><Dashboard /></ProtectedRoute>} />
-                <Route path="/profil-saya" element={<ProtectedRoute requiredRole="user"><ProfilSaya /></ProtectedRoute>} />
-                <Route path="/paket" element={<ProtectedRoute requiredRole="user"><PilihPaket /></ProtectedRoute>} />
-                <Route path="/pembayaran" element={<ProtectedRoute requiredRole="user"><Pembayaran /></ProtectedRoute>} />
-                <Route path="/invoice" element={<ProtectedRoute requiredRole="user"><DaftarInvoice /></ProtectedRoute>} />
-                <Route path="/invoice/:id" element={<ProtectedRoute requiredRole="user"><Invoice /></ProtectedRoute>} />
-                <Route path="/pesan" element={<ProtectedRoute requiredRole="user"><Pesan /></ProtectedRoute>} />
-                <Route path="/tiket" element={<ProtectedRoute requiredRole="user"><Tiket /></ProtectedRoute>} />
-                <Route path="/ulasan" element={<ProtectedRoute requiredRole="user"><Ulasan /></ProtectedRoute>} />
-                <Route path="/statistik" element={<ProtectedRoute requiredRole="user"><Statistik /></ProtectedRoute>} />
-                <Route path="/profil-publik" element={<ProtectedRoute requiredRole="user"><ProfilPublik /></ProtectedRoute>} />
-                <Route path="/pengaturan" element={<ProtectedRoute requiredRole="user"><Pengaturan /></ProtectedRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

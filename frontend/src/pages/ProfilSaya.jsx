@@ -7,18 +7,62 @@ import ImageCropper from '../components/ImageCropper.jsx';
 import CameraCapture from '../components/CameraCapture.jsx';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import {
+  UserIcon,
+  DocumentTextIcon,
+  AcademicCapIcon,
+  BriefcaseIcon,
+  TrophyIcon,
+  LinkIcon,
+  NewspaperIcon,
+  FolderIcon,
+  FolderOpenIcon,
+  CheckBadgeIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  XMarkIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ArrowTopRightOnSquareIcon,
+  ArrowUpTrayIcon,
+  CloudArrowUpIcon,
+  IdentificationIcon,
+  MapPinIcon,
+  MapIcon,
+  ClipboardDocumentCheckIcon,
+  DocumentMagnifyingGlassIcon,
+  PlusIcon,
+  PlusCircleIcon,
+  PencilIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  CheckIcon,
+  UserGroupIcon,
+  MegaphoneIcon,
+  BookOpenIcon,
+  CameraIcon,
+  PhotoIcon,
+  Squares2X2Icon,
+  DocumentIcon,
+  EyeIcon,
+  PaperAirplaneIcon,
+  InformationCircleIcon,
+  ShieldCheckIcon,
+  ClockIcon,
+} from '@heroicons/react/24/outline';
 
 /* ─── constants ──────────────────────────────────────────────────────────── */
 const getTabs = (t) => [
-  { id: 'pribadi', label: t('profile.tabs.personal_data', 'Data Pribadi'), icon: 'person' },
-  { id: 'profil-bio', label: t('profile.tabs.profile_bio', 'Profil Bio'), icon: 'description' },
-  { id: 'pendidikan', label: t('profile.tabs.education', 'Pendidikan'), icon: 'school' },
-  { id: 'pengalaman', label: t('profile.tabs.experience', 'Pengalaman'), icon: 'work' },
-  { id: 'sertifikat', label: t('profile.tabs.certificates', 'Sertifikat'), icon: 'workspace_premium' },
-  { id: 'akademik', label: t('profile.tabs.academic_links', 'Link Akademik'), icon: 'link' },
-  { id: 'publikasi', label: t('profile.tabs.publication', 'Publikasi & Riwayat'), icon: 'article' },
-  { id: 'dokumen', label: t('profile.tabs.documents', 'Upload Dokumen'), icon: 'folder' },
-  { id: 'verifikasi', label: t('profile.tabs.verification', 'Kirim Verifikasi'), icon: 'verified' },
+  { id: 'pribadi', label: t('profile.tabs.personal_data', 'Data Pribadi'), Icon: UserIcon },
+  { id: 'profil-bio', label: t('profile.tabs.profile_bio', 'Profil Bio'), Icon: DocumentTextIcon },
+  { id: 'pendidikan', label: t('profile.tabs.education', 'Pendidikan'), Icon: AcademicCapIcon },
+  { id: 'pengalaman', label: t('profile.tabs.experience', 'Pengalaman'), Icon: BriefcaseIcon },
+  { id: 'sertifikat', label: t('profile.tabs.certificates', 'Sertifikat'), Icon: TrophyIcon },
+  { id: 'akademik', label: t('profile.tabs.academic_links', 'Link Akademik'), Icon: LinkIcon },
+  { id: 'publikasi', label: t('profile.tabs.publication', 'Publikasi & Riwayat'), Icon: NewspaperIcon },
+  { id: 'dokumen', label: t('profile.tabs.documents', 'Upload Dokumen'), Icon: FolderIcon },
+  { id: 'verifikasi', label: t('profile.tabs.verification', 'Kirim Verifikasi'), Icon: CheckBadgeIcon },
 ];
 
 const getStatusPengajuan = (t) => ({
@@ -33,9 +77,6 @@ const BTN_PRIMARY = 'bg-[#2E5E3B] text-white text-sm font-bold px-5 py-2.5 round
 const BTN_GHOST = 'text-[#2E5E3B] text-sm font-bold px-4 py-2 rounded-xl border border-[#2E5E3B]/30 hover:bg-[#2E5E3B]/5 transition-colors flex items-center gap-1.5';
 const BTN_DANGER = 'text-[#B3261E] text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-[#B3261E]/10 transition-colors flex items-center gap-1';
 
-// Sama persis dengan pilihan di halaman pendaftaran (Daftar.jsx) supaya
-// data "Kriteria Profesional" yang diisi saat daftar tetap konsisten & bisa
-// diedit lagi di sini.
 const KRITERIA_OPTIONS = [
   'Tenaga Ahli',
   'Narasumber/Pembicara',
@@ -43,16 +84,34 @@ const KRITERIA_OPTIONS = [
   'Instruktur/Mentor',
 ];
 
+// Ikon dokumen tersimpan berdasarkan tipe.
+const DOC_TYPE_ICON = {
+  foto_profil: CameraIcon,
+  ktp: IdentificationIcon,
+  ijazah: AcademicCapIcon,
+  lainnya: DocumentTextIcon,
+};
+
+const getDOCTYPELABEL = (t) => ({
+  foto_profil: t('profile.doc_type.profile_photo', 'Foto Profil'),
+  ktp: t('profile.doc_type.id_card', 'KTP'),
+  ijazah: t('profile.doc_type.diploma', 'Ijazah'),
+  lainnya: t('profile.doc_type.other', 'Dokumen Lainnya'),
+});
+
+function Spinner({ className = 'w-4 h-4 border-2 border-white/30 border-t-white' }) {
+  return <span className={`inline-block rounded-full animate-spin ${className}`} />;
+}
 function Label({ children }) {
   return <span className="text-xs font-bold uppercase tracking-wide text-[#414844]/60 block mb-1">{children}</span>;
 }
 function Card({ children, className = '' }) {
   return <div className={`bg-white rounded-2xl border border-black/5 shadow-sm p-6 ${className}`}>{children}</div>;
 }
-function SectionTitle({ icon, children }) {
+function SectionTitle({ icon: Icon, children }) {
   return (
     <h3 className="flex items-center gap-2 text-sm font-bold text-[#2E5E3B] uppercase tracking-wider mb-4">
-      <span className="material-symbols-outlined text-[18px]">{icon}</span>
+      <Icon className="w-[18px] h-[18px]" strokeWidth={2} />
       {children}
     </h3>
   );
@@ -60,11 +119,16 @@ function SectionTitle({ icon, children }) {
 function Alert({ type, msg, onClose }) {
   if (!msg) return null;
   const isErr = type === 'error';
+  const Icon = isErr ? ExclamationCircleIcon : CheckCircleIcon;
   return (
     <div className={`flex items-start gap-3 text-sm rounded-xl p-4 mb-4 ${isErr ? 'bg-[#FFDAD6] text-[#93000A]' : 'bg-[#E3F2E7] text-[#2E5E3B]'}`}>
-      <span className="material-symbols-outlined text-[18px] shrink-0 mt-0.5">{isErr ? 'error' : 'check_circle'}</span>
+      <Icon className="w-[18px] h-[18px] shrink-0 mt-0.5" strokeWidth={2} />
       <span className="flex-1">{msg}</span>
-      {onClose && <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100"><span className="material-symbols-outlined text-[16px]">close</span></button>}
+      {onClose && (
+        <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100">
+          <XMarkIcon className="w-4 h-4" strokeWidth={2} />
+        </button>
+      )}
     </div>
   );
 }
@@ -72,17 +136,20 @@ function Alert({ type, msg, onClose }) {
 // Bar navigasi "wizard" — dipakai di bawah setiap tab supaya user tahu ada
 // langkah berikutnya, sekaligus bisa kembali ke tab sebelumnya. Warna tetap
 // mengikuti palet utama web TenagaAhli (hijau #2E5E3B).
-function WizardNav({ onBack, onNext, showBack = true, showNext = true, nextLabel = 'Lanjut', backLabel = 'Kembali' }) {
+function WizardNav({ onBack, onNext, showBack = true, showNext = true, nextLabel, backLabel, t }) {
+  const defaultNextLabel = nextLabel || t('profile.wizard.next', 'Lanjut');
+  const defaultBackLabel = backLabel || t('profile.wizard.back', 'Kembali');
+  
   return (
     <div className="flex items-center justify-between pt-2">
       {showBack ? (
         <button type="button" className={BTN_GHOST} onClick={onBack}>
-          <span className="material-symbols-outlined text-[18px]">arrow_back</span>{backLabel}
+          <ArrowLeftIcon className="w-[18px] h-[18px]" strokeWidth={2} />{defaultBackLabel}
         </button>
       ) : <span />}
       {showNext && (
         <button type="button" className={BTN_PRIMARY} onClick={onNext}>
-          {nextLabel}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          {defaultNextLabel}<ArrowRightIcon className="w-[18px] h-[18px]" strokeWidth={2} />
         </button>
       )}
     </div>
@@ -242,17 +309,66 @@ export default function ProfilSaya() {
     setTimeout(() => { setOk(''); setErr(''); }, 4000);
   };
 
-  /* ── wizard navigation ───────────────────────────────────────────
-     Memungkinkan user berpindah antar-tab secara berurutan lewat tombol
-     "Lanjut" / "Kembali" di bagian bawah setiap tab, selain lewat klik
-     langsung di tab bar. */
-  const currentTabIdx = TABS.findIndex((t) => t.id === tab);
-  const goNext = () => {
+  /* ── wizard navigation ─────────────────────────────────────────── */
+  const currentTabIdx = TABS.findIndex((tb) => tb.id === tab);
+  
+  // Auto-save data pribadi sebelum pindah tab
+  const goNext = async () => {
     if (currentTabIdx < TABS.length - 1) {
+      // Auto-save jika di tab pribadi
+      if (tab === 'pribadi') {
+        setSaving(true);
+        try {
+          await api.post('/my/profile', { ...form, kriteria_list: kriteriaList });
+          flash('ok', 'Data pribadi berhasil disimpan.');
+          await load();
+        } catch (e) { 
+          flash('err', e.response?.data?.message || 'Gagal menyimpan.');
+          setSaving(false);
+          return; // Jangan pindah tab jika gagal save
+        }
+        setSaving(false);
+      }
+      
+      // Auto-save jika di tab profil-bio
+      if (tab === 'profil-bio') {
+        setSaving(true);
+        try {
+          const payload = {
+            ...bioForm,
+            bidang_utama: bioForm.bidang_utama ? bioForm.bidang_utama.split(',').map(s => s.trim()).filter(Boolean) : []
+          };
+          await api.post('/my/profile', payload);
+          flash('ok', 'Profil bio berhasil disimpan.');
+          await load();
+        } catch (e) { 
+          flash('err', e.response?.data?.message || 'Gagal menyimpan.');
+          setSaving(false);
+          return;
+        }
+        setSaving(false);
+      }
+      
+      // Auto-save jika di tab link akademik
+      if (tab === 'akademik') {
+        setSaving(true);
+        try {
+          await api.post('/my/profile', akademikForm);
+          flash('ok', 'Link akademik berhasil disimpan.');
+          await load();
+        } catch (e) { 
+          flash('err', e.response?.data?.message || 'Gagal menyimpan.');
+          setSaving(false);
+          return;
+        }
+        setSaving(false);
+      }
+      
       setTab(TABS[currentTabIdx + 1].id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+  
   const goPrev = () => {
     if (currentTabIdx > 0) {
       setTab(TABS[currentTabIdx - 1].id);
@@ -260,7 +376,7 @@ export default function ProfilSaya() {
     }
   };
 
-  /* ── kelengkapan profil ───────────────────────────────────────────
+  /* ── kelengkapan profil ──────────────────────────────────────────
      Dipakai sebagai syarat sebelum tombol "Kirim Pengajuan" ke admin
      bisa ditekan. Juga dipakai untuk memberi tanda centang di tab bar. */
   const profileCompleteness = {
@@ -271,11 +387,11 @@ export default function ProfilSaya() {
     fotoProfil: !!photoPreview,
   };
   const missingSteps = [
-    !profileCompleteness.pribadi && 'Data Pribadi (nama & no. HP wajib diisi)',
-    !profileCompleteness.profilBio && 'Profil Bio (tentang saya & bidang utama)',
-    !profileCompleteness.pendidikan && 'Pendidikan (minimal 1 data)',
-    !profileCompleteness.pengalaman && 'Pengalaman (minimal 1 data)',
-    !profileCompleteness.fotoProfil && 'Foto Profil',
+    !profileCompleteness.pribadi && t('profile.missing.personal_data', 'Data Pribadi (nama & no. HP wajib diisi)'),
+    !profileCompleteness.profilBio && t('profile.missing.profile_bio', 'Profil Bio (tentang saya & bidang utama)'),
+    !profileCompleteness.pendidikan && t('profile.missing.education', 'Pendidikan (minimal 1 data)'),
+    !profileCompleteness.pengalaman && t('profile.missing.experience', 'Pengalaman (minimal 1 data)'),
+    !profileCompleteness.fotoProfil && t('profile.missing.profile_photo', 'Foto Profil'),
   ].filter(Boolean);
   const isProfileComplete = missingSteps.length === 0;
 
@@ -293,8 +409,6 @@ export default function ProfilSaya() {
   // Sinkronkan data user (khususnya foto profil) yang baru saja diambil dari
   // server ke localStorage['amdal_user'], lalu beri tahu komponen lain
   // (mis. Navbar) supaya ikut refresh tanpa perlu logout/login ulang.
-  // Tanpa ini, Navbar akan terus menampilkan foto lama karena dia hanya
-  // baca localStorage, bukan API /my/profile.
   const syncUserToLocalStorage = (d, resolvedPhotoUrl) => {
     try {
       const raw = localStorage.getItem('amdal_user');
@@ -302,8 +416,6 @@ export default function ProfilSaya() {
 
       const storedUser = JSON.parse(raw);
 
-      // PENTING: Simpan URL foto yang sudah resolved (dengan domain lengkap)
-      // supaya Navbar bisa langsung pakai tanpa perlu resolve lagi
       const updatedUser = {
         ...storedUser,
         name: d.name ?? storedUser.name,
@@ -315,7 +427,7 @@ export default function ProfilSaya() {
       localStorage.setItem('amdal_user', JSON.stringify(updatedUser));
 
       // Dispatch event supaya Navbar dan komponen lain tahu ada update
-      console.log('📸 Foto profil diupdate di localStorage:', resolvedPhotoUrl);
+      console.log('[ProfilSaya] Foto profil diupdate di localStorage:', resolvedPhotoUrl);
       window.dispatchEvent(new Event('amdal-user-updated'));
     } catch (e) {
       console.error('Gagal sinkronkan data user ke localStorage', e);
@@ -342,9 +454,6 @@ export default function ProfilSaya() {
         catatan: d.catatan || '',
       });
 
-      // Kriteria Profesional yang diisi saat pendaftaran (kriteria_list) —
-      // pisahkan pilihan bawaan vs yang diketik sendiri oleh user supaya
-      // keduanya tetap tercermin di checklist.
       const kriteriaFromServer = Array.isArray(d.kriteria_list) ? d.kriteria_list : [];
       setKriteriaList(kriteriaFromServer);
       setCustomKriteria(kriteriaFromServer.filter((k) => !KRITERIA_OPTIONS.includes(k)));
@@ -370,25 +479,17 @@ export default function ProfilSaya() {
 
       const docs = d.documents || [];
 
-      // Foto profil bisa datang dari 2 tempat: kolom `photo` pada data expert,
-      // atau dari daftar dokumen (type = 'foto_profil') kalau backend belum
-      // sinkron menulis ke kolom `photo`. Ambil sumber yang tersedia, dan
-      // SELALU set preview (termasuk ke null) supaya tidak ada foto lama /
-      // foto yang sudah dihapus yang "nyangkut" di layar.
       const photoDoc = docs.find((doc) => doc.type === 'foto_profil');
       const photoSource = d.photo || photoDoc?.file_path || photoDoc?.file_url;
 
       let resolvedPhotoUrl = null;
       if (photoSource) {
-        // Cache-buster supaya browser tidak menampilkan foto lama dari cache
-        // saat file diganti dengan nama yang sama.
         resolvedPhotoUrl = `${getFileUrl(photoSource)}?t=${Date.now()}`;
         setPreview(resolvedPhotoUrl);
       } else {
         setPreview(null);
       }
 
-      // Foto cover - dari kolom `cover` pada data expert
       const coverSource = d.cover;
       if (coverSource) {
         const resolvedCoverUrl = `${getFileUrl(coverSource)}?t=${Date.now()}`;
@@ -397,7 +498,6 @@ export default function ProfilSaya() {
         setCoverPreview(null);
       }
 
-      // Populate sub-resources dari data pendaftaran
       setEducations(d.educations || []);
       setExperiences(d.experiences || []);
       setCertificates(d.certificates || []);
@@ -408,10 +508,8 @@ export default function ProfilSaya() {
       setInstruktur(d.instruktur || []);
       setNarasumber(d.narasumber || []);
 
-      // Sinkronkan ke localStorage supaya Navbar (dan komponen lain yang
-      // baca amdal_user) ikut menampilkan foto & nama terbaru.
       syncUserToLocalStorage(d, resolvedPhotoUrl);
-    } catch { setErr('Gagal memuat data profil.'); }
+    } catch { setErr(t('profile.error.load_failed', 'Gagal memuat data profil.')); }
     finally { setLoading(false); }
   };
 
@@ -422,9 +520,9 @@ export default function ProfilSaya() {
     setSaving(true);
     try {
       await api.post('/my/profile', { ...form, kriteria_list: kriteriaList });
-      flash('ok', 'Data pribadi berhasil disimpan.');
+      flash('ok', t('profile.success.personal_data_saved', 'Data pribadi berhasil disimpan.'));
       load();
-    } catch (e) { flash('err', e.response?.data?.message || 'Gagal menyimpan.'); }
+    } catch (e) { flash('err', e.response?.data?.message || t('profile.error.save_failed', 'Gagal menyimpan.')); }
     finally { setSaving(false); }
   };
 
@@ -432,15 +530,14 @@ export default function ProfilSaya() {
   const saveProfilBio = async () => {
     setSaving(true);
     try {
-      // Convert bidang_utama dari string ke array
       const payload = {
         ...bioForm,
         bidang_utama: bioForm.bidang_utama ? bioForm.bidang_utama.split(',').map(s => s.trim()).filter(Boolean) : []
       };
       await api.post('/my/profile', payload);
-      flash('ok', 'Profil bio berhasil disimpan.');
+      flash('ok', t('profile.success.bio_saved', 'Profil bio berhasil disimpan.'));
       load();
-    } catch (e) { flash('err', e.response?.data?.message || 'Gagal menyimpan.'); }
+    } catch (e) { flash('err', e.response?.data?.message || t('profile.error.save_failed', 'Gagal menyimpan.')); }
     finally { setSaving(false); }
   };
 
@@ -449,22 +546,22 @@ export default function ProfilSaya() {
     setSaving(true);
     try {
       await api.post('/my/profile', akademikForm);
-      flash('ok', 'Link akademik berhasil disimpan.');
+      flash('ok', t('profile.success.academic_links_saved', 'Link akademik berhasil disimpan.'));
       load();
-    } catch (e) { flash('err', e.response?.data?.message || 'Gagal menyimpan.'); }
+    } catch (e) { flash('err', e.response?.data?.message || t('profile.error.save_failed', 'Gagal menyimpan.')); }
     finally { setSaving(false); }
   };
 
   /* ── handlers: pendidikan ────────────────────────────────────── */
   const addEdu = async () => {
-    if (!newEdu.jenjang || !newEdu.institusi) return flash('err', 'Jenjang dan institusi wajib diisi.');
+    if (!newEdu.jenjang || !newEdu.institusi) return flash('err', t('profile.error.education_required', 'Jenjang dan institusi wajib diisi.'));
     setSaving(true);
     try {
       await api.post('/my/educations', newEdu);
-      flash('ok', 'Pendidikan ditambahkan.');
+      flash('ok', t('profile.success.education_added', 'Pendidikan ditambahkan.'));
       setNewEdu({ jenjang: '', institusi: '', jurusan: '', tahun_lulus: '' });
       setAddingEdu(false); load();
-    } catch { flash('err', 'Gagal menambah pendidikan.'); }
+    } catch { flash('err', t('profile.error.add_education_failed', 'Gagal menambah pendidikan.')); }
     finally { setSaving(false); }
   };
 
@@ -472,27 +569,27 @@ export default function ProfilSaya() {
     setSaving(true);
     try {
       await api.put(`/my/educations/${id}`, editEdu);
-      flash('ok', 'Pendidikan diperbarui.'); setEditEdu(null); load();
-    } catch { flash('err', 'Gagal memperbarui.'); }
+      flash('ok', t('profile.success.education_updated', 'Pendidikan diperbarui.')); setEditEdu(null); load();
+    } catch { flash('err', t('profile.error.update_failed', 'Gagal memperbarui.')); }
     finally { setSaving(false); }
   };
 
   const deleteEdu = async (id) => {
-    if (!confirm('Hapus data pendidikan ini?')) return;
-    try { await api.delete(`/my/educations/${id}`); flash('ok', 'Dihapus.'); load(); }
-    catch { flash('err', 'Gagal menghapus.'); }
+    if (!confirm(t('profile.confirm.delete_education', 'Hapus data pendidikan ini?'))) return;
+    try { await api.delete(`/my/educations/${id}`); flash('ok', t('profile.success.deleted', 'Dihapus.')); load(); }
+    catch { flash('err', t('profile.error.delete_failed', 'Gagal menghapus.')); }
   };
 
   /* ── handlers: pengalaman ────────────────────────────────────── */
   const addExp = async () => {
-    if (!newExp.posisi || !newExp.instansi) return flash('err', 'Posisi dan instansi wajib diisi.');
+    if (!newExp.posisi || !newExp.instansi) return flash('err', t('profile.error.experience_required', 'Posisi dan instansi wajib diisi.'));
     setSaving(true);
     try {
       await api.post('/my/experiences', newExp);
-      flash('ok', 'Pengalaman ditambahkan.');
+      flash('ok', t('profile.success.experience_added', 'Pengalaman ditambahkan.'));
       setNewExp({ posisi: '', instansi: '', tahun_mulai: '', tahun_selesai: '', deskripsi: '' });
       setAddingExp(false); load();
-    } catch { flash('err', 'Gagal menambah pengalaman.'); }
+    } catch { flash('err', t('profile.error.add_experience_failed', 'Gagal menambah pengalaman.')); }
     finally { setSaving(false); }
   };
 
@@ -605,16 +702,16 @@ export default function ProfilSaya() {
   /* ── handlers: kirim verifikasi ──────────────────────────────── */
   const submitVerification = async () => {
     if (!isProfileComplete) {
-      return flash('err', 'Lengkapi profil Anda terlebih dahulu (semua langkah harus centang hijau) sebelum mengirim verifikasi.');
+      return flash('err', t('profile.error.complete_profile_first', 'Lengkapi profil Anda terlebih dahulu (semua langkah harus centang hijau) sebelum mengirim verifikasi.'));
     }
 
     setSubmitting(true);
     try {
       await api.post('/my/profile/submit');
-      flash('ok', 'Profil berhasil dikirim. Menunggu review admin.');
-      load(); // Refresh data to update status
+      flash('ok', t('profile.success.profile_submitted', 'Profil berhasil dikirim. Menunggu review admin.'));
+      load();
     } catch (e) {
-      flash('err', e.response?.data?.message || 'Gagal mengirim verifikasi.');
+      flash('err', e.response?.data?.message || t('profile.error.submit_failed', 'Gagal mengirim verifikasi.'));
     } finally {
       setSubmitting(false);
     }
@@ -622,51 +719,23 @@ export default function ProfilSaya() {
 
   /* ── handlers: narasumber ─────────────────────────────────────── */
   const addNara = async () => {
-    if (!newNara.title) return flash('err', 'Judul kegiatan wajib diisi.');
+    if (!newNara.title) return flash('err', t('profile.error.title_required', 'Judul kegiatan wajib diisi.'));
     setSaving(true);
     try {
       await api.post('/my/narasumber', newNara);
-      flash('ok', 'Riwayat narasumber ditambahkan.');
+      flash('ok', t('profile.success.speaker_added', 'Riwayat narasumber ditambahkan.'));
       setNewNara({ title: '', penyelenggara: '', tempat: '', tanggal: '' });
       setAddingNara(false); load();
-    } catch { flash('err', 'Gagal menambah data.'); }
+    } catch { flash('err', t('profile.error.add_data_failed', 'Gagal menambah data.')); }
     finally { setSaving(false); }
   };
   const deleteNara = async (id) => {
-    if (!confirm('Hapus data ini?')) return;
-    try { await api.delete(`/my/narasumber/${id}`); flash('ok', 'Dihapus.'); load(); }
-    catch { flash('err', 'Gagal menghapus.'); }
+    if (!confirm(t('profile.confirm.delete_data', 'Hapus data ini?'))) return;
+    try { await api.delete(`/my/narasumber/${id}`); flash('ok', t('profile.success.deleted', 'Dihapus.')); load(); }
+    catch { flash('err', t('profile.error.delete_failed', 'Gagal menghapus.')); }
   };
 
   /* ── handlers: map picker ──────────────────────────────────────── */
-  // CATATAN PERBAIKAN (fix peta tidak muncul):
-  // Sebelumnya inisialisasi peta dilakukan lewat setTimeout tebak-tebakan
-  // (350ms) di dalam openMapPicker. Masalahnya: kalau animasi modal lebih
-  // lambat dari itu (device lemot, dsb), container masih 0x0 saat L.map()
-  // dipanggil sehingga tile Leaflet gagal ter-render walau invalidateSize()
-  // sudah dipanggil setelahnya.
-  //
-  // Solusi: pindahkan inisialisasi peta ke useEffect yang jalan begitu
-  // mapPickerOpen = true DAN mapRef.current sudah ada di DOM, lalu pasang
-  // ResizeObserver supaya invalidateSize() dipanggil persis saat container
-  // benar-benar mendapat ukuran akhirnya (bukan menebak durasi animasi).
-  //
-  // JANGAN LUPA: tambahkan juga CSS berikut di file CSS global (mis.
-  // src/index.css), karena Tailwind preflight men-set `img { max-width:
-  // 100% }` secara global yang membuat tile Leaflet (yang butuh ukuran
-  // pasti 256x256) menjadi tidak ter-render / terlihat kosong:
-  //
-  //   .leaflet-container { height: 100%; width: 100%; }
-  //   .leaflet-container img { max-width: none !important; }
-  //
-  // CATATAN PERBAIKAN #2 (tile tetap blank walau container sudah benar):
-  // Leaflet melakukan fade-in tile dari opacity 0 -> 1 lewat class
-  // `.leaflet-tile-loaded`. Kalau CSS bawaan leaflet.css belum sempat
-  // diterapkan browser (mis. karena lazy-loading/code-splitting halaman
-  // ini), transisi opacity itu bisa "macet" di 0 walau tile sudah benar2
-  // selesai di-load (network request sukses, elemen <img> ada di DOM).
-  // Kita paksa opacity tile = 1 secara eksplisit sebagai jaring pengaman,
-  // supaya kasus ini tidak membuat peta terlihat blank/putih.
   const forceTileVisibility = () => {
     if (!mapRef.current) return;
     mapRef.current.querySelectorAll('.leaflet-tile').forEach((img) => {
@@ -675,8 +744,6 @@ export default function ProfilSaya() {
   };
 
   const openMapPicker = () => {
-    // Simpan snapshot lokasi SEBELUM modal dibuka, supaya bisa di-revert
-    // kalau user menekan Batal / menutup modal tanpa konfirmasi.
     setOriginalLocation({ lat: form.lat, lng: form.lng, location: form.location });
     setMapPickerOpen(true);
   };
@@ -693,8 +760,6 @@ export default function ProfilSaya() {
       attribution: '&copy; OpenStreetMap &copy; CARTO',
     }).addTo(instance);
 
-    // Jaring pengaman: paksa tile terlihat begitu selesai load, untuk
-    // menghindari kasus fade-in opacity yang macet (lihat catatan di atas).
     instance.on('tileload', forceTileVisibility);
     instance.whenReady(forceTileVisibility);
 
@@ -722,16 +787,11 @@ export default function ProfilSaya() {
       updateLocationFromCoords(e.latlng.lat, e.latlng.lng);
     });
 
-    // PENTING: paksa Leaflet menghitung ulang ukuran tile begitu container
-    // benar-benar mendapat ukuran akhirnya. Lebih andal dibanding
-    // setTimeout tebak-tebakan karena ResizeObserver bereaksi terhadap
-    // perubahan ukuran nyata, bukan menebak durasi animasi.
     const ro = new ResizeObserver(() => {
       instance.invalidateSize();
       forceTileVisibility();
     });
     ro.observe(mapRef.current);
-    // Panggil sekali di awal juga untuk jaga-jaga.
     requestAnimationFrame(() => {
       instance.invalidateSize();
       forceTileVisibility();
@@ -755,9 +815,6 @@ export default function ProfilSaya() {
     }));
   };
 
-  // closeMapPicker: HANYA membersihkan/unmount instance peta. Tidak
-  // mengubah data form sama sekali. Dipanggil secara internal oleh
-  // cancelMapPicker() (revert data) dan saveMapLocation() (commit data).
   const closeMapPicker = () => {
     setMapPickerOpen(false);
     if (mapInstance) {
@@ -767,10 +824,6 @@ export default function ProfilSaya() {
     }
   };
 
-  // cancelMapPicker: dipakai oleh tombol "Batal", tombol X, dan klik di
-  // area backdrop/luar modal. Mengembalikan form.lat/lng/location ke nilai
-  // SEBELUM modal dibuka, supaya klik/drag yang sempat dilakukan user di
-  // peta tidak "nyangkut" walau dia membatalkan pemilihan lokasi.
   const cancelMapPicker = () => {
     if (originalLocation) {
       setForm(prev => ({
@@ -783,10 +836,6 @@ export default function ProfilSaya() {
     closeMapPicker();
   };
 
-  // saveMapLocation: dipakai oleh tombol "Pilih Lokasi Ini". Data di form
-  // sudah ter-update secara live lewat updateLocationFromCoords() setiap
-  // kali user klik/drag di peta, jadi di sini cukup tutup modal saja
-  // (tanpa revert).
   const saveMapLocation = () => {
     closeMapPicker();
     flash('ok', 'Lokasi berhasil dipilih. Jangan lupa klik "Simpan Data Pribadi"');
@@ -796,10 +845,9 @@ export default function ProfilSaya() {
   const uploadDoc = async (file, type, label, resetFn) => {
     if (!file) return;
 
-    // Validasi ukuran file
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      flash('err', 'Ukuran file terlalu besar. Maksimal 5MB.');
+      flash('err', t('profile.error.file_too_large', 'Ukuran file terlalu besar. Maksimal 5MB.'));
       return;
     }
 
@@ -816,69 +864,59 @@ export default function ProfilSaya() {
 
       console.log('Upload response:', response.data);
 
-      flash('ok', `${label} berhasil diunggah.`);
+      flash('ok', t('profile.success.file_uploaded', '{label} berhasil diunggah.').replace('{label}', label));
 
-      // Reset input file terlebih dahulu
       resetFn();
 
-      // Reload data - backend sudah update kolom photo di Expert jika type=foto_profil.
-      // load() juga akan sinkronkan foto/nama terbaru ke localStorage & Navbar.
       await load();
 
-      // PENTING: Dispatch event SETELAH load() selesai
-      // supaya data di localStorage sudah benar-benar terupdate
       window.dispatchEvent(new Event('amdal-user-updated'));
-      console.log('✅ Event amdal-user-updated dispatched setelah upload foto');
+      console.log('[ProfilSaya] Event amdal-user-updated dispatched setelah upload foto');
 
-      // Jika foto profil, reload page setelah 500ms supaya navbar terupdate pasti
       if (type === 'foto_profil') {
         setTimeout(() => {
           window.location.reload();
         }, 500);
       }
     } catch (e) {
-      flash('err', e.response?.data?.message || `Gagal mengunggah ${label}.`);
+      flash('err', e.response?.data?.message || t('profile.error.upload_failed', 'Gagal mengunggah {label}.').replace('{label}', label));
     }
     finally { setSaving(false); }
   };
 
   const deleteDoc = async (id) => {
-    if (!confirm('Hapus dokumen ini?')) return;
+    if (!confirm(t('profile.confirm.delete_document', 'Hapus dokumen ini?'))) return;
     try {
       await api.delete(`/my/documents/${id}`);
-      flash('ok', 'Dokumen dihapus.');
+      flash('ok', t('profile.success.document_deleted', 'Dokumen dihapus.'));
       load();
     }
-    catch { flash('err', 'Gagal menghapus.'); }
+    catch { flash('err', t('profile.error.delete_failed', 'Gagal menghapus.')); }
   };
 
-  // Delete foto profil
   const deletePhoto = async () => {
-    if (!confirm('Hapus foto profil?')) return;
+    if (!confirm(t('profile.confirm.delete_photo', 'Hapus foto profil?'))) return;
     setSaving(true);
     try {
       await api.put('/my/profile', { photo: null });
-      flash('ok', 'Foto profil dihapus.');
+      flash('ok', t('profile.success.photo_deleted', 'Foto profil dihapus.'));
       setPhotoModal(false);
       await load();
     }
-    catch { flash('err', 'Gagal menghapus foto.'); }
+    catch { flash('err', t('profile.error.delete_photo_failed', 'Gagal menghapus foto.')); }
     finally { setSaving(false); }
   };
 
-  // Ganti foto profil (trigger input)
   const triggerPhotoInput = () => {
     setPhotoModal(false);
     if (photoRef.current) photoRef.current.click();
   };
 
-  // Ambil foto dari kamera
   const triggerCamera = () => {
     setPhotoModal(false);
     setCameraOpen(true);
   };
 
-  // Callback setelah foto diambil dari kamera
   const handleCameraCapture = (blob) => {
     const imageUrl = URL.createObjectURL(blob);
     setImageToCrop(imageUrl);
@@ -886,42 +924,34 @@ export default function ProfilSaya() {
     setCropperOpen(true);
   };
 
-  // Cancel camera
   const handleCameraCancel = () => {
     setCameraOpen(false);
   };
 
-  // Lihat foto profil fullscreen
   const viewFullPhoto = () => {
     setPhotoModal(false);
     setFullPhotoView(true);
   };
 
-  // Helper untuk menampilkan file yang dipilih
   const handlePhotoChange = (e) => {
     const f = e.target.files?.[0];
     if (f) {
-      // Validasi tipe file
       if (!f.type.match(/image\/(jpeg|jpg|png)/)) {
-        flash('err', 'Format file harus JPG atau PNG.');
+        flash('err', t('profile.error.photo_format', 'Format file harus JPG atau PNG.'));
         return;
       }
-      // Validasi ukuran (2MB untuk foto)
       if (f.size > 2 * 1024 * 1024) {
-        flash('err', 'Ukuran foto maksimal 2MB.');
+        flash('err', t('profile.error.photo_size', 'Ukuran foto maksimal 2MB.'));
         return;
       }
 
-      // Buka cropper
       const imageUrl = URL.createObjectURL(f);
       setImageToCrop(imageUrl);
       setCropperOpen(true);
     }
   };
 
-  // Callback setelah crop selesai
   const handleCropComplete = (croppedBlob) => {
-    // Convert blob to File object
     const croppedFile = new File([croppedBlob], 'profile-photo.jpg', {
       type: 'image/jpeg',
       lastModified: Date.now()
@@ -931,21 +961,18 @@ export default function ProfilSaya() {
     setPreview(URL.createObjectURL(croppedBlob));
     setCropperOpen(false);
 
-    // Clean up
     if (imageToCrop) {
       URL.revokeObjectURL(imageToCrop);
       setImageToCrop(null);
     }
   };
 
-  // Cancel cropping
   const handleCropCancel = () => {
     setCropperOpen(false);
     if (imageToCrop) {
       URL.revokeObjectURL(imageToCrop);
       setImageToCrop(null);
     }
-    // Reset file input
     if (photoRef.current) {
       photoRef.current.value = '';
     }
@@ -955,11 +982,11 @@ export default function ProfilSaya() {
     const f = e.target.files?.[0];
     if (f) {
       if (f.type !== 'application/pdf') {
-        flash('err', 'Format CV harus PDF.');
+        flash('err', t('profile.error.cv_format', 'Format CV harus PDF.'));
         return;
       }
       if (f.size > 5 * 1024 * 1024) {
-        flash('err', 'Ukuran file CV maksimal 5MB.');
+        flash('err', t('profile.error.cv_size', 'Ukuran file CV maksimal 5MB.'));
         return;
       }
       setCvFile(f);
@@ -972,11 +999,11 @@ export default function ProfilSaya() {
     if (f) {
       const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(f.type)) {
-        flash('err', 'Format file harus PDF, JPG, atau PNG.');
+        flash('err', t('profile.error.bukti_format', 'Format file harus PDF, JPG, atau PNG.'));
         return;
       }
       if (f.size > 5 * 1024 * 1024) {
-        flash('err', 'Ukuran file maksimal 5MB.');
+        flash('err', t('profile.error.file_size_5mb', 'Ukuran file maksimal 5MB.'));
         return;
       }
       setBuktiFile(f);
@@ -987,14 +1014,12 @@ export default function ProfilSaya() {
   const handleCoverChange = (e) => {
     const f = e.target.files?.[0];
     if (f) {
-      // Validasi tipe file
       if (!f.type.match(/image\/(jpeg|jpg|png)/)) {
-        flash('err', 'Format file harus JPG atau PNG.');
+        flash('err', t('profile.error.cover_format', 'Format file harus JPG atau PNG.'));
         return;
       }
-      // Validasi ukuran (5MB untuk cover)
       if (f.size > 5 * 1024 * 1024) {
-        flash('err', 'Ukuran foto cover maksimal 5MB.');
+        flash('err', t('profile.error.cover_size', 'Ukuran foto cover maksimal 5MB.'));
         return;
       }
 
@@ -1014,27 +1039,27 @@ export default function ProfilSaya() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      flash('ok', 'Foto cover berhasil diupload.');
+      flash('ok', t('profile.success.cover_uploaded', 'Foto cover berhasil diupload.'));
       setCoverFile(null);
       if (coverRef.current) coverRef.current.value = '';
       await load();
     } catch (e) {
-      flash('err', e.response?.data?.message || 'Gagal mengupload foto cover.');
+      flash('err', e.response?.data?.message || t('profile.error.cover_upload_failed', 'Gagal mengupload foto cover.'));
     } finally {
       setSaving(false);
     }
   };
 
   const deleteCover = async () => {
-    if (!confirm('Hapus foto cover?')) return;
+    if (!confirm(t('profile.confirm.delete_cover', 'Hapus foto cover?'))) return;
     setSaving(true);
     try {
       await api.post('/my/profile', { cover: null });
-      flash('ok', 'Foto cover dihapus.');
+      flash('ok', t('profile.success.cover_deleted', 'Foto cover dihapus.'));
       setCoverPreview(null);
       await load();
     } catch {
-      flash('err', 'Gagal menghapus foto cover.');
+      flash('err', t('profile.error.cover_delete_failed', 'Gagal menghapus foto cover.'));
     } finally {
       setSaving(false);
     }
@@ -1042,33 +1067,32 @@ export default function ProfilSaya() {
 
   /* ── loading ─────────────────────────────────────────────────── */
   if (loading) return (
-    <DashboardLayout title={t('Profil Saya')}>
+    <DashboardLayout title={t('profile.title', 'Profil Saya')}>
       <div className="flex items-center gap-3 text-[#5B6660]">
-        <span className="w-5 h-5 rounded-full border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B] animate-spin" />
-        
-                      {t('Memuat profil...')}
-                    </div>
+        <Spinner className="w-5 h-5 border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B]" />
+        {t('profile.loading', 'Memuat profil...')}
+      </div>
     </DashboardLayout>
   );
 
   const profileStatus = expert?.profile_status || 'draft';
 
   return (
-    <DashboardLayout title={t('Profil Saya')} subtitle="Kelola data, riwayat, dan dokumen profil tenaga ahli Anda.">
+    <DashboardLayout title={t('profile.title', 'Profil Saya')} subtitle={t('profile.subtitle', 'Kelola data, riwayat, dan dokumen profil tenaga ahli Anda.')}>
       {/* ── Status Banner ─────────────────────────────────────── */}
       {profileStatus === 'ditolak' && expert?.reject_reason && (
         <div className="mb-5 bg-[#FFDAD6] border border-[#FFB4AB] rounded-xl p-4 flex items-start gap-3">
-          <span className="material-symbols-outlined text-[#B3261E] text-[20px] shrink-0 mt-0.5">error</span>
+          <ExclamationCircleIcon className="text-[#B3261E] w-5 h-5 shrink-0 mt-0.5" strokeWidth={2} />
           <div>
-            <p className="font-bold text-[#93000A] text-sm mb-1">{t('Profil Ditolak — Harap Diperbaiki')}</p>
+            <p className="font-bold text-[#93000A] text-sm mb-1">{t('profile.status.rejected_header', 'Profil Ditolak — Harap Diperbaiki')}</p>
             <p className="text-sm text-[#410002]">{expert.reject_reason}</p>
           </div>
         </div>
       )}
       {profileStatus === 'aktif' && (
         <div className="mb-5 bg-[#E3F2E7] border border-[#A7D7B0] rounded-xl p-4 flex items-center gap-3">
-          <span className="material-symbols-outlined text-[#2E5E3B] text-[20px]">verified</span>
-          <p className="text-sm font-semibold text-[#1C3822]">{t('Profil aktif — perubahan akan ditinjau ulang oleh admin.')}</p>
+          <CheckBadgeIcon className="text-[#2E5E3B] w-5 h-5" strokeWidth={2} />
+          <p className="text-sm font-semibold text-[#1C3822]">{t('profile.status.active_notice', 'Profil aktif — perubahan akan ditinjau ulang oleh admin.')}</p>
         </div>
       )}
 
@@ -1077,24 +1101,23 @@ export default function ProfilSaya() {
 
       {/* ── Tab Navigation ────────────────────────────────────── */}
       <div className="flex gap-1 overflow-x-auto pb-1 mb-6 border-b border-outline-variant/20">
-        {TABS.map((t) => {
+        {TABS.map((tabItem) => {
           const doneKey =
-            t.id === 'profil-bio' ? 'profilBio' :
-            t.id === 'dokumen' ? 'fotoProfil' :
-            t.id;
+            tabItem.id === 'profil-bio' ? 'profilBio' :
+            tabItem.id === 'dokumen' ? 'fotoProfil' :
+            tabItem.id;
           const done = !!profileCompleteness[doneKey];
+          const TabIcon = tabItem.Icon;
           return (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-t-xl text-sm font-semibold whitespace-nowrap transition-colors border-b-2 ${tab === t.id
+            <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-t-xl text-sm font-semibold whitespace-nowrap transition-colors border-b-2 ${tab === tabItem.id
                   ? 'border-[#2E5E3B] text-[#2E5E3B] bg-[#2E5E3B]/5'
                   : 'border-transparent text-[#5B6660] hover:text-[#2E5E3B] hover:bg-[#2E5E3B]/5'
                 }`}
             >
-              <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
-              {t.label}
-              {done && (
-                <span className="material-symbols-outlined text-[15px] text-[#2E5E3B]">check_circle</span>
-              )}
+              <TabIcon className="w-[18px] h-[18px]" strokeWidth={2} />
+              {tabItem.label}
+              {done && <CheckCircleIcon className="w-[15px] h-[15px] text-[#2E5E3B]" strokeWidth={2} />}
             </button>
           );
         })}
@@ -1106,11 +1129,11 @@ export default function ProfilSaya() {
       {tab === 'pribadi' && (
         <div className="space-y-6 animate-fadeIn">
           <Card>
-            <SectionTitle icon="badge">{t('Identitas & Profesi')}</SectionTitle>
+            <SectionTitle icon={IdentificationIcon}>{t('profile.section.identity', 'Identitas & Profesi')}</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><Label>{t('Nama Lengkap *')}</Label>
-                <input className={INPUT} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t('Dr. Nama Anda, S.Hut, M.Si')} /></div>
-              <div><Label>{t('No. HP / WhatsApp *')}</Label>
+              <div><Label>{t('profile.field.full_name', 'Nama Lengkap')} *</Label>
+                <input className={INPUT} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder={t('profile.placeholder.name', 'Dr. Nama Anda, S.Hut, M.Si')} /></div>
+              <div><Label>{t('profile.field.phone', 'No. HP / WhatsApp')} *</Label>
                 <PhoneInput
                   value={form.phone}
                   onChange={(val) => setForm({ ...form, phone: val })}
@@ -1118,35 +1141,35 @@ export default function ProfilSaya() {
                   required
                 />
               </div>
-              <div><Label>{t('Institusi / Perusahaan')}</Label>
-                <input className={INPUT} value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} placeholder={t('PSL - IPB University')} /></div>
-              <div><Label>{t('Bidang Keahlian')}</Label>
-                <input className={INPUT} value={form.field} onChange={e => setForm({ ...form, field: e.target.value })} placeholder={t('Ahli Kehutanan & Tata Ruang')} /></div>
-              <div><Label>{t('Tempat Lahir')}</Label>
-                <input className={INPUT} value={form.tempat_lahir} onChange={e => setForm({ ...form, tempat_lahir: e.target.value })} placeholder={t('Jakarta')} /></div>
-              <div><Label>{t('Tanggal Lahir')}</Label>
+              <div><Label>{t('profile.field.institution', 'Institusi / Perusahaan')}</Label>
+                <input className={INPUT} value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} placeholder={t('profile.placeholder.institution', 'PSL - IPB University')} /></div>
+              <div><Label>{t('profile.field.expertise', 'Bidang Keahlian')}</Label>
+                <input className={INPUT} value={form.field} onChange={e => setForm({ ...form, field: e.target.value })} placeholder={t('profile.placeholder.expertise', 'Ahli Kehutanan & Tata Ruang')} /></div>
+              <div><Label>{t('profile.field.birth_place', 'Tempat Lahir')}</Label>
+                <input className={INPUT} value={form.tempat_lahir} onChange={e => setForm({ ...form, tempat_lahir: e.target.value })} placeholder={t('profile.placeholder.birth_place', 'Jakarta')} /></div>
+              <div><Label>{t('profile.field.birth_date', 'Tanggal Lahir')}</Label>
                 <input type="date" className={INPUT} value={form.tanggal_lahir} onChange={e => setForm({ ...form, tanggal_lahir: e.target.value })} /></div>
             </div>
           </Card>
 
           <Card>
-            <SectionTitle icon="location_on">{t('Alamat')}</SectionTitle>
+            <SectionTitle icon={MapPinIcon}>{t('profile.section.address', 'Alamat')}</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2"><Label>{t('Alamat Lengkap')}</Label>
-                <textarea className={INPUT + ' min-h-[80px] resize-none'} value={form.alamat_lengkap} onChange={e => setForm({ ...form, alamat_lengkap: e.target.value })} placeholder={t('Jl. Contoh No. 4, Kecamatan...')} /></div>
-              <div><Label>{t('Kota / Kabupaten')}</Label>
-                <input className={INPUT} value={form.alamat_kota} onChange={e => setForm({ ...form, alamat_kota: e.target.value })} placeholder={t('Kota Bogor')} /></div>
-              <div><Label>{t('Provinsi')}</Label>
-                <input className={INPUT} value={form.alamat_provinsi} onChange={e => setForm({ ...form, alamat_provinsi: e.target.value })} placeholder={t('Jawa Barat')} /></div>
+              <div className="md:col-span-2"><Label>{t('profile.field.full_address', 'Alamat Lengkap')}</Label>
+                <textarea className={INPUT + ' min-h-[80px] resize-none'} value={form.alamat_lengkap} onChange={e => setForm({ ...form, alamat_lengkap: e.target.value })} placeholder={t('profile.placeholder.address', 'Jl. Contoh No. 4, Kecamatan...')} /></div>
+              <div><Label>{t('profile.field.city', 'Kota / Kabupaten')}</Label>
+                <input className={INPUT} value={form.alamat_kota} onChange={e => setForm({ ...form, alamat_kota: e.target.value })} placeholder={t('profile.placeholder.city', 'Kota Bogor')} /></div>
+              <div><Label>{t('profile.field.province', 'Provinsi')}</Label>
+                <input className={INPUT} value={form.alamat_provinsi} onChange={e => setForm({ ...form, alamat_provinsi: e.target.value })} placeholder={t('profile.placeholder.province', 'Jawa Barat')} /></div>
 
               {/* Location Picker */}
               <div className="md:col-span-2 mt-4">
-                <Label>{t('Lokasi pada Peta (untuk ditampilkan di pencarian)')}</Label>
+                <Label>{t('profile.field.map_location', 'Lokasi pada Peta (untuk ditampilkan di pencarian)')}</Label>
                 <div className="flex flex-col gap-2">
                   {form.lat && form.lng && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      <span>{t('Koordinat:')} {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}</span>
+                      <MapPinIcon className="w-4 h-4" strokeWidth={2} />
+                      <span>{t('profile.coordinates', 'Koordinat:')} {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}</span>
                       {form.location && <span className="text-gray-400">• {form.location}</span>}
                     </div>
                   )}
@@ -1155,8 +1178,8 @@ export default function ProfilSaya() {
                     onClick={openMapPicker}
                     className="flex items-center gap-2 text-sm font-bold text-[#0EA5E9] hover:text-[#0284C7] transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[18px]">map</span>
-                    {form.lat && form.lng ? 'Ubah Lokasi di Peta' : 'Pilih Lokasi di Peta'}
+                    <MapIcon className="w-[18px] h-[18px]" strokeWidth={2} />
+                    {form.lat && form.lng ? t('profile.change_map_location', 'Ubah Lokasi di Peta') : t('profile.select_map_location', 'Pilih Lokasi di Peta')}
                   </button>
                 </div>
               </div>
@@ -1164,8 +1187,8 @@ export default function ProfilSaya() {
           </Card>
 
           <Card>
-            <SectionTitle icon="checklist">{t('Kriteria Profesional')}</SectionTitle>
-            <p className="text-sm text-gray-600 mb-4">{t('Sama seperti yang diisi saat pendaftaran — pilih semua yang sesuai, atau tambahkan kriteria Anda sendiri.')}</p>
+            <SectionTitle icon={ClipboardDocumentCheckIcon}>{t('profile.section.professional_criteria', 'Kriteria Profesional')}</SectionTitle>
+            <p className="text-sm text-gray-600 mb-4">{t('profile.criteria_note', 'Sama seperti yang diisi saat pendaftaran — pilih semua yang sesuai, atau tambahkan kriteria Anda sendiri.')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {KRITERIA_OPTIONS.map((option) => (
                 <label
@@ -1199,7 +1222,7 @@ export default function ProfilSaya() {
                     <span className="text-sm text-[#2E5E3B] font-semibold truncate">{option}</span>
                   </label>
                   <button type="button" onClick={() => removeCustomKriteria(option)} className="text-red-400 hover:text-red-600 transition-colors shrink-0">
-                    <span className="material-symbols-outlined text-[18px]">close</span>
+                    <XMarkIcon className="w-[18px] h-[18px]" strokeWidth={2} />
                   </button>
                 </div>
               ))}
@@ -1220,13 +1243,13 @@ export default function ProfilSaya() {
                 disabled={!customKriteriaInput.trim()}
                 className="shrink-0 flex items-center gap-1 bg-[#2E5E3B] text-white text-sm font-bold px-4 py-2.5 rounded-lg hover:bg-[#244B2F] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <span className="material-symbols-outlined text-[18px]">add</span>{t('Tambah')}
-                                            </button>
+                <PlusIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah')}
+              </button>
             </div>
           </Card>
 
           <Card>
-            <SectionTitle icon="note_alt">{t('Catatan')}</SectionTitle>
+            <SectionTitle icon={PencilSquareIcon}>{t('Catatan')}</SectionTitle>
             <textarea
               className={INPUT + ' min-h-[100px] resize-none'}
               value={form.catatan}
@@ -1236,13 +1259,22 @@ export default function ProfilSaya() {
           </Card>
 
           <div className="flex items-center justify-end gap-3">
-            <button className={BTN_PRIMARY} onClick={savePribadi} disabled={saving}>
-              <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
-              {saving ? 'Menyimpan...' : 'Simpan Data Pribadi'}
-            </button>
-            <button className={BTN_GHOST} onClick={goNext}>
-              
-                                        {t('Lanjut')}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            <button 
+              className={BTN_GHOST} 
+              onClick={goNext}
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <Spinner />
+                  {t('Menyimpan...')}
+                </>
+              ) : (
+                <>
+                  {t('Lanjut')}
+                  <ArrowRightIcon className="w-[18px] h-[18px]" strokeWidth={2} />
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -1254,7 +1286,7 @@ export default function ProfilSaya() {
       {tab === 'profil-bio' && (
         <div className="space-y-6 animate-fadeIn">
           <Card>
-            <SectionTitle icon="description">{t('Profil Bio')}</SectionTitle>
+            <SectionTitle icon={DocumentTextIcon}>{t('Profil Bio')}</SectionTitle>
             <div className="space-y-4">
               <div>
                 <Label>{t('Tentang Saya')}</Label>
@@ -1289,18 +1321,25 @@ export default function ProfilSaya() {
 
           <div className="flex items-center justify-between gap-3">
             <button className={BTN_GHOST} onClick={goPrev}>
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t('Kembali')}
-                                      </button>
-            <div className="flex items-center gap-3">
-              <button className={BTN_PRIMARY} onClick={saveProfilBio} disabled={saving}>
-                <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
-                {saving ? 'Menyimpan...' : 'Simpan Profil Bio'}
-              </button>
-              <button className={BTN_GHOST} onClick={goNext}>
-                
-                                              {t('Lanjut')}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </button>
-            </div>
+              <ArrowLeftIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Kembali')}
+            </button>
+            <button 
+              className={BTN_GHOST} 
+              onClick={goNext}
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <Spinner />
+                  {t('Menyimpan...')}
+                </>
+              ) : (
+                <>
+                  {t('Lanjut')}
+                  <ArrowRightIcon className="w-[18px] h-[18px]" strokeWidth={2} />
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
@@ -1311,11 +1350,10 @@ export default function ProfilSaya() {
       {tab === 'akademik' && (
         <div className="space-y-6 animate-fadeIn">
           <Card>
-            <SectionTitle icon="link">{t('Link Profil Akademik')}</SectionTitle>
+            <SectionTitle icon={LinkIcon}>{t('Link Profil Akademik')}</SectionTitle>
             <p className="text-sm text-gray-600 mb-4">{t('Tambahkan link ke profil akademik Anda untuk meningkatkan kredibilitas.')}</p>
 
             <div className="space-y-5">
-              {/* Scopus */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>{t('Scopus URL')}</Label>
@@ -1337,7 +1375,6 @@ export default function ProfilSaya() {
                 </div>
               </div>
 
-              {/* Google Scholar */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>{t('Google Scholar URL')}</Label>
@@ -1359,7 +1396,6 @@ export default function ProfilSaya() {
                 </div>
               </div>
 
-              {/* SINTA */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>{t('SINTA URL')}</Label>
@@ -1381,7 +1417,6 @@ export default function ProfilSaya() {
                 </div>
               </div>
 
-              {/* ORCID */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>{t('ORCID URL')}</Label>
@@ -1403,7 +1438,6 @@ export default function ProfilSaya() {
                 </div>
               </div>
 
-              {/* ResearchGate */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label>{t('ResearchGate URL')}</Label>
@@ -1429,18 +1463,25 @@ export default function ProfilSaya() {
 
           <div className="flex items-center justify-between gap-3">
             <button className={BTN_GHOST} onClick={goPrev}>
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t('Kembali')}
-                                      </button>
-            <div className="flex items-center gap-3">
-              <button className={BTN_PRIMARY} onClick={saveLinkAkademik} disabled={saving}>
-                <span className="material-symbols-outlined text-[18px]">{saving ? 'sync' : 'save'}</span>
-                {saving ? 'Menyimpan...' : 'Simpan Link Akademik'}
-              </button>
-              <button className={BTN_GHOST} onClick={goNext}>
-                
-                                              {t('Lanjut')}<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </button>
-            </div>
+              <ArrowLeftIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Kembali')}
+            </button>
+            <button 
+              className={BTN_GHOST} 
+              onClick={goNext}
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <Spinner />
+                  {t('Menyimpan...')}
+                </>
+              ) : (
+                <>
+                  {t('Lanjut')}
+                  <ArrowRightIcon className="w-[18px] h-[18px]" strokeWidth={2} />
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
@@ -1474,7 +1515,7 @@ export default function ProfilSaya() {
                     <div><Label>{t('Tahun Lulus')}</Label><input type="number" className={INPUT} value={editEdu.tahun_lulus || ''} onChange={v => setEditEdu({ ...editEdu, tahun_lulus: v.target.value })} /></div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button className={BTN_PRIMARY} onClick={() => updateEdu(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{t('Simpan')}</button>
+                    <button className={BTN_PRIMARY} onClick={() => updateEdu(e.id)} disabled={saving}><CheckIcon className="w-4 h-4" strokeWidth={2} />{t('Simpan')}</button>
                     <button className={BTN_GHOST} onClick={() => setEditEdu(null)}>{t('Batal')}</button>
                   </div>
                 </div>
@@ -1486,8 +1527,8 @@ export default function ProfilSaya() {
                     {e.tahun_lulus && <p className="text-xs text-[#5B6660] mt-1">{t('Lulus')} {e.tahun_lulus}</p>}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button className={BTN_GHOST} onClick={() => setEditEdu({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>{t('Edit')}</button>
-                    <button className={BTN_DANGER} onClick={() => deleteEdu(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                    <button className={BTN_GHOST} onClick={() => setEditEdu({ ...e })}><PencilIcon className="w-4 h-4" strokeWidth={2} />{t('Edit')}</button>
+                    <button className={BTN_DANGER} onClick={() => deleteEdu(e.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
                   </div>
                 </div>
               )}
@@ -1496,7 +1537,7 @@ export default function ProfilSaya() {
 
           {addingEdu ? (
             <Card>
-              <SectionTitle icon="add_circle">{t('Tambah Pendidikan')}</SectionTitle>
+              <SectionTitle icon={PlusCircleIcon}>{t('Tambah Pendidikan')}</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 <div>
                   <Label>{t('Jenjang *')}</Label>
@@ -1514,17 +1555,17 @@ export default function ProfilSaya() {
                 <div><Label>{t('Tahun Lulus')}</Label><input type="number" className={INPUT} value={newEdu.tahun_lulus} onChange={v => setNewEdu({ ...newEdu, tahun_lulus: v.target.value })} placeholder="2015" /></div>
               </div>
               <div className="flex gap-2">
-                <button className={BTN_PRIMARY} onClick={addEdu} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                <button className={BTN_PRIMARY} onClick={addEdu} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                 <button className={BTN_GHOST} onClick={() => setAddingEdu(false)}>{t('Batal')}</button>
               </div>
             </Card>
           ) : (
             <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingEdu(true)}>
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Pendidikan')}
-                                          </button>
+              <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Pendidikan')}
+            </button>
           )}
 
-          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`${t('profile.wizard.continue_to', 'Lanjut ke')} ${TABS[currentTabIdx + 1]?.label}`} t={t} />
         </div>
       )}
 
@@ -1548,7 +1589,7 @@ export default function ProfilSaya() {
                     <div className="md:col-span-2"><Label>{t('Deskripsi')}</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={editExp.deskripsi || ''} onChange={v => setEditExp({ ...editExp, deskripsi: v.target.value })} /></div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button className={BTN_PRIMARY} onClick={() => updateExp(e.id)} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{t('Simpan')}</button>
+                    <button className={BTN_PRIMARY} onClick={() => updateExp(e.id)} disabled={saving}><CheckIcon className="w-4 h-4" strokeWidth={2} />{t('Simpan')}</button>
                     <button className={BTN_GHOST} onClick={() => setEditExp(null)}>{t('Batal')}</button>
                   </div>
                 </div>
@@ -1558,13 +1599,13 @@ export default function ProfilSaya() {
                     <p className="font-bold text-[#1F2A22]">{e.posisi}</p>
                     <p className="text-sm text-[#5B6660]">{e.instansi}</p>
                     {(e.tahun_mulai || e.tahun_selesai) && (
-                      <p className="text-xs text-[#5B6660] mt-1">{e.tahun_mulai || '?'} — {e.tahun_selesai || 'Sekarang'}</p>
+                      <p className="text-xs text-[#5B6660] mt-1">{e.tahun_mulai || '?'} — {e.tahun_selesai || t('Sekarang')}</p>
                     )}
                     {e.deskripsi && <p className="text-xs text-[#5B6660] mt-1 line-clamp-2">{e.deskripsi}</p>}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button className={BTN_GHOST} onClick={() => setEditExp({ ...e })}><span className="material-symbols-outlined text-[16px]">edit</span>{t('Edit')}</button>
-                    <button className={BTN_DANGER} onClick={() => deleteExp(e.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                    <button className={BTN_GHOST} onClick={() => setEditExp({ ...e })}><PencilIcon className="w-4 h-4" strokeWidth={2} />{t('Edit')}</button>
+                    <button className={BTN_DANGER} onClick={() => deleteExp(e.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
                   </div>
                 </div>
               )}
@@ -1573,7 +1614,7 @@ export default function ProfilSaya() {
 
           {addingExp ? (
             <Card>
-              <SectionTitle icon="add_circle">{t('Tambah Pengalaman')}</SectionTitle>
+              <SectionTitle icon={PlusCircleIcon}>{t('Tambah Pengalaman')}</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 <div><Label>{t('Posisi / Jabatan *')}</Label><input className={INPUT} value={newExp.posisi} onChange={v => setNewExp({ ...newExp, posisi: v.target.value })} placeholder={t('Konsultan AMDAL')} /></div>
                 <div><Label>{t('Instansi / Organisasi *')}</Label><input className={INPUT} value={newExp.instansi} onChange={v => setNewExp({ ...newExp, instansi: v.target.value })} placeholder={t('PT. Contoh Jaya')} /></div>
@@ -1582,17 +1623,17 @@ export default function ProfilSaya() {
                 <div className="md:col-span-2"><Label>{t('Deskripsi Singkat')}</Label><textarea className={INPUT + ' resize-none min-h-[72px]'} value={newExp.deskripsi} onChange={v => setNewExp({ ...newExp, deskripsi: v.target.value })} /></div>
               </div>
               <div className="flex gap-2">
-                <button className={BTN_PRIMARY} onClick={addExp} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                <button className={BTN_PRIMARY} onClick={addExp} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                 <button className={BTN_GHOST} onClick={() => setAddingExp(false)}>{t('Batal')}</button>
               </div>
             </Card>
           ) : (
             <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingExp(true)}>
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Pengalaman')}
-                                          </button>
+              <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Pengalaman')}
+            </button>
           )}
 
-          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`${t('profile.wizard.continue_to', 'Lanjut ke')} ${TABS[currentTabIdx + 1]?.label}`} t={t} />
         </div>
       )}
 
@@ -1608,7 +1649,7 @@ export default function ProfilSaya() {
             <Card key={c.id}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-[#2E5E3B] text-[22px] mt-0.5">workspace_premium</span>
+                  <TrophyIcon className="text-[#2E5E3B] w-[22px] h-[22px] mt-0.5" strokeWidth={2} />
                   <div>
                     <p className="font-bold text-[#1F2A22]">{c.nama_sertifikat}</p>
                     {c.penerbit && <p className="text-sm text-[#5B6660]">{c.penerbit}</p>}
@@ -1620,38 +1661,37 @@ export default function ProfilSaya() {
                         rel="noreferrer"
                         className="text-xs text-[#0284C7] hover:underline mt-1 inline-flex items-center gap-1"
                       >
-                        <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                        
-                                                              {t('Lihat File')}
-                                                            </a>
+                        <ArrowTopRightOnSquareIcon className="w-[14px] h-[14px]" strokeWidth={2} />
+                        {t('Lihat File')}
+                      </a>
                     )}
                   </div>
                 </div>
-                <button className={BTN_DANGER} onClick={() => deleteCert(c.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                <button className={BTN_DANGER} onClick={() => deleteCert(c.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
               </div>
             </Card>
           ))}
 
           {addingCert ? (
             <Card>
-              <SectionTitle icon="add_circle">{t('Tambah Sertifikat')}</SectionTitle>
+              <SectionTitle icon={PlusCircleIcon}>{t('Tambah Sertifikat')}</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                 <div className="md:col-span-2"><Label>{t('Nama Sertifikat *')}</Label><input className={INPUT} value={newCert.nama_sertifikat} onChange={v => setNewCert({ ...newCert, nama_sertifikat: v.target.value })} placeholder={t('Sertifikat AMDAL A')} /></div>
                 <div><Label>{t('Tahun')}</Label><input type="number" className={INPUT} value={newCert.tahun} onChange={v => setNewCert({ ...newCert, tahun: v.target.value })} placeholder="2022" /></div>
                 <div className="md:col-span-3"><Label>{t('Penerbit / Lembaga')}</Label><input className={INPUT} value={newCert.penerbit} onChange={v => setNewCert({ ...newCert, penerbit: v.target.value })} placeholder={t('KLHK / BPLHD / Instansi Penerbit')} /></div>
               </div>
               <div className="flex gap-2">
-                <button className={BTN_PRIMARY} onClick={addCert} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                <button className={BTN_PRIMARY} onClick={addCert} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                 <button className={BTN_GHOST} onClick={() => setAddingCert(false)}>{t('Batal')}</button>
               </div>
             </Card>
           ) : (
             <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingCert(true)}>
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Sertifikat')}
-                                          </button>
+              <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Sertifikat')}
+            </button>
           )}
 
-          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`${t('profile.wizard.continue_to', 'Lanjut ke')} ${TABS[currentTabIdx + 1]?.label}`} t={t} />
         </div>
       )}
 
@@ -1662,7 +1702,7 @@ export default function ProfilSaya() {
         <div className="space-y-10 animate-fadeIn">
           {/* ── Publikasi ─────────────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="article">{t('Publikasi')}</SectionTitle>
+            <SectionTitle icon={NewspaperIcon}>{t('Publikasi')}</SectionTitle>
             {publikasi.length === 0 && !addingPub && (
               <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('Belum ada data publikasi.')}</p></Card>
             )}
@@ -1675,17 +1715,17 @@ export default function ProfilSaya() {
                     {p.penerbit && <p className="text-sm text-[#5B6660]">{p.penerbit}{p.tahun ? ` · ${p.tahun}` : ''}</p>}
                     {p.link && p.link !== '#' && (
                       <a href={p.link} target="_blank" rel="noreferrer" className="text-xs text-[#0284C7] hover:underline mt-1 inline-flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px]">open_in_new</span>{t('Lihat Publikasi')}
-                                                          </a>
+                        <ArrowTopRightOnSquareIcon className="w-[14px] h-[14px]" strokeWidth={2} />{t('Lihat Publikasi')}
+                      </a>
                     )}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deletePub(p.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                  <button className={BTN_DANGER} onClick={() => deletePub(p.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingPub ? (
               <Card>
-                <SectionTitle icon="add_circle">{t('Tambah Publikasi')}</SectionTitle>
+                <SectionTitle icon={PlusCircleIcon}>{t('Tambah Publikasi')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div>
                     <Label>{t('Jenis')}</Label>
@@ -1703,20 +1743,20 @@ export default function ProfilSaya() {
                   <div><Label>{t('Link (opsional)')}</Label><input className={INPUT} value={newPub.link} onChange={v => setNewPub({ ...newPub, link: v.target.value })} placeholder={t('https://...')} /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addPub} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_PRIMARY} onClick={addPub} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                   <button className={BTN_GHOST} onClick={() => setAddingPub(false)}>{t('Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingPub(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Publikasi')}
-                                                </button>
+                <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Publikasi')}
+              </button>
             )}
           </div>
 
           {/* ── Organisasi ────────────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="groups">{t('Organisasi')}</SectionTitle>
+            <SectionTitle icon={UserGroupIcon}>{t('Organisasi')}</SectionTitle>
             {organisasi.length === 0 && !addingOrg && (
               <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('Belum ada data organisasi.')}</p></Card>
             )}
@@ -1728,13 +1768,13 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{o.jabatan}{o.periode ? ` · ${o.periode}` : ''}</p>
                     {o.kontribusi && <p className="text-xs text-[#5B6660] mt-1">{o.kontribusi}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteOrg(o.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                  <button className={BTN_DANGER} onClick={() => deleteOrg(o.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingOrg ? (
               <Card>
-                <SectionTitle icon="add_circle">{t('Tambah Organisasi')}</SectionTitle>
+                <SectionTitle icon={PlusCircleIcon}>{t('Tambah Organisasi')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div><Label>{t('Nama Organisasi *')}</Label><input className={INPUT} value={newOrg.nama} onChange={v => setNewOrg({ ...newOrg, nama: v.target.value })} placeholder={t('Ikatan Ahli...')} /></div>
                   <div><Label>{t('Jabatan')}</Label><input className={INPUT} value={newOrg.jabatan} onChange={v => setNewOrg({ ...newOrg, jabatan: v.target.value })} placeholder={t('Anggota / Pengurus')} /></div>
@@ -1742,20 +1782,20 @@ export default function ProfilSaya() {
                   <div className="md:col-span-2"><Label>{t('Kontribusi')}</Label><textarea className={INPUT + ' resize-none min-h-[64px]'} value={newOrg.kontribusi} onChange={v => setNewOrg({ ...newOrg, kontribusi: v.target.value })} /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addOrg} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_PRIMARY} onClick={addOrg} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                   <button className={BTN_GHOST} onClick={() => setAddingOrg(false)}>{t('Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingOrg(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Organisasi')}
-                                                </button>
+                <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Organisasi')}
+              </button>
             )}
           </div>
 
           {/* ── Reviewer Jurnal ───────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="fact_check">{t('Reviewer Jurnal')}</SectionTitle>
+            <SectionTitle icon={DocumentMagnifyingGlassIcon}>{t('Reviewer Jurnal')}</SectionTitle>
             {reviewerJurnal.length === 0 && !addingRev && (
               <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('Belum ada data reviewer jurnal.')}</p></Card>
             )}
@@ -1767,13 +1807,13 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{r.institusi}{r.periode ? ` · ${r.periode}` : ''}</p>
                     {r.bidang && <p className="text-xs text-[#5B6660] mt-1">{r.bidang}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteRev(r.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                  <button className={BTN_DANGER} onClick={() => deleteRev(r.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingRev ? (
               <Card>
-                <SectionTitle icon="add_circle">{t('Tambah Reviewer Jurnal')}</SectionTitle>
+                <SectionTitle icon={PlusCircleIcon}>{t('Tambah Reviewer Jurnal')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div><Label>{t('Nama Jurnal *')}</Label><input className={INPUT} value={newRev.nama} onChange={v => setNewRev({ ...newRev, nama: v.target.value })} /></div>
                   <div><Label>{t('Institusi Penerbit')}</Label><input className={INPUT} value={newRev.institusi} onChange={v => setNewRev({ ...newRev, institusi: v.target.value })} /></div>
@@ -1781,20 +1821,20 @@ export default function ProfilSaya() {
                   <div><Label>{t('Periode')}</Label><input className={INPUT} value={newRev.periode} onChange={v => setNewRev({ ...newRev, periode: v.target.value })} placeholder={t('2020 — Sekarang')} /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addRev} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_PRIMARY} onClick={addRev} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                   <button className={BTN_GHOST} onClick={() => setAddingRev(false)}>{t('Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingRev(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Reviewer Jurnal')}
-                                                </button>
+                <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Reviewer Jurnal')}
+              </button>
             )}
           </div>
 
           {/* ── Narasumber ────────────────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="campaign">{t('Narasumber')}</SectionTitle>
+            <SectionTitle icon={MegaphoneIcon}>{t('Narasumber')}</SectionTitle>
             {narasumber.length === 0 && !addingNara && (
               <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('Belum ada riwayat sebagai narasumber.')}</p></Card>
             )}
@@ -1806,13 +1846,13 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{n.penyelenggara}</p>
                     {(n.tempat || n.tanggal) && <p className="text-xs text-[#5B6660] mt-1">{n.tempat}{n.tempat && n.tanggal ? ', ' : ''}{n.tanggal}</p>}
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteNara(n.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                  <button className={BTN_DANGER} onClick={() => deleteNara(n.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingNara ? (
               <Card>
-                <SectionTitle icon="add_circle">{t('Tambah Riwayat Narasumber')}</SectionTitle>
+                <SectionTitle icon={PlusCircleIcon}>{t('Tambah Riwayat Narasumber')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div className="md:col-span-2"><Label>{t('Judul Kegiatan *')}</Label><input className={INPUT} value={newNara.title} onChange={v => setNewNara({ ...newNara, title: v.target.value })} /></div>
                   <div><Label>{t('Penyelenggara')}</Label><input className={INPUT} value={newNara.penyelenggara} onChange={v => setNewNara({ ...newNara, penyelenggara: v.target.value })} /></div>
@@ -1820,20 +1860,20 @@ export default function ProfilSaya() {
                   <div><Label>{t('Tanggal')}</Label><input className={INPUT} value={newNara.tanggal} onChange={v => setNewNara({ ...newNara, tanggal: v.target.value })} placeholder={t('15 Nov 2022')} /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addNara} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_PRIMARY} onClick={addNara} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                   <button className={BTN_GHOST} onClick={() => setAddingNara(false)}>{t('Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingNara(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Riwayat Narasumber')}
-                                                </button>
+                <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Riwayat Narasumber')}
+              </button>
             )}
           </div>
 
           {/* ── Instruktur / Trainer ──────────────────────────── */}
           <div className="space-y-4">
-            <SectionTitle icon="cast_for_education">{t('Instruktur / Trainer')}</SectionTitle>
+            <SectionTitle icon={BookOpenIcon}>{t('Instruktur / Trainer')}</SectionTitle>
             {instruktur.length === 0 && !addingIns && (
               <Card><p className="text-sm text-[#5B6660] text-center py-4">{t('Belum ada riwayat sebagai instruktur.')}</p></Card>
             )}
@@ -1845,13 +1885,13 @@ export default function ProfilSaya() {
                     <p className="text-sm text-[#5B6660]">{i.materi}</p>
                     <p className="text-xs text-[#5B6660] mt-1">{i.peran}{i.peran && i.penyelenggara ? ' · ' : ''}{i.penyelenggara}{i.tahun ? ` (${i.tahun})` : ''}</p>
                   </div>
-                  <button className={BTN_DANGER} onClick={() => deleteIns(i.id)}><span className="material-symbols-outlined text-[16px]">delete</span>{t('Hapus')}</button>
+                  <button className={BTN_DANGER} onClick={() => deleteIns(i.id)}><TrashIcon className="w-4 h-4" strokeWidth={2} />{t('Hapus')}</button>
                 </div>
               </Card>
             ))}
             {addingIns ? (
               <Card>
-                <SectionTitle icon="add_circle">{t('Tambah Riwayat Instruktur')}</SectionTitle>
+                <SectionTitle icon={PlusCircleIcon}>{t('Tambah Riwayat Instruktur')}</SectionTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div className="md:col-span-2"><Label>{t('Nama Kegiatan *')}</Label><input className={INPUT} value={newIns.nama} onChange={v => setNewIns({ ...newIns, nama: v.target.value })} /></div>
                   <div><Label>{t('Materi')}</Label><input className={INPUT} value={newIns.materi} onChange={v => setNewIns({ ...newIns, materi: v.target.value })} /></div>
@@ -1860,18 +1900,18 @@ export default function ProfilSaya() {
                   <div><Label>{t('Tahun')}</Label><input type="number" className={INPUT} value={newIns.tahun} onChange={v => setNewIns({ ...newIns, tahun: v.target.value })} /></div>
                 </div>
                 <div className="flex gap-2">
-                  <button className={BTN_PRIMARY} onClick={addIns} disabled={saving}><span className="material-symbols-outlined text-[16px]">save</span>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+                  <button className={BTN_PRIMARY} onClick={addIns} disabled={saving}>{saving ? <Spinner /> : <CheckIcon className="w-4 h-4" strokeWidth={2} />}{saving ? t('Menyimpan...') : t('Simpan')}</button>
                   <button className={BTN_GHOST} onClick={() => setAddingIns(false)}>{t('Batal')}</button>
                 </div>
               </Card>
             ) : (
               <button className={BTN_GHOST + ' self-start'} onClick={() => setAddingIns(true)}>
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>{t('Tambah Riwayat Instruktur')}
-                                                </button>
+                <PlusCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Tambah Riwayat Instruktur')}
+              </button>
             )}
           </div>
 
-          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`${t('profile.wizard.continue_to', 'Lanjut ke')} ${TABS[currentTabIdx + 1]?.label}`} t={t} />
         </div>
       )}
 
@@ -1882,16 +1922,15 @@ export default function ProfilSaya() {
         <div className="space-y-6 animate-fadeIn">
           {/* ── Foto Profil ─────────────────────────────────── */}
           <Card>
-            <SectionTitle icon="photo_camera">{t('Foto Profil')}</SectionTitle>
+            <SectionTitle icon={CameraIcon}>{t('Foto Profil')}</SectionTitle>
             <div className="flex items-start gap-6">
-              {/* Foto (klik untuk buka opsi WhatsApp-style) */}
               <button
                 onClick={() => setPhotoModal(true)}
                 className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#2E5E3B]/20 bg-[#F5F4F0] flex items-center justify-center shrink-0 hover:opacity-80 hover:scale-105 transition-all cursor-pointer"
               >
                 {photoPreview
                   ? <img src={photoPreview} alt="Foto profil" className="w-full h-full object-cover" />
-                  : <span className="material-symbols-outlined text-4xl text-[#5B6660]/40">person</span>}
+                  : <UserIcon className="w-10 h-10 text-[#5B6660]/40" strokeWidth={1.5} />}
               </button>
               <div className="flex flex-col gap-3 flex-1">
                 <div>
@@ -1900,10 +1939,9 @@ export default function ProfilSaya() {
                     <li>{t('Format JPG atau PNG, maksimal 2MB')}</li>
                     <li>{t('Gunakan foto formal dengan latar polos')}</li>
                     <li>{t('Wajah terlihat jelas dan profesional')}</li>
-                    <li><strong>{t('Klik foto')}</strong>  {t('untuk mengganti, melihat, atau menghapus')}</li>
+                    <li><strong>{t('Klik foto')}</strong> {t('untuk mengganti, melihat, atau menghapus')}</li>
                   </ul>
                 </div>
-                {/* Hidden input for file selection (triggered from modal) */}
                 <input
                   type="file"
                   accept="image/jpeg,image/jpg,image/png"
@@ -1911,11 +1949,10 @@ export default function ProfilSaya() {
                   ref={photoRef}
                   onChange={handlePhotoChange}
                 />
-                {/* Preview setelah crop - tombol upload */}
                 {photoFile && (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-2 rounded-lg">
-                      <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                      <CheckCircleIcon className="w-4 h-4" strokeWidth={2} />
                       <span className="flex-1 truncate">{t('Foto siap diupload ·')} {(photoFile.size / 1024).toFixed(0)} KB</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -1932,8 +1969,8 @@ export default function ProfilSaya() {
                           }
                         )}
                       >
-                        <span className="material-symbols-outlined text-[16px]">{saving ? 'sync' : 'cloud_upload'}</span>
-                        {saving ? 'Mengunggah...' : 'Upload Foto'}
+                        {saving ? <Spinner /> : <CloudArrowUpIcon className="w-4 h-4" strokeWidth={2} />}
+                        {saving ? t('Mengunggah...') : t('Upload Foto')}
                       </button>
                       <button
                         className={BTN_DANGER}
@@ -1943,10 +1980,9 @@ export default function ProfilSaya() {
                           if (photoRef.current) photoRef.current.value = '';
                         }}
                       >
-                        <span className="material-symbols-outlined text-[16px]">close</span>
-                        
-                                                                      {t('Batal')}
-                                                                    </button>
+                        <XMarkIcon className="w-4 h-4" strokeWidth={2} />
+                        {t('Batal')}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -1956,9 +1992,8 @@ export default function ProfilSaya() {
 
           {/* ── Foto Cover / Background ────────────────────── */}
           <Card>
-            <SectionTitle icon="image">{t('Foto Cover / Background')}</SectionTitle>
+            <SectionTitle icon={PhotoIcon}>{t('Foto Cover / Background')}</SectionTitle>
             <div className="space-y-4">
-              {/* Preview Cover */}
               {coverPreview && (
                 <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-[#2E5E3B]/20">
                   <img src={coverPreview} alt="Foto cover" className="w-full h-full object-cover" />
@@ -1968,12 +2003,11 @@ export default function ProfilSaya() {
                     className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors disabled:opacity-50"
                     title={t('Hapus foto cover')}
                   >
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                    <TrashIcon className="w-[18px] h-[18px]" strokeWidth={2} />
                   </button>
                 </div>
               )}
 
-              {/* Panduan */}
               <div>
                 <p className="text-xs font-semibold text-[#1F2A22] mb-1">{t('Panduan Foto Cover:')}</p>
                 <ul className="text-xs text-[#5B6660] list-disc list-inside space-y-0.5">
@@ -1984,12 +2018,11 @@ export default function ProfilSaya() {
                 </ul>
               </div>
 
-              {/* File Input */}
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap gap-2 items-center">
                   <label className={BTN_GHOST + ' cursor-pointer'}>
-                    <span className="material-symbols-outlined text-[16px]">upload_file</span>
-                    {coverPreview ? 'Ganti Foto Cover' : 'Pilih Foto Cover'}
+                    <ArrowUpTrayIcon className="w-4 h-4" strokeWidth={2} />
+                    {coverPreview ? t('Ganti Foto Cover') : t('Pilih Foto Cover')}
                     <input
                       type="file"
                       accept="image/jpeg,image/jpg,image/png"
@@ -2006,8 +2039,8 @@ export default function ProfilSaya() {
                         disabled={saving}
                         onClick={uploadCover}
                       >
-                        <span className="material-symbols-outlined text-[16px]">{saving ? 'sync' : 'cloud_upload'}</span>
-                        {saving ? 'Mengunggah...' : 'Upload Cover'}
+                        {saving ? <Spinner /> : <CloudArrowUpIcon className="w-4 h-4" strokeWidth={2} />}
+                        {saving ? t('Mengunggah...') : t('Upload Cover')}
                       </button>
                       <button
                         className={BTN_DANGER}
@@ -2017,17 +2050,16 @@ export default function ProfilSaya() {
                           if (coverRef.current) coverRef.current.value = '';
                         }}
                       >
-                        <span className="material-symbols-outlined text-[16px]">close</span>
-                        
-                                                                      {t('Batal')}
-                                                                    </button>
+                        <XMarkIcon className="w-4 h-4" strokeWidth={2} />
+                        {t('Batal')}
+                      </button>
                     </>
                   )}
                 </div>
 
                 {coverFile && (
                   <div className="flex items-center gap-2 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-2 rounded-lg">
-                    <span className="material-symbols-outlined text-[16px] text-[#0EA5E9]">image</span>
+                    <PhotoIcon className="w-4 h-4 text-[#0EA5E9]" strokeWidth={2} />
                     <span className="flex-1 truncate">{coverFile.name}</span>
                     <span className="font-semibold">{(coverFile.size / 1024).toFixed(0)} KB</span>
                   </div>
@@ -2038,13 +2070,13 @@ export default function ProfilSaya() {
 
           {/* ── CV ──────────────────────────────────────────── */}
           <Card>
-            <SectionTitle icon="description">{t('Curriculum Vitae (CV)')}</SectionTitle>
+            <SectionTitle icon={DocumentTextIcon}>{t('Curriculum Vitae (CV)')}</SectionTitle>
             <p className="text-xs text-[#5B6660] mb-3">{t('Format PDF, maksimal 5MB. Pastikan CV Anda terbaru dan lengkap.')}</p>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2 items-center">
                 <label className={BTN_GHOST + ' cursor-pointer'}>
-                  <span className="material-symbols-outlined text-[16px]">upload_file</span>{t('Pilih File CV')}
-                                                    <input
+                  <ArrowUpTrayIcon className="w-4 h-4" strokeWidth={2} />{t('Pilih File CV')}
+                  <input
                     type="file"
                     accept=".pdf,application/pdf"
                     className="hidden"
@@ -2068,8 +2100,8 @@ export default function ProfilSaya() {
                         }
                       )}
                     >
-                      <span className="material-symbols-outlined text-[16px]">{saving ? 'sync' : 'cloud_upload'}</span>
-                      {saving ? 'Mengunggah...' : 'Upload CV'}
+                      {saving ? <Spinner /> : <CloudArrowUpIcon className="w-4 h-4" strokeWidth={2} />}
+                      {saving ? t('Mengunggah...') : t('Upload CV')}
                     </button>
                     <button
                       className={BTN_DANGER}
@@ -2079,16 +2111,15 @@ export default function ProfilSaya() {
                         if (cvRef.current) cvRef.current.value = '';
                       }}
                     >
-                      <span className="material-symbols-outlined text-[16px]">close</span>
-                      
-                                                                {t('Batal')}
-                                                              </button>
+                      <XMarkIcon className="w-4 h-4" strokeWidth={2} />
+                      {t('Batal')}
+                    </button>
                   </>
                 )}
               </div>
               {cvFile && (
                 <div className="flex items-center gap-2 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-2 rounded-lg">
-                  <span className="material-symbols-outlined text-[16px] text-red-600">picture_as_pdf</span>
+                  <DocumentIcon className="w-4 h-4 text-red-600" strokeWidth={2} />
                   <span className="flex-1 truncate">{cvFileName}</span>
                   <span className="font-semibold">{(cvFile.size / 1024).toFixed(0)} KB</span>
                 </div>
@@ -2098,13 +2129,13 @@ export default function ProfilSaya() {
 
           {/* ── Bukti Kompetensi ────────────────────────────── */}
           <Card>
-            <SectionTitle icon="verified">{t('Bukti Kompetensi')}</SectionTitle>
+            <SectionTitle icon={CheckBadgeIcon}>{t('Bukti Kompetensi')}</SectionTitle>
             <p className="text-xs text-[#5B6660] mb-3">{t('Sertifikat, ijazah, atau dokumen pendukung lainnya (PDF/JPG/PNG, maksimal 5MB).')}</p>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2 items-center">
                 <label className={BTN_GHOST + ' cursor-pointer'}>
-                  <span className="material-symbols-outlined text-[16px]">upload_file</span>{t('Pilih Bukti Kompetensi')}
-                                                    <input
+                  <ArrowUpTrayIcon className="w-4 h-4" strokeWidth={2} />{t('Pilih Bukti Kompetensi')}
+                  <input
                     type="file"
                     accept=".pdf,image/jpeg,image/jpg,image/png,application/pdf"
                     className="hidden"
@@ -2128,8 +2159,8 @@ export default function ProfilSaya() {
                         }
                       )}
                     >
-                      <span className="material-symbols-outlined text-[16px]">{saving ? 'sync' : 'cloud_upload'}</span>
-                      {saving ? 'Mengunggah...' : 'Upload Bukti'}
+                      {saving ? <Spinner /> : <CloudArrowUpIcon className="w-4 h-4" strokeWidth={2} />}
+                      {saving ? t('Mengunggah...') : t('Upload Bukti')}
                     </button>
                     <button
                       className={BTN_DANGER}
@@ -2139,79 +2170,44 @@ export default function ProfilSaya() {
                         if (buktiRef.current) buktiRef.current.value = '';
                       }}
                     >
-                      <span className="material-symbols-outlined text-[16px]">close</span>
-                      
-                                                                {t('Batal')}
-                                                              </button>
+                      <XMarkIcon className="w-4 h-4" strokeWidth={2} />
+                      {t('Batal')}
+                    </button>
                   </>
                 )}
               </div>
               {buktiFile && (
                 <div className="flex items-center gap-2 text-xs text-[#5B6660] bg-[#F5F4F0] px-3 py-2 rounded-lg">
-                  <span className="material-symbols-outlined text-[16px]">
-                    {buktiFile.type.includes('pdf') ? 'picture_as_pdf' : 'image'}
-                  </span>
+                  {buktiFile.type.includes('pdf')
+                    ? <DocumentIcon className="w-4 h-4" strokeWidth={2} />
+                    : <PhotoIcon className="w-4 h-4" strokeWidth={2} />}
                   <span className="flex-1 truncate">{buktiFileName}</span>
                   <span className="font-semibold">{(buktiFile.size / 1024).toFixed(0)} KB</span>
                 </div>
               )}
-            </div>
-            <div className="mt-8 pt-6 border-t border-outline-variant/20">
-              <button
-                className={BTN_PRIMARY + ' w-full sm:w-auto'}
-                disabled={!isProfileComplete || submitting}
-                onClick={async () => {
-                  setSubmitting(true);
-                  try {
-                    await fetch('/my/profile/submit', { method: 'POST' });
-                    window.location.reload();
-                  } catch (err) {
-                    console.error(err);
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
-              >
-                <span className="material-symbols-outlined text-[18px]">send</span>
-                {submitting ? 'Mengirim...' : 'Kirim Verifikasi Profil'}
-              </button>
             </div>
           </Card>
 
           {/* ── Daftar Dokumen Tersimpan ─────────────────────── */}
           {documents.length > 0 ? (
             <Card>
-              <SectionTitle icon="folder_open">{t('Dokumen Tersimpan (')}{documents.length})</SectionTitle>
+              <SectionTitle icon={FolderOpenIcon}>{t('Dokumen Tersimpan')} ({documents.length})</SectionTitle>
               <ul className="divide-y divide-outline-variant/20">
                 {documents.map((doc) => {
-                  const docTypeLabel = {
-                    'foto_profil': 'Foto Profil',
-                    'ktp': 'KTP',
-                    'ijazah': 'Ijazah',
-                    'lainnya': 'Dokumen Lainnya'
-                  };
-                  const docIcon = {
-                    'foto_profil': 'photo_camera',
-                    'ktp': 'badge',
-                    'ijazah': 'school',
-                    'lainnya': 'description'
-                  };
-
+                  const DocIcon = DOC_TYPE_ICON[doc.type] || DocumentTextIcon;
                   return (
                     <li key={doc.id} className="flex items-center justify-between py-3 gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-10 h-10 rounded-lg bg-[#2E5E3B]/10 flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-[20px] text-[#2E5E3B]">
-                            {docIcon[doc.type] || 'description'}
-                          </span>
+                          <DocIcon className="w-5 h-5 text-[#2E5E3B]" strokeWidth={2} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <p className="text-sm font-semibold text-[#1F2A22] truncate">
-                              {doc.label || docTypeLabel[doc.type] || doc.type}
+                              {doc.label || DOC_TYPE_LABEL[doc.type] || doc.type}
                             </p>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-[#5B6660] bg-[#F5F4F0] px-2 py-0.5 rounded-full shrink-0">
-                              {docTypeLabel[doc.type] || doc.type}
+                              {DOC_TYPE_LABEL[doc.type] || doc.type}
                             </span>
                           </div>
                           {doc.file_path && (
@@ -2221,10 +2217,9 @@ export default function ProfilSaya() {
                               rel="noreferrer"
                               className="text-xs text-[#0284C7] hover:underline inline-flex items-center gap-1 font-medium"
                             >
-                              <span className="material-symbols-outlined text-[14px]">visibility</span>
-                              
-                                                                        {t('Lihat & Unduh File')}
-                                                                      </a>
+                              <EyeIcon className="w-[14px] h-[14px]" strokeWidth={2} />
+                              {t('Lihat & Unduh File')}
+                            </a>
                           )}
                         </div>
                       </div>
@@ -2233,10 +2228,9 @@ export default function ProfilSaya() {
                         onClick={() => deleteDoc(doc.id)}
                         title={t('Hapus dokumen')}
                       >
-                        <span className="material-symbols-outlined text-[16px]">delete</span>
-                        
-                                                      {t('Hapus')}
-                                                    </button>
+                        <TrashIcon className="w-4 h-4" strokeWidth={2} />
+                        {t('Hapus')}
+                      </button>
                     </li>
                   );
                 })}
@@ -2246,7 +2240,7 @@ export default function ProfilSaya() {
             <Card>
               <div className="text-center py-8">
                 <div className="w-16 h-16 rounded-full bg-[#F5F4F0] flex items-center justify-center mx-auto mb-3">
-                  <span className="material-symbols-outlined text-3xl text-[#5B6660]/40">folder_open</span>
+                  <FolderOpenIcon className="w-8 h-8 text-[#5B6660]/40" strokeWidth={1.5} />
                 </div>
                 <p className="text-sm text-[#5B6660] mb-1">{t('Belum ada dokumen tersimpan')}</p>
                 <p className="text-xs text-[#5B6660]/70">{t('Upload foto profil, CV, atau dokumen pendukung di atas')}</p>
@@ -2254,7 +2248,7 @@ export default function ProfilSaya() {
             </Card>
           )}
 
-          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`Lanjut ke ${TABS[currentTabIdx + 1]?.label}`} />
+          <WizardNav onBack={goPrev} onNext={goNext} nextLabel={`${t('profile.wizard.continue_to', 'Lanjut ke')} ${TABS[currentTabIdx + 1]?.label}`} t={t} />
         </div>
       )}
 
@@ -2264,12 +2258,12 @@ export default function ProfilSaya() {
       {tab === 'verifikasi' && (
         <div className="space-y-6 animate-fadeIn">
           <button className={BTN_GHOST + ' self-start'} onClick={goPrev}>
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t('Kembali ke')} {TABS[currentTabIdx - 1]?.label}
+            <ArrowLeftIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Kembali ke')} {TABS[currentTabIdx - 1]?.label}
           </button>
 
           {/* ── Status Saat Ini ──────────────────────────────── */}
           <Card>
-            <SectionTitle icon="verified_user">{t('Kirim Profil untuk Verifikasi')}</SectionTitle>
+            <SectionTitle icon={ShieldCheckIcon}>{t('Kirim Profil untuk Verifikasi')}</SectionTitle>
             <div className="text-sm text-[#414844] leading-relaxed mb-6">
               <p>{t('Setelah Anda melengkapi seluruh data profil, memilih paket keanggotaan, dan mengunggah dokumen pendukung, Anda dapat mengirimkan profil ini untuk ditinjau oleh admin.')}</p>
               <p className="mt-2">{t('Pastikan semua data sudah benar karena profil tidak dapat diubah selama proses verifikasi berlangsung.')}</p>
@@ -2277,7 +2271,7 @@ export default function ProfilSaya() {
 
             {expert?.profile_status === 'aktif' ? (
               <div className="bg-[#E3F2E7] border border-[#A7D7B0] rounded-xl p-4 flex items-start gap-3">
-                <span className="material-symbols-outlined text-[#2E5E3B] text-[20px] shrink-0 mt-0.5">check_circle</span>
+                <CheckCircleIcon className="text-[#2E5E3B] w-5 h-5 shrink-0 mt-0.5" strokeWidth={2} />
                 <div className="text-sm text-[#1C3822]">
                   <p className="font-semibold mb-0.5">{t('Profil Telah Disetujui')}</p>
                   <p className="text-xs">{t('Profil Anda sudah aktif dan tayang di direktori publik.')}</p>
@@ -2285,7 +2279,7 @@ export default function ProfilSaya() {
               </div>
             ) : expert?.profile_status === 'menunggu_verifikasi' ? (
               <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
-                <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">schedule</span>
+                <ClockIcon className="text-[#B36B00] w-5 h-5 shrink-0 mt-0.5" strokeWidth={2} />
                 <div className="text-sm text-[#5C3D00]">
                   <p className="font-semibold mb-0.5">{t('Menunggu Verifikasi Admin')}</p>
                   <p className="text-xs">{t('Profil Anda sedang ditinjau. Kami akan memberi tahu Anda melalui email setelah proses selesai.')}</p>
@@ -2293,10 +2287,9 @@ export default function ProfilSaya() {
               </div>
             ) : (
               <div className="space-y-4">
-                {/* ── Kelengkapan profil ────────────────────────────── */}
                 {!isProfileComplete && (
                   <div className="bg-[#FFF4E5] border border-[#FFD8A8] rounded-xl p-4 flex items-start gap-3">
-                    <span className="material-symbols-outlined text-[#B36B00] text-[20px] shrink-0 mt-0.5">warning</span>
+                    <ExclamationTriangleIcon className="text-[#B36B00] w-5 h-5 shrink-0 mt-0.5" strokeWidth={2} />
                     <div className="text-sm text-[#5C3D00]">
                       <p className="font-semibold mb-1">{t('Lengkapi profil Anda terlebih dahulu')}</p>
                       <p className="text-xs leading-relaxed mb-2">{t('Profil baru bisa dikirim ke admin setelah bagian berikut lengkap:')}</p>
@@ -2307,12 +2300,11 @@ export default function ProfilSaya() {
                   </div>
                 )}
 
-                {/* Info paket & pembayaran (opsional, divalidasi backend) */}
                 <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl p-4 flex items-start gap-3 mb-6">
-                  <span className="material-symbols-outlined text-[#0284C7] text-[20px] shrink-0 mt-0.5">workspace_premium</span>
+                  <TrophyIcon className="text-[#0284C7] w-5 h-5 shrink-0 mt-0.5" strokeWidth={2} />
                   <div className="text-sm text-[#0369A1]">
                     <p className="font-semibold mb-0.5">{t('Syarat Verifikasi')}</p>
-                    <p className="text-xs">{t('Anda harus memiliki')} <strong>{t('Paket Aktif')}</strong>  {t('(telah memilih paket dan melunasi pembayaran) sebelum admin memproses verifikasi profil ini.')}</p>
+                    <p className="text-xs">{t('Anda harus memiliki')} <strong>{t('Paket Aktif')}</strong> {t('(telah memilih paket dan melunasi pembayaran) sebelum admin memproses verifikasi profil ini.')}</p>
                   </div>
                 </div>
 
@@ -2323,9 +2315,9 @@ export default function ProfilSaya() {
                     className="w-full sm:w-auto bg-[#0284C7] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#0369A1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                   >
                     {submitting ? (
-                      <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />  {t('Mengirim...')}</>
+                      <><Spinner className="w-5 h-5 border-2 border-white/30 border-t-white" /> {t('Mengirim...')}</>
                     ) : (
-                      <><span className="material-symbols-outlined text-[20px]">send</span>  {t('Kirim Profil Sekarang')}</>
+                      <><PaperAirplaneIcon className="w-5 h-5" strokeWidth={2} /> {t('Kirim Profil Sekarang')}</>
                     )}
                   </button>
                 </div>
@@ -2368,7 +2360,6 @@ export default function ProfilSaya() {
             className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-sm shadow-2xl animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Foto */}
             {photoPreview && (
               <div className="p-6 pb-4">
                 <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-[#F5F4F0]">
@@ -2377,14 +2368,13 @@ export default function ProfilSaya() {
               </div>
             )}
 
-            {/* Opsi */}
             <div className="px-2 pb-2">
               {photoPreview && (
                 <button
                   onClick={viewFullPhoto}
                   className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
                 >
-                  <span className="material-symbols-outlined text-[24px] text-[#5B6660]">visibility</span>
+                  <EyeIcon className="w-6 h-6 text-[#5B6660]" strokeWidth={2} />
                   <span className="text-[15px] font-medium text-[#1F2A22]">{t('Lihat Foto')}</span>
                 </button>
               )}
@@ -2393,7 +2383,7 @@ export default function ProfilSaya() {
                 onClick={triggerCamera}
                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
               >
-                <span className="material-symbols-outlined text-[24px] text-[#5B6660]">photo_camera</span>
+                <CameraIcon className="w-6 h-6 text-[#5B6660]" strokeWidth={2} />
                 <span className="text-[15px] font-medium text-[#1F2A22]">{t('Ambil Foto')}</span>
               </button>
 
@@ -2401,9 +2391,9 @@ export default function ProfilSaya() {
                 onClick={triggerPhotoInput}
                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
               >
-                <span className="material-symbols-outlined text-[24px] text-[#5B6660]">photo_library</span>
+                <Squares2X2Icon className="w-6 h-6 text-[#5B6660]" strokeWidth={2} />
                 <span className="text-[15px] font-medium text-[#1F2A22]">
-                  {photoPreview ? 'Ganti dari Galeri' : 'Pilih dari Galeri'}
+                  {photoPreview ? t('Ganti dari Galeri') : t('Pilih dari Galeri')}
                 </span>
               </button>
 
@@ -2413,9 +2403,9 @@ export default function ProfilSaya() {
                   disabled={saving}
                   className="w-full flex items-center gap-4 px-6 py-4 hover:bg-red-50 active:bg-red-100 transition-colors rounded-xl disabled:opacity-50"
                 >
-                  <span className="material-symbols-outlined text-[24px] text-[#B3261E]">delete</span>
+                  <TrashIcon className="w-6 h-6 text-[#B3261E]" strokeWidth={2} />
                   <span className="text-[15px] font-medium text-[#B3261E]">
-                    {saving ? 'Menghapus...' : 'Hapus Foto'}
+                    {saving ? t('Menghapus...') : t('Hapus Foto')}
                   </span>
                 </button>
               )}
@@ -2424,9 +2414,8 @@ export default function ProfilSaya() {
                 onClick={() => setPhotoModal(false)}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 mt-2 text-[14px] font-semibold text-[#5B6660] hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-xl"
               >
-                
-                                              {t('Batal')}
-                                            </button>
+                {t('Batal')}
+              </button>
             </div>
           </div>
         </div>
@@ -2444,7 +2433,7 @@ export default function ProfilSaya() {
             onClick={() => setFullPhotoView(false)}
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-colors z-10"
           >
-            <span className="material-symbols-outlined text-white">close</span>
+            <XMarkIcon className="w-5 h-5 text-white" strokeWidth={2} />
           </button>
           <img
             src={photoPreview}
@@ -2477,7 +2466,7 @@ export default function ProfilSaya() {
                 onClick={cancelMapPicker}
                 className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
               >
-                <span className="material-symbols-outlined text-[20px] text-[#5B6660]">close</span>
+                <XMarkIcon className="w-5 h-5 text-[#5B6660]" strokeWidth={2} />
               </button>
             </div>
 
@@ -2493,12 +2482,11 @@ export default function ProfilSaya() {
               <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-outline-variant/20">
                 {form.lat && form.lng ? (
                   <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-[#0EA5E9] text-[22px] shrink-0 mt-0.5">location_on</span>
+                    <MapPinIcon className="text-[#0EA5E9] w-[22px] h-[22px] shrink-0 mt-0.5" strokeWidth={2} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-[#1F2A22] mb-1">{t('Lokasi Terpilih')}</p>
                       <p className="text-xs text-[#5B6660]">
-                        
-                                                                      {t('Koordinat:')} {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}
+                        {t('Koordinat:')} {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}
                       </p>
                       {form.location && (
                         <p className="text-xs text-[#5B6660] mt-0.5">{form.location}</p>
@@ -2507,7 +2495,7 @@ export default function ProfilSaya() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-sm text-[#5B6660]">
-                    <span className="material-symbols-outlined text-[18px]">info</span>
+                    <InformationCircleIcon className="w-[18px] h-[18px]" strokeWidth={2} />
                     <span>{t('Klik pada peta untuk menandai lokasi Anda')}</span>
                   </div>
                 )}
@@ -2544,34 +2532,31 @@ export default function ProfilSaya() {
                 }}
                 className="flex items-center gap-2 text-sm font-semibold text-[#0EA5E9] hover:text-[#0284C7] transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">my_location</span>
-                
-                                              {t('Gunakan Lokasi Saya')}
-                                            </button>
+                <MapPinIcon className="w-[18px] h-[18px]" strokeWidth={2} />
+                {t('Gunakan Lokasi Saya')}
+              </button>
 
               <div className="flex gap-2">
                 <button
                   onClick={cancelMapPicker}
                   className={BTN_GHOST}
                 >
-                  
-                                                    {t('Batal')}
-                                                  </button>
+                  {t('Batal')}
+                </button>
                 <button
                   onClick={saveMapLocation}
                   disabled={!form.lat || !form.lng}
                   className={BTN_PRIMARY + ' disabled:opacity-50 disabled:cursor-not-allowed'}
                 >
-                  <span className="material-symbols-outlined text-[18px]">check</span>
-                  
-                                                    {t('Pilih Lokasi Ini')}
-                                                  </button>
+                  <CheckIcon className="w-[18px] h-[18px]" strokeWidth={2} />
+                  {t('Pilih Lokasi Ini')}
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
-      
+
     </DashboardLayout>
   );
 }

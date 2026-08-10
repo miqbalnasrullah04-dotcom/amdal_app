@@ -293,10 +293,25 @@ export default function Home() {
                 className="flex items-center mb-4 p-1 rounded-full relative w-full justify-between"
                 style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }}
             >
+              {/* ✅ Pill aktif — premium glassmorphism (gradient + saturate blur + inner highlight/sheen) */}
               <div
-                className="absolute top-1 bottom-1 bg-white/90 rounded-full transition-all duration-300 ease-out z-0"
-                style={{ left: sliderStyle.left, width: sliderStyle.width }}
-              />
+                className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out z-0 overflow-hidden"
+                style={{
+                  left: sliderStyle.left,
+                  width: sliderStyle.width,
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 100%)',
+                  backdropFilter: 'blur(16px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                  border: '1px solid rgba(255,255,255,0.4)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(255,255,255,0.05)',
+                }}
+              >
+                {/* highlight sheen di bagian atas, khas kaca */}
+                <div
+                  className="absolute inset-x-0 top-0 h-1/2 rounded-t-full"
+                  style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.25), transparent)' }}
+                />
+              </div>
               {SEARCH_MODES.map((mode) => (
                 <button
                   key={mode.key}
@@ -310,7 +325,7 @@ export default function Home() {
                     setIsSearchFocused(true);
                   }}
                   className={`relative z-10 flex-1 px-6 py-2.5 rounded-full font-semibold text-sm text-center transition-colors ${
-                    activeMode === mode.key ? 'text-on-background' : 'text-white hover:bg-white/5'
+                    activeMode === mode.key ? 'text-white' : 'text-white/70 hover:bg-white/5'
                   }`}
                 >
                   {t(mode.label)}

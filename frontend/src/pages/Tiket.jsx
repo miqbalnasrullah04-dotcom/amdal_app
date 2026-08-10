@@ -1,48 +1,28 @@
-﻿import { useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useTranslation } from '../context/LanguageContext.jsx';
+import api from '../api/client.js';
 
-const PRIORITIES = {
-  rendah: { label: 'Rendah', color: '#2E5E3B', bg: '#E3F2E7' },
-  sedang: { label: 'Sedang', color: '#7A5900', bg: '#FFF4D6' },
-  tinggi: { label: 'Tinggi', color: '#B3261E', bg: '#FFDAD6' },
-};
+const getPRIORITIES = (t) => ({
+  rendah: { label: t('ticket.priority.low', 'Rendah'), color: '#2E5E3B', bg: '#E3F2E7' },
+  sedang: { label: t('ticket.priority.medium', 'Sedang'), color: '#7A5900', bg: '#FFF4D6' },
+  tinggi: { label: t('ticket.priority.high', 'Tinggi'), color: '#B3261E', bg: '#FFDAD6' },
+});
 
-const STATUS_MAP = {
-  baru: { label: 'Baru', color: '#0284C7', bg: '#E0F2FE' },
-  diproses: { label: 'Diproses', color: '#7A5900', bg: '#FFF4D6' },
-  selesai: { label: 'Selesai', color: '#2E5E3B', bg: '#E3F2E7' },
-};
+const getSTATUSMAP = (t) => ({
+  baru: { label: t('ticket.status.new', 'Baru'), color: '#0284C7', bg: '#E0F2FE' },
+  diproses: { label: t('ticket.status.processing', 'Diproses'), color: '#7A5900', bg: '#FFF4D6' },
+  selesai: { label: t('ticket.status.completed', 'Selesai'), color: '#2E5E3B', bg: '#E3F2E7' },
+});
 
-const KATEGORI_OPTIONS = [
-  'Masalah Login / Akun',
-  'Upload Dokumen Gagal',
-  'Status Verifikasi',
-  'Pembayaran & Invoice',
-  'Perubahan Data Profil',
-  'Bug / Error Sistem',
-  'Lainnya',
-];
-
-const DEMO_TICKETS = [
-  {
-    id: 'TKT-20260101',
-    judul: 'Tidak bisa upload foto profil',
-    kategori: 'Upload Dokumen Gagal',
-    prioritas: 'sedang',
-    status: 'selesai',
-    created_at: '2026-07-20T10:30:00',
-    updated_at: '2026-07-21T14:15:00',
-    pesan: 'Saya sudah coba upload foto profil berkali-kali tapi selalu gagal. File berformat JPG ukuran 500KB.',
-    balasan: [
-      {
-        dari: 'admin',
-        nama: 'Admin Support',
-        waktu: '2026-07-21T14:15:00',
-        pesan: 'Terima kasih laporannya. Masalah sudah kami perbaiki. Silakan coba upload kembali.',
-      },
-    ],
-  },
+const getKATEGORIOPTIONS = (t) => [
+  t('ticket.category.login_account', 'Masalah Login / Akun'),
+  t('ticket.category.upload_document', 'Upload Dokumen Gagal'),
+  t('ticket.category.verification_status', 'Status Verifikasi'),
+  t('ticket.category.payment_invoice', 'Pembayaran & Invoice'),
+  t('ticket.category.profile_change', 'Perubahan Data Profil'),
+  t('ticket.category.bug_system', 'Bug / Error Sistem'),
+  t('ticket.category.other', 'Lainnya'),
 ];
 
 function Card({ children, className = '' }) {
@@ -71,7 +51,13 @@ function formatDate(dateStr) {
 
 export default function Tiket() {
   const { t } = useTranslation();
-  const [tickets, setTickets] = useState(DEMO_TICKETS);
+  const PRIORITIES = getPRIORITIES(t);
+  const STATUS_MAP = getSTATUSMAP(t);
+  const KATEGORI_OPTIONS = getKATEGORIOPTIONS(t);
+  
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('daftar'); // daftar | buat
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [filter, setFilter] = useState('semua');
@@ -84,63 +70,109 @@ export default function Tiket() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState('');
 
+  // Reply state
+  const [replyMessage, setReplyMessage] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+
+  // Load tickets from API
+  const loadTickets = () => {
+    setLoading(true);
+    setError('');
+    api
+      .get('/tickets')
+      .then((res) => {
+        setTickets(res.data);
+      })
+      .catch((err) => {
+        setError(err.response?.data?.message || t('ticket.error.load_failed', 'Gagal memuat data tiket.'));
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
   const filteredTickets = filter === 'semua' ? tickets : tickets.filter((tk) => tk.status === filter);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!judul.trim() || !kategori || !pesan.trim()) return;
     setSubmitting(true);
+    setError('');
 
-    setTimeout(() => {
-      const newTicket = {
-        id: `TKT-${Date.now().toString().slice(-8)}`,
-        judul,
-        kategori,
-        prioritas,
-        status: 'baru',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        pesan,
-        balasan: [],
-      };
-      setTickets((prev) => [newTicket, ...prev]);
-      setJudul('');
-      setKategori('');
-      setPrioritas('sedang');
-      setPesan('');
-      setSubmitting(false);
-      setSuccess('Tiket berhasil dikirim! Tim kami akan segera merespons.');
-      setTimeout(() => {
-        setSuccess('');
-        setActiveTab('daftar');
-      }, 2500);
-    }, 800);
+    api
+      .post('/tickets', {
+        title: judul,
+        category: kategori,
+        priority: prioritas,
+        message: pesan,
+      })
+      .then((res) => {
+        setTickets((prev) => [res.data, ...prev]);
+        setJudul('');
+        setKategori('');
+        setPrioritas('sedang');
+        setPesan('');
+        setSuccess('Tiket berhasil dikirim! Tim kami akan segera merespons.');
+        setTimeout(() => {
+          setSuccess('');
+          setActiveTab('daftar');
+        }, 2500);
+      })
+      .catch((err) => {
+        setError(err.response?.data?.message || 'Gagal mengirim tiket.');
+      })
+      .finally(() => setSubmitting(false));
+  };
+
+  const handleReply = (e) => {
+    e.preventDefault();
+    if (!replyMessage.trim() || !selectedTicket) return;
+    setSendingReply(true);
+
+    api
+      .post(`/tickets/${selectedTicket.id}/reply`, {
+        message: replyMessage,
+      })
+      .then((res) => {
+        setSelectedTicket((prev) => ({
+          ...prev,
+          replies: [...prev.replies, res.data],
+        }));
+        setReplyMessage('');
+        // Refresh tickets list
+        loadTickets();
+      })
+      .catch((err) => {
+        alert(err.response?.data?.message || 'Gagal mengirim balasan.');
+      })
+      .finally(() => setSendingReply(false));
   };
 
   // Detail View
   if (selectedTicket) {
     const s = STATUS_MAP[selectedTicket.status];
-    const p = PRIORITIES[selectedTicket.prioritas];
+    const p = PRIORITIES[selectedTicket.priority];
     return (
       <DashboardLayout
         title={t('Detail Tiket')}
-        subtitle={selectedTicket.id}
+        subtitle={selectedTicket.ticket_number}
         headerRight={
           <button
             onClick={() => setSelectedTicket(null)}
             className="text-sm font-bold text-[#0284C7] hover:underline flex items-center gap-1"
           >
             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-            
-                            {t('Kembali')}
-                          </button>
+            {t('Kembali')}
+          </button>
         }
       >
         <div className="space-y-5 animate-fadeIn">
           {/* Ticket Info */}
           <Card className="p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <h2 className="text-lg font-bold text-[#1F2A22]">{selectedTicket.judul}</h2>
+              <h2 className="text-lg font-bold text-[#1F2A22]">{selectedTicket.title}</h2>
               <div className="flex gap-2 shrink-0">
                 <span
                   className="text-[10px] font-bold px-2.5 py-1 rounded-full"
@@ -152,8 +184,7 @@ export default function Tiket() {
                   className="text-[10px] font-bold px-2.5 py-1 rounded-full"
                   style={{ color: p.color, backgroundColor: p.bg }}
                 >
-                  
-                                                  {t('Prioritas')} {p.label}
+                  {t('Prioritas')} {p.label}
                 </span>
               </div>
             </div>
@@ -161,11 +192,11 @@ export default function Tiket() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mb-5">
               <div>
                 <span className="text-[#414844]/60 block font-medium">{t('ID Tiket')}</span>
-                <span className="font-bold text-[#1F2A22]">{selectedTicket.id}</span>
+                <span className="font-bold text-[#1F2A22]">{selectedTicket.ticket_number}</span>
               </div>
               <div>
                 <span className="text-[#414844]/60 block font-medium">{t('Kategori')}</span>
-                <span className="font-bold text-[#1F2A22]">{selectedTicket.kategori}</span>
+                <span className="font-bold text-[#1F2A22]">{selectedTicket.category}</span>
               </div>
               <div>
                 <span className="text-[#414844]/60 block font-medium">{t('Dibuat')}</span>
@@ -180,7 +211,7 @@ export default function Tiket() {
             <div className="border-t border-black/5 pt-4">
               <p className="text-xs font-bold text-[#414844]/60 uppercase tracking-wide mb-2">{t('Pesan Anda')}</p>
               <div className="bg-[#F5F4EF] rounded-xl p-4 text-sm text-[#414844] leading-relaxed">
-                {selectedTicket.pesan}
+                {selectedTicket.message}
               </div>
             </div>
           </Card>
@@ -188,18 +219,18 @@ export default function Tiket() {
           {/* Balasan */}
           <Card className="p-6">
             <SectionTitle icon="forum">{t('Balasan')}</SectionTitle>
-            {selectedTicket.balasan.length === 0 ? (
+            {selectedTicket.replies.length === 0 ? (
               <div className="text-center py-8">
                 <span className="material-symbols-outlined text-[40px] text-[#0284C7]/20 mb-2 block">forum</span>
                 <p className="text-sm text-[#414844]/60">{t('Belum ada balasan. Tim kami akan segera merespons.')}</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {selectedTicket.balasan.map((b, i) => (
+              <div className="space-y-4 mb-6">
+                {selectedTicket.replies.map((b) => (
                   <div
-                    key={i}
+                    key={b.id}
                     className={`rounded-xl p-4 border ${
-                      b.dari === 'admin'
+                      b.is_admin
                         ? 'bg-[#E0F2FE] border-[#0284C7]/20'
                         : 'bg-[#F5F4EF] border-black/5'
                     }`}
@@ -207,19 +238,55 @@ export default function Tiket() {
                     <div className="flex items-center gap-2 mb-2">
                       <div
                         className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${
-                          b.dari === 'admin' ? 'bg-[#0284C7]' : 'bg-[#2E5E3B]'
+                          b.is_admin ? 'bg-[#0284C7]' : 'bg-[#2E5E3B]'
                         }`}
                       >
-                        {b.dari === 'admin' ? 'A' : 'U'}
+                        {b.is_admin ? 'A' : 'U'}
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-[#1F2A22]">{b.nama}</p>
-                        <p className="text-[10px] text-[#414844]/60">{formatDate(b.waktu)}</p>
+                        <p className="text-xs font-bold text-[#1F2A22]">{b.user?.name || 'User'}</p>
+                        <p className="text-[10px] text-[#414844]/60">{formatDate(b.created_at)}</p>
                       </div>
                     </div>
-                    <p className="text-sm text-[#414844] leading-relaxed">{b.pesan}</p>
+                    <p className="text-sm text-[#414844] leading-relaxed">{b.message}</p>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Reply Form - Only if ticket not closed */}
+            {selectedTicket.status !== 'selesai' && (
+              <div className="border-t border-black/5 pt-4 mt-4">
+                <p className="text-xs font-bold text-[#414844]/60 uppercase tracking-wide mb-2">{t('Tambah Balasan')}</p>
+                <form onSubmit={handleReply} className="space-y-3">
+                  <textarea
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    required
+                    rows={3}
+                    placeholder={t('Tulis balasan Anda...')}
+                    className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0284C7]/30 focus:border-[#0284C7] transition-all resize-none"
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={sendingReply || !replyMessage.trim()}
+                      className="bg-[#0284C7] text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:bg-[#0369A1] disabled:opacity-50 transition-all shadow-md shadow-[#0284C7]/15 flex items-center gap-2"
+                    >
+                      {sendingReply ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          {t('Mengirim...')}
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-[18px]">send</span>
+                          {t('Kirim Balasan')}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
           </Card>
@@ -230,6 +297,13 @@ export default function Tiket() {
 
   return (
     <DashboardLayout title={t('Tiket Bantuan')} subtitle={t('Sampaikan kendala atau pertanyaan teknis ke tim Admin.')}>
+      {error && (
+        <div className="mb-4 bg-[#FFDAD6] text-[#93000A] text-sm rounded-xl p-4 flex items-start gap-2">
+          <span className="material-symbols-outlined text-[18px] mt-0.5 shrink-0">error</span>
+          <span>{error}</span>
+        </div>
+      )}
+
       <div className="space-y-5 animate-fadeIn">
         {/* Tab switch */}
         <div className="flex gap-2">
@@ -242,11 +316,10 @@ export default function Tiket() {
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">list_alt</span>
-            
-                                  {t('Daftar Tiket')}
-                                </button>
+            {t('Daftar Tiket')}
+          </button>
           <button
-            onClick={() => { setActiveTab('buat'); setSuccess(''); }}
+            onClick={() => { setActiveTab('buat'); setSuccess(''); setError(''); }}
             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'buat'
                 ? 'bg-[#0284C7] text-white shadow-md shadow-[#0284C7]/15'
@@ -254,9 +327,8 @@ export default function Tiket() {
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
-            
-                                  {t('Buat Tiket Baru')}
-                                </button>
+            {t('Buat Tiket Baru')}
+          </button>
         </div>
 
         {/* ── DAFTAR TIKET ── */}
@@ -279,30 +351,33 @@ export default function Tiket() {
               ))}
             </div>
 
-            {filteredTickets.length === 0 ? (
+            {loading ? (
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0284C7]/20 border-t-[#0284C7] mx-auto mb-3"></div>
+                <p className="text-sm text-[#414844]/60">{t('Memuat data tiket...')}</p>
+              </div>
+            ) : filteredTickets.length === 0 ? (
               <div className="p-12 text-center">
                 <span className="material-symbols-outlined text-[56px] text-[#0284C7]/20 mb-3 block">
                   confirmation_number
                 </span>
                 <h3 className="text-base font-bold text-[#1F2A22] mb-1">{t('Tidak ada tiket')}</h3>
                 <p className="text-sm text-[#414844]/60 mb-4">
-                  
-                                                    {t('Anda belum memiliki tiket bantuan')}{filter !== 'semua' ? ` dengan status "${STATUS_MAP[filter]?.label}"` : ''}.
+                  {t('Anda belum memiliki tiket bantuan')}{filter !== 'semua' ? ` dengan status "${STATUS_MAP[filter]?.label}"` : ''}.
                 </p>
                 <button
                   onClick={() => setActiveTab('buat')}
                   className="text-sm font-bold text-[#0284C7] hover:underline inline-flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[16px]">add</span>
-                  
-                                                    {t('Buat tiket baru')}
-                                                  </button>
+                  {t('Buat tiket baru')}
+                </button>
               </div>
             ) : (
               <div className="divide-y divide-black/5">
                 {filteredTickets.map((ticket) => {
                   const s = STATUS_MAP[ticket.status];
-                  const p = PRIORITIES[ticket.prioritas];
+                  const p = PRIORITIES[ticket.priority];
                   return (
                     <button
                       key={ticket.id}
@@ -323,10 +398,10 @@ export default function Tiket() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h4 className="font-bold text-sm text-[#1F2A22] truncate">{ticket.judul}</h4>
-                          <span className="text-[9px] font-bold text-[#414844]/50">{ticket.id}</span>
+                          <h4 className="font-bold text-sm text-[#1F2A22] truncate">{ticket.title}</h4>
+                          <span className="text-[9px] font-bold text-[#414844]/50">{ticket.ticket_number}</span>
                         </div>
-                        <p className="text-xs text-[#414844]/70 mb-2 line-clamp-1">{ticket.pesan}</p>
+                        <p className="text-xs text-[#414844]/70 mb-2 line-clamp-1">{ticket.message}</p>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
                             className="text-[9px] font-bold px-2 py-0.5 rounded-full"
@@ -341,11 +416,11 @@ export default function Tiket() {
                             {p.label}
                           </span>
                           <span className="text-[10px] text-[#414844]/50">{formatDate(ticket.created_at)}</span>
-                          {ticket.balasan.length > 0 && (
+                          {ticket.replies && ticket.replies.length > 0 && (
                             <span className="text-[10px] text-[#0284C7] font-bold flex items-center gap-0.5">
                               <span className="material-symbols-outlined text-[12px]">reply</span>
-                              {ticket.balasan.length}  {t('balasan')}
-                                                                      </span>
+                              {ticket.replies.length} {t('balasan')}
+                            </span>
                           )}
                         </div>
                       </div>

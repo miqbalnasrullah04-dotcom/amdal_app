@@ -13,9 +13,10 @@ const MAX_DURATION = 6000; // ms
 
 // Halaman-halaman dashboard/member punya layout sendiri dan tidak memanggil
 // reportReady(), jadi RouteLoader tidak boleh aktif di sini.
-const SKIP_LOADER_ROUTES = [
+const DASHBOARD_USER_ROUTES = [
   '/dashboard',
   '/profil-saya',
+  '/membership',
   '/paket',
   '/pembayaran',
   '/profil-publik',
@@ -30,13 +31,37 @@ const SKIP_LOADER_ROUTES = [
   '/invoice',
 ];
 
+// Admin routes juga tidak butuh RouteLoader
+const ADMIN_ROUTES_PREFIX = ['/admin'];
+
+// Function to check if route should skip loader
+const shouldSkipLoader = (pathname) => {
+  // Exact match untuk dashboard user routes
+  if (DASHBOARD_USER_ROUTES.includes(pathname)) return true;
+  
+  // Pattern match untuk invoice dengan parameter
+  if (pathname.startsWith('/invoice/')) return true;
+  
+  // Pattern match untuk admin routes
+  if (ADMIN_ROUTES_PREFIX.some(prefix => pathname.startsWith(prefix))) return true;
+  
+  // Skip loader untuk semua dashboard user routes yang mungkin ada parameter
+  if (pathname.startsWith('/dashboard') || 
+      pathname.startsWith('/profil') || 
+      pathname.startsWith('/member') ||
+      pathname.startsWith('/paket') ||
+      pathname.startsWith('/pembayaran')) return true;
+      
+  return false;
+};
+
 export default function RouteLoader({ children }) {
   const location = useLocation();
   const { dataReady, resetReady } = usePageLoading();
   const [visible, setVisible] = useState(true);
   const startedAtRef = useRef(Date.now());
 
-  const shouldSkip = SKIP_LOADER_ROUTES.includes(location.pathname) || location.pathname.startsWith('/invoice/');
+  const shouldSkip = shouldSkipLoader(location.pathname);
 
   // Setiap kali rute berubah: nyalakan lagi loader, reset status "data siap",
   // dan pasang jaring pengaman durasi maksimum.

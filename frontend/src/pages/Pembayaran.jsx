@@ -6,23 +6,68 @@ import DashboardLayout from '../components/DashboardLayout.jsx';
 
 const BACKEND_URL = 'http://localhost:8000';
 
-const BANK_ACCOUNTS = [
-  { bank: 'BCA',     norek: '1234567890', atas_nama: 'TenagaAhli.com' },
-  { bank: 'Mandiri', norek: '9876543210', atas_nama: 'TenagaAhli.com' },
-  { bank: 'BNI',     norek: '1122334455', atas_nama: 'TenagaAhli.com' },
-  { bank: 'BRI',     norek: '5544332211', atas_nama: 'TenagaAhli.com' },
+const getBANKACCOUNTS = (t) => [
+  { bank: 'BCA',     norek: '1234567890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+  { bank: 'Mandiri', norek: '9876543210', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+  { bank: 'BNI',     norek: '1122334455', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+  { bank: 'BRI',     norek: '5544332211', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
 ];
 
-const EWALLET_ACCOUNTS = [
-  { name: 'GoPay', number: '0812-3456-7890', atas_nama: 'TenagaAhli.com' },
-  { name: 'OVO',   number: '0812-3456-7890', atas_nama: 'TenagaAhli.com' },
-  { name: 'DANA',  number: '0812-3456-7890', atas_nama: 'TenagaAhli.com' },
+const getEWALLETACCOUNTS = (t) => [
+  { name: 'GoPay', number: '0812-3456-7890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+  { name: 'OVO',   number: '0812-3456-7890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+  { name: 'DANA',  number: '0812-3456-7890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
 ];
 
 const getPaymentMethods = (t) => [
-  { id: 'qris',          label: 'QRIS',         desc: t('payment.methods.qris_desc', 'Scan QR dari e-wallet atau m-banking apa pun'), icon: 'qr_code_2'              },
-  { id: 'transfer_bank', label: 'Transfer Bank', desc: 'BCA, Mandiri, BNI, BRI',                      icon: 'account_balance'        },
-  { id: 'e_wallet',      label: 'E-Wallet',      desc: 'GoPay, OVO, DANA',                            icon: 'account_balance_wallet' },
+  { 
+    id: 'credit_card', 
+    label: t('payment.methods.credit_card', 'Kartu Kredit/Debit'), 
+    desc: t('payment.methods.credit_card_desc', 'Visa, Mastercard, JCB, AMEX'), 
+    icon: 'credit_card',
+    subMethods: [
+      { id: 'visa', name: 'Visa', desc: t('payment.methods.visa_desc', 'Kartu kredit Visa') },
+      { id: 'mastercard', name: 'Mastercard', desc: t('payment.methods.mastercard_desc', 'Kartu kredit Mastercard') },
+      { id: 'jcb', name: 'JCB', desc: t('payment.methods.jcb_desc', 'Kartu kredit JCB') },
+      { id: 'amex', name: 'American Express', desc: t('payment.methods.amex_desc', 'Kartu kredit AMEX') },
+    ]
+  },
+  { 
+    id: 'bank_transfer', 
+    label: t('payment.methods.bank_transfer', 'Transfer Bank'), 
+    desc: t('payment.methods.bank_transfer_desc', 'Virtual Account BCA, BNI, BRI, Mandiri, Permata'), 
+    icon: 'account_balance',
+    subMethods: [
+      { id: 'bca_va', name: t('payment.methods.bca_va', 'BCA Virtual Account'), desc: t('payment.methods.bca_va_desc', 'No. Rekening: 1234567890'), account: '1234567890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'bni_va', name: t('payment.methods.bni_va', 'BNI Virtual Account'), desc: t('payment.methods.bni_va_desc', 'No. Rekening: 9876543210'), account: '9876543210', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'bri_va', name: t('payment.methods.bri_va', 'BRI Virtual Account'), desc: t('payment.methods.bri_va_desc', 'No. Rekening: 5544332211'), account: '5544332211', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'mandiri_va', name: t('payment.methods.mandiri_va', 'Mandiri Virtual Account'), desc: t('payment.methods.mandiri_va_desc', 'No. Rekening: 1122334455'), account: '1122334455', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'permata_va', name: t('payment.methods.permata_va', 'Permata Virtual Account'), desc: t('payment.methods.permata_va_desc', 'No. Rekening: 6677889900'), account: '6677889900', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+    ]
+  },
+  { 
+    id: 'e_wallet', 
+    label: t('payment.methods.ewallet_qris', 'E-Wallet & QRIS'), 
+    desc: t('payment.methods.ewallet_qris_desc', 'GoPay, ShopeePay, QRIS'), 
+    icon: 'qr_code_2',
+    subMethods: [
+      { id: 'gopay', name: 'GoPay', desc: t('payment.methods.gopay_desc', 'Nomor: 0812-3456-7890'), account: '081234567890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'shopeepay', name: 'ShopeePay', desc: t('payment.methods.shopeepay_desc', 'Nomor: 0812-3456-7890'), account: '081234567890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'qris', name: 'QRIS', desc: t('payment.methods.qris_desc', 'Scan QR Code untuk pembayaran'), account: 'QRIS_TENAGAAHLI', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'ovo', name: 'OVO', desc: t('payment.methods.ovo_desc', 'Nomor: 0812-3456-7890'), account: '081234567890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+      { id: 'dana', name: 'DANA', desc: t('payment.methods.dana_desc', 'Nomor: 0812-3456-7890'), account: '081234567890', atas_nama: t('payment.account_name', 'TenagaAhli.com') },
+    ]
+  },
+  { 
+    id: 'convenience_store', 
+    label: t('payment.methods.convenience_store', 'Convenience Store'), 
+    desc: t('payment.methods.convenience_store_desc', 'Indomaret, Alfamart'), 
+    icon: 'store',
+    subMethods: [
+      { id: 'indomaret', name: 'Indomaret', desc: t('payment.methods.indomaret_desc', 'Bayar di kasir Indomaret terdekat dengan kode pembayaran') },
+      { id: 'alfamart', name: 'Alfamart', desc: t('payment.methods.alfamart_desc', 'Bayar di kasir Alfamart terdekat dengan kode pembayaran') },
+    ]
+  },
 ];
 
 function formatRupiah(v) {
@@ -75,7 +120,7 @@ export default function Pembayaran() {
 
   const [pkg,          setPkg]          = useState(location.state?.package ?? null);
   const [order,        setOrder]        = useState(null);
-  const [method,       setMethod]       = useState('qris');
+  const [method,       setMethod]       = useState('credit_card');
   const [proof,        setProof]        = useState(null);
   const [proofPreview, setProofPreview] = useState(null);
   const [step,         setStep]         = useState('choose');
@@ -117,14 +162,19 @@ export default function Pembayaran() {
   }, []);
 
   const handleChooseMethod = async () => {
-    if (!pkg) return;
+    if (!pkg || !method) return;
     setSubmitting(true);
     setError('');
     try {
       const res = await api.post('/my/choose-package', { package_id: pkg.id });
       if (res.data?.order) {
         setOrder(res.data.order);
-        setStep('confirm');
+        // Langsung buka Midtrans Snap dengan metode yang dipilih
+        if (res.data.snap_token) {
+          openMidtransSnap(res.data.snap_token);
+        } else {
+          setStep('confirm'); // Fallback ke manual payment
+        }
       } else {
         navigate('/dashboard');
       }
@@ -132,6 +182,63 @@ export default function Pembayaran() {
       setError(e.response?.data?.message || t('payment.error_create_order', 'Gagal membuat order. Coba lagi.'));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const openMidtransSnap = (snapToken) => {
+    const isProd = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === '1';
+    const snapUrl = isProd
+      ? 'https://app.midtrans.com/snap/snap.js'
+      : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+    const handlePayNow = () => {
+      // Mapping metode pembayaran ke enabled_payments Midtrans yang benar
+      let enabledPayments = [];
+      if (method === 'credit_card') {
+        enabledPayments = ['credit_card'];
+      } else if (method === 'bank_transfer') {
+        enabledPayments = ['bca_va', 'bni_va', 'bri_va', 'echannel', 'permata_va', 'other_va'];
+      } else if (method === 'e_wallet') {
+        enabledPayments = ['gopay', 'shopeepay', 'qris'];
+      } else if (method === 'convenience_store') {
+        enabledPayments = ['indomaret', 'alfamart'];
+      } else {
+        // Default: semua metode
+        enabledPayments = ['credit_card', 'bca_va', 'bni_va', 'bri_va', 'echannel', 'permata_va', 'other_va', 'gopay', 'shopeepay', 'qris', 'indomaret', 'alfamart'];
+      }
+
+      window.snap.pay(snapToken, {
+        enabledPayments: enabledPayments,
+        onSuccess: function(result) {
+          console.log('Payment success:', result);
+          setStep('success');
+          api.get('/orders/history').then(r => setHistory(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+        },
+        onPending: function(result) {
+          console.log('Payment pending:', result);
+          setStep('success');
+          api.get('/orders/history').then(r => setHistory(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+        },
+        onError: function(result) {
+          console.log('Payment error:', result);
+          setError(t('payment.error_midtrans', 'Pembayaran gagal atau dibatalkan. Silakan coba lagi.'));
+        },
+        onClose: function() {
+          console.log('Payment popup closed');
+          setError(t('payment.cancelled', 'Pembayaran dibatalkan.'));
+        }
+      });
+    };
+
+    if (window.snap) {
+      handlePayNow();
+    } else {
+      const script = document.createElement('script');
+      script.src = snapUrl;
+      script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || '');
+      script.onload = handlePayNow;
+      script.onerror = () => setError(t('payment.error_load_midtrans', 'Gagal memuat Midtrans. Periksa koneksi internet Anda.'));
+      document.body.appendChild(script);
     }
   };
 

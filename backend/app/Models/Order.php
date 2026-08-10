@@ -8,7 +8,8 @@ class Order extends Model
 {
     protected $fillable = [
         'user_id', 'package_id', 'package_name', 'amount', 'reference_code',
-        'proof_of_payment', 'status', 'reject_reason', 'verified_by', 'verified_at',
+        'snap_token', 'payment_type', 'proof_of_payment', 'status', 'reject_reason',
+        'verified_by', 'verified_at',
     ];
 
     protected $casts = [

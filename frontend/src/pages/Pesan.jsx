@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from '../context/LanguageContext.jsx';
 import DashboardLayout from '../components/DashboardLayout';
 
-function formatTime(dateStr) {
+function formatTime(dateStr, t) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   const now = new Date();
@@ -11,10 +11,10 @@ function formatTime(dateStr) {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (mins < 1) return 'Baru saja';
-  if (mins < 60) return `${mins} menit lalu`;
-  if (hours < 24) return `${hours} jam lalu`;
-  if (days < 7) return `${days} hari lalu`;
+  if (mins < 1) return t('message.time.just_now', 'Baru saja');
+  if (mins < 60) return t('message.time.minutes_ago', '{minutes} menit lalu').replace('{minutes}', mins);
+  if (hours < 24) return t('message.time.hours_ago', '{hours} jam lalu').replace('{hours}', hours);
+  if (days < 7) return t('message.time.days_ago', '{days} hari lalu').replace('{days}', days);
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 }
 
@@ -23,49 +23,49 @@ function formatFullTime(dateStr) {
   return new Date(dateStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 }
 
-const DEMO_CONVERSATIONS = [
+const getDEMOCONVERSATIONS = (t) => [
   {
     id: 1,
     nama: 'PT Bangun Nusantara',
     avatar: 'B',
     avatarColor: '#0284C7',
     unread: 2,
-    lastMessage: 'Baik pak, kami tunggu revisi dokumen AMDAL-nya ya.',
+    lastMessage: t('message.demo.last_message_1', 'Baik pak, kami tunggu revisi dokumen AMDAL-nya ya.'),
     lastTime: new Date(Date.now() - 30 * 60000).toISOString(),
     messages: [
-      { id: 1, dari: 'klien', pesan: 'Selamat pagi, Pak. Kami ingin konsultasi tentang analisis dampak lingkungan untuk proyek baru kami.', waktu: new Date(Date.now() - 3 * 86400000).toISOString() },
-      { id: 2, dari: 'saya', pesan: 'Selamat pagi. Tentu, bisa dijelaskan terlebih dahulu detail proyeknya?', waktu: new Date(Date.now() - 3 * 86400000 + 3600000).toISOString() },
-      { id: 3, dari: 'klien', pesan: 'Kami berencana membangun gedung perkantoran 12 lantai di Jakarta Selatan. Lahan sekitar 2 hektar.', waktu: new Date(Date.now() - 2 * 86400000).toISOString() },
-      { id: 4, dari: 'saya', pesan: 'Baik, untuk proyek tersebut memerlukan dokumen AMDAL lengkap. Saya bisa buatkan proposal kerjasama terlebih dahulu.', waktu: new Date(Date.now() - 2 * 86400000 + 1800000).toISOString() },
-      { id: 5, dari: 'klien', pesan: 'Bagus, silakan kirim proposalnya. Apakah bisa juga termasuk analisis hidrologi?', waktu: new Date(Date.now() - 86400000).toISOString() },
-      { id: 6, dari: 'klien', pesan: 'Baik pak, kami tunggu revisi dokumen AMDAL-nya ya.', waktu: new Date(Date.now() - 30 * 60000).toISOString() },
+      { id: 1, dari: 'klien', pesan: t('message.demo.msg_1_1', 'Selamat pagi, Pak. Kami ingin konsultasi tentang analisis dampak lingkungan untuk proyek baru kami.'), waktu: new Date(Date.now() - 3 * 86400000).toISOString() },
+      { id: 2, dari: 'saya', pesan: t('message.demo.msg_1_2', 'Selamat pagi. Tentu, bisa dijelaskan terlebih dahulu detail proyeknya?'), waktu: new Date(Date.now() - 3 * 86400000 + 3600000).toISOString() },
+      { id: 3, dari: 'klien', pesan: t('message.demo.msg_1_3', 'Kami berencana membangun gedung perkantoran 12 lantai di Jakarta Selatan. Lahan sekitar 2 hektar.'), waktu: new Date(Date.now() - 2 * 86400000).toISOString() },
+      { id: 4, dari: 'saya', pesan: t('message.demo.msg_1_4', 'Baik, untuk proyek tersebut memerlukan dokumen AMDAL lengkap. Saya bisa buatkan proposal kerjasama terlebih dahulu.'), waktu: new Date(Date.now() - 2 * 86400000 + 1800000).toISOString() },
+      { id: 5, dari: 'klien', pesan: t('message.demo.msg_1_5', 'Bagus, silakan kirim proposalnya. Apakah bisa juga termasuk analisis hidrologi?'), waktu: new Date(Date.now() - 86400000).toISOString() },
+      { id: 6, dari: 'klien', pesan: t('message.demo.msg_1_6', 'Baik pak, kami tunggu revisi dokumen AMDAL-nya ya.'), waktu: new Date(Date.now() - 30 * 60000).toISOString() },
     ],
   },
   {
     id: 2,
-    nama: 'Admin TenagaAhli.com',
+    nama: t('message.demo.admin_name', 'Admin TenagaAhli.com'),
     avatar: 'A',
     avatarColor: '#2E5E3B',
     unread: 0,
-    lastMessage: 'Profil Anda telah diverifikasi. Selamat bergabung!',
+    lastMessage: t('message.demo.last_message_2', 'Profil Anda telah diverifikasi. Selamat bergabung!'),
     lastTime: new Date(Date.now() - 5 * 86400000).toISOString(),
     messages: [
-      { id: 1, dari: 'admin', pesan: 'Selamat datang di TenagaAhli.com! Profil Anda sedang kami review.', waktu: new Date(Date.now() - 7 * 86400000).toISOString() },
-      { id: 2, dari: 'admin', pesan: 'Profil Anda telah diverifikasi. Selamat bergabung!', waktu: new Date(Date.now() - 5 * 86400000).toISOString() },
+      { id: 1, dari: 'admin', pesan: t('message.demo.msg_2_1', 'Selamat datang di TenagaAhli.com! Profil Anda sedang kami review.'), waktu: new Date(Date.now() - 7 * 86400000).toISOString() },
+      { id: 2, dari: 'admin', pesan: t('message.demo.msg_2_2', 'Profil Anda telah diverifikasi. Selamat bergabung!'), waktu: new Date(Date.now() - 5 * 86400000).toISOString() },
     ],
   },
   {
     id: 3,
-    nama: 'Dinas LH Kota Bogor',
+    nama: t('message.demo.dinas_name', 'Dinas LH Kota Bogor'),
     avatar: 'D',
     avatarColor: '#EA580C',
     unread: 0,
-    lastMessage: 'Terima kasih atas pelatihannya, sangat bermanfaat untuk tim kami.',
+    lastMessage: t('message.demo.last_message_3', 'Terima kasih atas pelatihannya, sangat bermanfaat untuk tim kami.'),
     lastTime: new Date(Date.now() - 10 * 86400000).toISOString(),
     messages: [
-      { id: 1, dari: 'klien', pesan: 'Apakah Bapak bersedia menjadi narasumber pelatihan untuk staf kami?', waktu: new Date(Date.now() - 20 * 86400000).toISOString() },
-      { id: 2, dari: 'saya', pesan: 'Tentu, saya bersedia. Bisa diinfokan jadwal dan topik pelatihannya?', waktu: new Date(Date.now() - 19 * 86400000).toISOString() },
-      { id: 3, dari: 'klien', pesan: 'Terima kasih atas pelatihannya, sangat bermanfaat untuk tim kami.', waktu: new Date(Date.now() - 10 * 86400000).toISOString() },
+      { id: 1, dari: 'klien', pesan: t('message.demo.msg_3_1', 'Apakah Bapak bersedia menjadi narasumber pelatihan untuk staf kami?'), waktu: new Date(Date.now() - 20 * 86400000).toISOString() },
+      { id: 2, dari: 'saya', pesan: t('message.demo.msg_3_2', 'Tentu, saya bersedia. Bisa diinfokan jadwal dan topik pelatihannya?'), waktu: new Date(Date.now() - 19 * 86400000).toISOString() },
+      { id: 3, dari: 'klien', pesan: t('message.demo.msg_3_3', 'Terima kasih atas pelatihannya, sangat bermanfaat untuk tim kami.'), waktu: new Date(Date.now() - 10 * 86400000).toISOString() },
     ],
   },
 ];
@@ -76,7 +76,7 @@ function Card({ children, className = '' }) {
 
 export default function Pesan() {
   const { t } = useTranslation();
-  const [conversations] = useState(DEMO_CONVERSATIONS);
+  const [conversations] = useState(getDEMOCONVERSATIONS(t));
   const [selectedConvo, setSelectedConvo] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const [search, setSearch] = useState('');

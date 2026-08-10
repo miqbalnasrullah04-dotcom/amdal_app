@@ -23,9 +23,9 @@ function formatDate(dateStr, opts = {}) {
   });
 }
 
-const STATUS_MAP = {
+const getSTATUSMAP = (t) => ({
   menunggu_pembayaran: {
-    label: 'Menunggu Pembayaran',
+    label: t('invoice.status.waiting_payment', 'Menunggu Pembayaran'),
     color: '#92400E',
     bg: '#FEF3C7',
     border: '#FCD34D',
@@ -33,7 +33,7 @@ const STATUS_MAP = {
     dot: '#F59E0B',
   },
   menunggu_verifikasi: {
-    label: 'Menunggu Verifikasi',
+    label: t('invoice.status.waiting_verification', 'Menunggu Verifikasi'),
     color: '#1E40AF',
     bg: '#DBEAFE',
     border: '#93C5FD',
@@ -41,7 +41,7 @@ const STATUS_MAP = {
     dot: '#3B82F6',
   },
   verified: {
-    label: 'LUNAS',
+    label: t('invoice.status.paid', 'LUNAS'),
     color: '#065F46',
     bg: '#D1FAE5',
     border: '#6EE7B7',
@@ -49,17 +49,18 @@ const STATUS_MAP = {
     dot: '#10B981',
   },
   rejected: {
-    label: 'Dibatalkan',
+    label: t('invoice.status.cancelled', 'Dibatalkan'),
     color: '#991B1B',
     bg: '#FEE2E2',
     border: '#FCA5A5',
     icon: 'cancel',
     dot: '#EF4444',
   },
-};
+});
 
 /* ─── StatusPill ───────────────────────────────────────────────── */
-function StatusPill({ status }) {
+function StatusPill({ status, t }) {
+  const STATUS_MAP = getSTATUSMAP(t);
   const d = STATUS_MAP[status] || {
     label: status,
     color: '#374151',
@@ -98,6 +99,10 @@ export default function Invoice() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [showPaymentMethods, setShowPaymentMethods] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState('credit_card');
+  const [selectedSubMethod, setSelectedSubMethod] = useState(null);
+  const [showSubMethods, setShowSubMethods] = useState(false);
 
   useEffect(() => {
     try {
@@ -152,6 +157,58 @@ export default function Invoice() {
 
   const status = STATUS_MAP[order?.status] || STATUS_MAP['menunggu_pembayaran'];
   
+  // Pilihan metode pembayaran sesuai Midtrans yang asli dengan detail submenu
+  const paymentMethods = [
+    { 
+      id: 'credit_card', 
+      label: 'Kartu Kredit/Debit', 
+      desc: 'Visa, Mastercard, JCB, AMEX', 
+      icon: 'credit_card',
+      subMethods: [
+        { id: 'visa', name: 'Visa', desc: 'Kartu kredit Visa' },
+        { id: 'mastercard', name: 'Mastercard', desc: 'Kartu kredit Mastercard' },
+        { id: 'jcb', name: 'JCB', desc: 'Kartu kredit JCB' },
+        { id: 'amex', name: 'American Express', desc: 'Kartu kredit AMEX' },
+      ]
+    },
+    { 
+      id: 'bank_transfer', 
+      label: 'Transfer Bank', 
+      desc: 'BCA, BNI, BRI, Mandiri, Permata VA', 
+      icon: 'account_balance',
+      subMethods: [
+        { id: 'bca_va', name: 'BCA Virtual Account', desc: 'No. Rekening: 1234567890', account: '1234567890', atas_nama: 'TenagaAhli.com' },
+        { id: 'bni_va', name: 'BNI Virtual Account', desc: 'No. Rekening: 9876543210', account: '9876543210', atas_nama: 'TenagaAhli.com' },
+        { id: 'bri_va', name: 'BRI Virtual Account', desc: 'No. Rekening: 5544332211', account: '5544332211', atas_nama: 'TenagaAhli.com' },
+        { id: 'mandiri_va', name: 'Mandiri Virtual Account', desc: 'No. Rekening: 1122334455', account: '1122334455', atas_nama: 'TenagaAhli.com' },
+        { id: 'permata_va', name: 'Permata Virtual Account', desc: 'No. Rekening: 6677889900', account: '6677889900', atas_nama: 'TenagaAhli.com' },
+      ]
+    },
+    { 
+      id: 'e_wallet', 
+      label: 'E-Wallet & QRIS', 
+      desc: 'GoPay, ShopeePay, QRIS', 
+      icon: 'qr_code_2',
+      subMethods: [
+        { id: 'gopay', name: 'GoPay', desc: 'Nomor: 0812-3456-7890', account: '081234567890', atas_nama: 'TenagaAhli.com' },
+        { id: 'shopeepay', name: 'ShopeePay', desc: 'Nomor: 0812-3456-7890', account: '081234567890', atas_nama: 'TenagaAhli.com' },
+        { id: 'qris', name: 'QRIS', desc: 'Scan QR Code untuk pembayaran', account: 'QRIS_TENAGAAHLI', atas_nama: 'TenagaAhli.com' },
+        { id: 'ovo', name: 'OVO', desc: 'Nomor: 0812-3456-7890', account: '081234567890', atas_nama: 'TenagaAhli.com' },
+        { id: 'dana', name: 'DANA', desc: 'Nomor: 0812-3456-7890', account: '081234567890', atas_nama: 'TenagaAhli.com' },
+      ]
+    },
+    { 
+      id: 'convenience_store', 
+      label: 'Convenience Store', 
+      desc: 'Indomaret, Alfamart', 
+      icon: 'store',
+      subMethods: [
+        { id: 'indomaret', name: 'Indomaret', desc: 'Bayar di kasir Indomaret terdekat dengan kode pembayaran' },
+        { id: 'alfamart', name: 'Alfamart', desc: 'Bayar di kasir Alfamart terdekat dengan kode pembayaran' },
+      ]
+    },
+  ];
+  
   const handlePay = () => {
     if (order?.snap_token) {
       const isProd = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true' || import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === '1';
@@ -160,7 +217,27 @@ export default function Invoice() {
         : 'https://app.sandbox.midtrans.com/snap/snap.js';
 
       const openSnap = () => {
+        // Filter metode pembayaran sesuai submenu yang dipilih
+        let enabledPayments = [];
+        
+        if (selectedSubMethod) {
+          // Jika user pilih submenu spesifik, gunakan hanya submenu itu
+          enabledPayments = [selectedSubMethod.id];
+        } else if (selectedMethod === 'credit_card') {
+          enabledPayments = ['credit_card'];
+        } else if (selectedMethod === 'bank_transfer') {
+          enabledPayments = ['bca_va', 'bni_va', 'bri_va', 'echannel', 'permata_va', 'other_va'];
+        } else if (selectedMethod === 'e_wallet') {
+          enabledPayments = ['gopay', 'shopeepay', 'qris'];
+        } else if (selectedMethod === 'convenience_store') {
+          enabledPayments = ['indomaret', 'alfamart'];
+        } else {
+          // Default: semua metode
+          enabledPayments = ['credit_card', 'bca_va', 'bni_va', 'bri_va', 'echannel', 'permata_va', 'other_va', 'gopay', 'shopeepay', 'qris', 'indomaret', 'alfamart'];
+        }
+
         window.snap.pay(order.snap_token, {
+          enabledPayments: enabledPayments,
           onSuccess: () => window.location.reload(),
           onPending: () => window.location.reload(),
           onError: () => alert('Pembayaran gagal, silakan coba lagi.'),
@@ -241,8 +318,12 @@ export default function Invoice() {
           </button>
           <div className="flex gap-2">
             {!isPaid && (
-              <button onClick={handlePay} className="bg-[#0284C7] text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors shadow-sm">
-                {t('Bayar Sekarang')}
+              <button 
+                onClick={() => setShowPaymentMethods(!showPaymentMethods)} 
+                className="bg-[#0284C7] text-white font-bold px-5 py-2 rounded-lg text-sm transition-colors shadow-sm flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">payments</span>
+                {showPaymentMethods ? t('Tutup') : t('Bayar Sekarang')}
               </button>
             )}
             <button onClick={() => window.print()} className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors border border-gray-300 shadow-sm">
@@ -251,6 +332,130 @@ export default function Invoice() {
             </button>
           </div>
         </div>
+
+        {/* Payment Methods Modal */}
+        {showPaymentMethods && !isPaid && (
+          <div className="no-print fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              
+              {!showSubMethods ? (
+                // Step 1: Pilih kategori metode pembayaran
+                <>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[24px] text-[#0EA5E9]">payment</span>
+                    {t('Pilih Metode Pembayaran')}
+                  </h3>
+                  
+                  <div className="space-y-3 mb-6">
+                    {paymentMethods.map(method => (
+                      <button 
+                        key={method.id}
+                        onClick={() => {
+                          setSelectedMethod(method.id);
+                          setShowSubMethods(true);
+                        }}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-[#0EA5E9]/40 transition-colors text-left"
+                      >
+                        <span className="material-symbols-outlined text-[28px] text-[#0EA5E9]">{method.icon}</span>
+                        <div>
+                          <p className="font-bold text-gray-900">{method.label}</p>
+                          <p className="text-sm text-gray-600">{method.desc}</p>
+                        </div>
+                        <span className="material-symbols-outlined text-[20px] text-gray-400 ml-auto">chevron_right</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <button 
+                    onClick={() => setShowPaymentMethods(false)}
+                    className="w-full px-6 py-3 rounded-xl text-sm font-bold border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    {t('Batalkan')}
+                  </button>
+                </>
+              ) : (
+                // Step 2: Pilih submenu spesifik
+                <>
+                  <div className="flex items-center gap-2 mb-4">
+                    <button 
+                      onClick={() => setShowSubMethods(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[20px] text-gray-600">arrow_back</span>
+                    </button>
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[24px] text-[#0EA5E9]">
+                        {paymentMethods.find(m => m.id === selectedMethod)?.icon}
+                      </span>
+                      {paymentMethods.find(m => m.id === selectedMethod)?.label}
+                    </h3>
+                  </div>
+                  
+                  <div className="space-y-3 mb-6">
+                    {paymentMethods.find(m => m.id === selectedMethod)?.subMethods?.map(subMethod => (
+                      <label 
+                        key={subMethod.id}
+                        className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
+                          selectedSubMethod?.id === subMethod.id 
+                            ? 'border-[#0EA5E9] bg-[#E0F2FE]/50' 
+                            : 'border-gray-200 hover:border-[#0EA5E9]/40'
+                        }`}
+                      >
+                        <input 
+                          type="radio" 
+                          name="subMethod" 
+                          checked={selectedSubMethod?.id === subMethod.id} 
+                          onChange={() => setSelectedSubMethod(subMethod)} 
+                          className="accent-[#0EA5E9] w-4 h-4 mt-1" 
+                        />
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-900">{subMethod.name}</p>
+                          <p className="text-sm text-gray-600 mb-2">{subMethod.desc}</p>
+                          
+                          {/* Detail rekening/nomor */}
+                          {subMethod.account && (
+                            <div className="bg-gray-50 rounded-lg p-3 text-xs">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="font-semibold text-gray-700">
+                                  {subMethod.id.includes('va') ? 'No. Virtual Account:' : 
+                                   subMethod.id === 'qris' ? 'QRIS ID:' : 'Nomor:'}
+                                </span>
+                                <button 
+                                  onClick={() => navigator.clipboard?.writeText(subMethod.account)}
+                                  className="text-[#0EA5E9] hover:text-[#0284C7] font-semibold"
+                                >
+                                  Copy
+                                </button>
+                              </div>
+                              <p className="font-mono text-gray-900 font-bold">{subMethod.account}</p>
+                              {subMethod.atas_nama && (
+                                <p className="text-gray-600 mt-1">a.n. {subMethod.atas_nama}</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={handlePay}
+                      disabled={!selectedSubMethod}
+                      className="flex-1 bg-[#0EA5E9] text-white font-bold px-6 py-3 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2 hover:bg-[#0284C7] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">credit_card</span>
+                      {selectedSubMethod ? 
+                        `${t('Bayar dengan')} ${selectedSubMethod.name}` : 
+                        t('Pilih metode terlebih dahulu')
+                      }
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Invoice Paper */}
         <div ref={printRef} className="invoice-paper">

@@ -1360,39 +1360,6 @@ export default function ProfilAhli() {
           </div>
         </div>
       </section>
-
-      {/* ---------- 17. HUBUNGI TENAGA AHLI ---------- */}
-      <section className="border-t border-gray-200" style={{ backgroundColor: NAVY_DARK }}>
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center">
-          <h2 className="font-headline-lg text-xl md:text-2xl font-bold text-white mb-2">{t('Hubungi')} {profile.name.split(',')[0]}</h2>
-          <p className="text-white/70 text-sm mb-8 max-w-xl mx-auto">
-            {t('Tertarik berkolaborasi atau membutuhkan konsultasi lebih lanjut? Pilih cara terbaik untuk terhubung.')}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <a
-              href={`mailto:${profile.email}`}
-              className="bg-white text-[#0EA5E9] h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/90 transition-colors shadow-lg"
-            >
-              <span className="material-symbols-outlined text-[18px]">chat</span>
-              {t('Kirim Pesan')}
-            </a>
-            <a
-              href={`mailto:${profile.email}?subject=Ajukan%20Kerja%20Sama`}
-              className="bg-white/10 text-white border border-white/25 h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/20 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]">handshake</span>
-              {t('Ajukan Kerja Sama')}
-            </a>
-            <a
-              href={`mailto:${profile.email}?subject=Minta%20Konsultasi`}
-              className="bg-white/10 text-white border border-white/25 h-11 px-6 rounded-full flex items-center gap-2 font-semibold text-sm hover:bg-white/20 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]">support_agent</span>
-              {t('Minta Konsultasi')}
-            </a>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

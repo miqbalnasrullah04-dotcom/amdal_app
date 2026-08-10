@@ -4,13 +4,13 @@ import { useTranslation } from '../context/LanguageContext.jsx';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout';
 
-const STATUS_MAP = {
-  pending:               { label: 'Belum Bayar',          color: '#7A5900', bg: '#FFF4D6', icon: 'schedule' },
-  menunggu_verifikasi:   { label: 'Menunggu Verifikasi',  color: '#7A5900', bg: '#FFF4D6', icon: 'hourglass_top' },
-  verified:              { label: 'Lunas',                color: '#2E5E3B', bg: '#E3F2E7', icon: 'check_circle' },
-  rejected:              { label: 'Ditolak',              color: '#B3261E', bg: '#FFDAD6', icon: 'cancel' },
-  expired:               { label: 'Kedaluwarsa',          color: '#414844', bg: '#F5F4F0', icon: 'timer_off' },
-};
+const getSTATUSMAP = (t) => ({
+  pending:               { label: t('invoice.status.pending', 'Belum Bayar'),          color: '#7A5900', bg: '#FFF4D6', icon: 'schedule' },
+  menunggu_verifikasi:   { label: t('invoice.status.awaiting_verification', 'Menunggu Verifikasi'),  color: '#7A5900', bg: '#FFF4D6', icon: 'hourglass_top' },
+  verified:              { label: t('invoice.status.paid', 'Lunas'),                color: '#2E5E3B', bg: '#E3F2E7', icon: 'check_circle' },
+  rejected:              { label: t('invoice.status.rejected', 'Ditolak'),              color: '#B3261E', bg: '#FFDAD6', icon: 'cancel' },
+  expired:               { label: t('invoice.status.expired', 'Kedaluwarsa'),          color: '#414844', bg: '#F5F4F0', icon: 'timer_off' },
+});
 
 function formatRupiah(v) {
   return new Intl.NumberFormat('id-ID', {
@@ -35,6 +35,7 @@ function Card({ children, className = '' }) {
 
 export default function DaftarInvoice() {
   const { t } = useTranslation();
+  const STATUS_MAP = getSTATUSMAP(t);
   const [orders, setOrders]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter]   = useState('semua');

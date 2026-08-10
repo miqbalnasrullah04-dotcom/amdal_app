@@ -23,16 +23,16 @@ export default function ProfilPublik() {
           setPointsData(pointsRes.data);
         }
       })
-      .catch(() => setError('Gagal memuat data profil.'))
+      .catch(() => setError(t('public_profile.error.load_failed', 'Gagal memuat data profil.')))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <DashboardLayout title={t('Profil Publik')}>
+      <DashboardLayout title={t('public_profile.title', 'Profil Publik')}>
         <div className="flex items-center gap-3 text-[#5B6660]">
           <span className="w-5 h-5 rounded-full border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B] animate-spin" />
-          {t('Memuat data...')}
+          {t('public_profile.loading', 'Memuat data...')}
         </div>
       </DashboardLayout>
     );
@@ -46,8 +46,8 @@ export default function ProfilPublik() {
 
   return (
     <DashboardLayout
-      title={t('Profil Publik')}
-      subtitle={t('Pratinjau tampilan profil Anda pada halaman pencarian Tenaga Ahli.')}
+      title={t('public_profile.title', 'Profil Publik')}
+      subtitle={t('public_profile.subtitle', 'Pratinjau tampilan profil Anda pada halaman pencarian Tenaga Ahli.')}
     >
       {error && (
         <p className="bg-error-container text-on-error-container text-sm rounded-lg p-3 mb-6">{error}</p>
@@ -57,19 +57,19 @@ export default function ProfilPublik() {
         <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-6 max-w-2xl">
           <h3 className="font-bold text-[#1F2A22] mb-2 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#2E5E3B] text-[20px]">language</span>
-            {t('Tampilan Direktori Publik')}
+            {t('public_profile.directory_view', 'Tampilan Direktori Publik')}
           </h3>
           <p className="text-sm text-on-surface-variant mb-6">
-            {t('Berikut adalah pratinjau status tampilan profil Anda di website pencarian Tenaga Ahli nasional.')}
+            {t('public_profile.preview_description', 'Berikut adalah pratinjau status tampilan profil Anda di website pencarian Tenaga Ahli nasional.')}
           </p>
 
           <div className="bg-[#F5F4EF] rounded-xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <p className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">{t('Status Tampil Website')}</p>
+              <p className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">{t('public_profile.website_status', 'Status Tampil Website')}</p>
               <div className="flex items-center gap-2">
                 <span className={`w-3 h-3 rounded-full ${isProfileLive ? 'bg-[#2E5E3B]' : 'bg-[#B3261E]'}`}></span>
                 <span className="font-bold text-base text-on-background">
-                  {isProfileLive ? t('Aktif (Tampil Publik)') : t('Tidak Tampil')}
+                  {isProfileLive ? t('public_profile.active_public', 'Aktif (Tampil Publik)') : t('public_profile.not_visible', 'Tidak Tampil')}
                 </span>
               </div>
             </div>
@@ -81,16 +81,16 @@ export default function ProfilPublik() {
                   className="bg-[#2E5E3B] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-[#1E3E26] shadow-sm flex items-center gap-1.5 transition-colors w-fit"
                 >
                   <span className="material-symbols-outlined text-base">visibility</span>
-                  {t('Lihat Profil Asli')}
+                  {t('public_profile.view_real_profile', 'Lihat Profil Asli')}
                 </Link>
                 <div className="text-xs text-[#2E5E3B] flex items-center gap-1 bg-[#2E5E3B]/10 px-3 py-1.5 rounded-lg border border-[#2E5E3B]/20 font-medium">
                   <span className="material-symbols-outlined text-[14px]">link</span>
-                  {t('amdal.id/profil/')}{expert.slug}
+                  {t('public_profile.profile_url', 'amdal.id/profil/')}{expert.slug}
                 </div>
               </div>
             ) : (
               <div className="text-xs text-on-surface-variant font-medium max-w-xs text-center sm:text-right">
-                {t('Profil tidak tampil karena Anda belum diverifikasi admin atau belum memilih paket berlangganan.')}
+                {t('public_profile.not_visible_reason', 'Profil tidak tampil karena Anda belum diverifikasi admin atau belum memilih paket berlangganan.')}
               </div>
             )}
           </div>

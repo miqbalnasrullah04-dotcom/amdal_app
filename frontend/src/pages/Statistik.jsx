@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useTranslation } from '../context/LanguageContext.jsx';
 
@@ -6,9 +6,17 @@ function Card({ children, className = '' }) {
   return <div className={`bg-white rounded-2xl border border-black/5 shadow-sm ${className}`}>{children}</div>;
 }
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul'];
+const getMONTHS = (t) => [
+  t('stats.month.jan', 'Jan'), 
+  t('stats.month.feb', 'Feb'), 
+  t('stats.month.mar', 'Mar'), 
+  t('stats.month.apr', 'Apr'), 
+  t('stats.month.may', 'Mei'), 
+  t('stats.month.jun', 'Jun'), 
+  t('stats.month.jul', 'Jul')
+];
 
-const DEMO_STATS = {
+const getDEMOSTATS = (t) => ({
   totalViews: 1247,
   viewsTrend: '+18%',
   totalClicks: 89,
@@ -18,19 +26,19 @@ const DEMO_STATS = {
   avgRating: 4.8,
   monthlyViews: [120, 180, 250, 210, 320, 380, 1247],
   topSources: [
-    { label: 'Pencarian Google', value: 42, pct: 45 },
-    { label: 'Direktori TenagaAhli', value: 28, pct: 30 },
-    { label: 'Link Langsung', value: 12, pct: 13 },
-    { label: 'Media Sosial', value: 7, pct: 7 },
-    { label: 'Lainnya', value: 5, pct: 5 },
+    { label: t('stats.source.google_search', 'Pencarian Google'), value: 42, pct: 45 },
+    { label: t('stats.source.directory', 'Direktori TenagaAhli'), value: 28, pct: 30 },
+    { label: t('stats.source.direct_link', 'Link Langsung'), value: 12, pct: 13 },
+    { label: t('stats.source.social_media', 'Media Sosial'), value: 7, pct: 7 },
+    { label: t('stats.source.others', 'Lainnya'), value: 5, pct: 5 },
   ],
   popularSections: [
-    { label: 'Ringkasan Profil', visits: 892, icon: 'person' },
-    { label: 'Pendidikan & Sertifikasi', visits: 654, icon: 'school' },
-    { label: 'Pengalaman Kerja', visits: 523, icon: 'work' },
-    { label: 'Kontak & Kolaborasi', visits: 312, icon: 'call' },
+    { label: t('stats.section.profile_summary', 'Ringkasan Profil'), visits: 892, icon: 'person' },
+    { label: t('stats.section.education_cert', 'Pendidikan & Sertifikasi'), visits: 654, icon: 'school' },
+    { label: t('stats.section.work_experience', 'Pengalaman Kerja'), visits: 523, icon: 'work' },
+    { label: t('stats.section.contact_collab', 'Kontak & Kolaborasi'), visits: 312, icon: 'call' },
   ],
-};
+});
 
 function MiniBarChart({ data, labels }) {
   const max = Math.max(...data, 1);
@@ -54,23 +62,64 @@ function MiniBarChart({ data, labels }) {
 
 export default function Statistik() {
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('7hari');
+  const MONTHS = getMONTHS(t);
+  const DEMO_STATS = getDEMOSTATS(t);
+
+  // Simulate API call untuk load statistik data
+  useEffect(() => {
+    const loadStatisticsData = async () => {
+      try {
+        setLoading(true);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // In real app, ini akan jadi:
+        // const response = await api.get('/my/statistics');
+        // setStatsData(response.data);
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+        // Handle error jika diperlukan
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStatisticsData();
+  }, [period]); // Reload data when period changes
+
+  // Loading state
+  if (loading) {
+    return (
+      <DashboardLayout 
+        title={t('stats.title', 'Statistik & Laporan')} 
+        subtitle={t('stats.subtitle', 'Analisis performa profil dan interaksi Anda.')}
+      >
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-12 h-12 border-4 border-[#0284C7]/20 border-t-[#0284C7] rounded-full animate-spin mb-4"></div>
+          <p className="text-sm text-[#5B6660] font-medium">{t('stats.loading', 'Memuat data statistik...')}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <DashboardLayout title={t('Statistik & Laporan')} subtitle={t('Analisis performa profil dan interaksi Anda.')}>
+    <DashboardLayout title={t('stats.title', 'Statistik & Laporan')} subtitle={t('stats.subtitle', 'Analisis performa profil dan interaksi Anda.')}>
       <div className="space-y-5 animate-fadeIn">
         {/* Period selector */}
         <div className="flex gap-2 flex-wrap">
           {[
-            { key: '7hari', label: '7 Hari' },
-            { key: '30hari', label: '30 Hari' },
-            { key: '3bulan', label: '3 Bulan' },
-            { key: 'semua', label: 'Semua Waktu' },
+            { key: '7hari', label: t('stats.period.7days', '7 Hari') },
+            { key: '30hari', label: t('stats.period.30days', '30 Hari') },
+            { key: '3bulan', label: t('stats.period.3months', '3 Bulan') },
+            { key: 'semua', label: t('stats.period.all_time', 'Semua Waktu') },
           ].map((p) => (
             <button
               key={p.key}
               onClick={() => setPeriod(p.key)}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${
+              disabled={loading}
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 period === p.key
                   ? 'bg-[#0284C7] text-white shadow-sm'
                   : 'bg-white text-[#414844] border border-black/10 hover:bg-[#0284C7]/5'
@@ -85,7 +134,7 @@ export default function Statistik() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             {
-              label: 'Kunjungan Profil',
+              label: t('stats.kpi.profile_visits', 'Kunjungan Profil'),
               value: DEMO_STATS.totalViews.toLocaleString('id-ID'),
               trend: DEMO_STATS.viewsTrend,
               icon: 'visibility',
@@ -93,7 +142,7 @@ export default function Statistik() {
               bg: '#E0F2FE',
             },
             {
-              label: 'Klik Kontak',
+              label: t('stats.kpi.contact_clicks', 'Klik Kontak'),
               value: DEMO_STATS.totalClicks,
               trend: DEMO_STATS.clicksTrend,
               icon: 'touch_app',

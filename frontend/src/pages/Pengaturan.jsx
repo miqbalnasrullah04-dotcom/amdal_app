@@ -67,8 +67,8 @@ export default function Pengaturan() {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPwError(''); setPwSuccess('');
-    if (newPw !== confirmPw) { setPwError('Konfirmasi kata sandi tidak cocok.'); return; }
-    if (newPw.length < 8)    { setPwError('Kata sandi baru minimal 8 karakter.'); return; }
+    if (newPw !== confirmPw) { setPwError(t('settings.error.password_mismatch', 'Konfirmasi kata sandi tidak cocok.')); return; }
+    if (newPw.length < 8)    { setPwError(t('settings.error.password_min_length', 'Kata sandi baru minimal 8 karakter.')); return; }
     setPwSaving(true);
     try {
       const res = await api.put('/user/change-password', {
@@ -76,10 +76,10 @@ export default function Pengaturan() {
         new_password: newPw,
         new_password_confirmation: confirmPw,
       });
-      setPwSuccess(res.data?.message || 'Kata sandi berhasil diubah.');
+      setPwSuccess(res.data?.message || t('settings.success.password_changed', 'Kata sandi berhasil diubah.'));
       setCurrentPw(''); setNewPw(''); setConfirmPw('');
     } catch (err) {
-      setPwError(err.response?.data?.message || 'Gagal mengubah kata sandi.');
+      setPwError(err.response?.data?.message || t('settings.error.password_change_failed', 'Gagal mengubah kata sandi.'));
     } finally {
       setPwSaving(false);
     }
@@ -90,10 +90,10 @@ export default function Pengaturan() {
 
   if (loading) {
     return (
-      <DashboardLayout title="Pengaturan">
+      <DashboardLayout title={t('settings.title', 'Pengaturan')}>
         <div className="flex items-center gap-3 text-[#5B6660]">
           <span className="w-5 h-5 rounded-full border-2 border-[#2E5E3B]/30 border-t-[#2E5E3B] animate-spin" />
-          {t('Memuat pengaturan...')}
+          {t('settings.loading', 'Memuat pengaturan...')}
         </div>
       </DashboardLayout>
     );

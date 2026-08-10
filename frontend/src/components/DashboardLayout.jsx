@@ -9,7 +9,7 @@ function SidebarContent({ user, onNavigate, onLogout, isExpanded, onToggle }) {
   const NAV_ITEMS = [
     { to: '/dashboard',    label: t('Dashboard'),       icon: 'space_dashboard' },
     { to: '/profil-saya',  label: t('Profil Saya'),     icon: 'person' },
-    { to: '/pesan',        label: t('Pesan'),            icon: 'chat' },
+    { to: '/membership',   label: t('Membership'),      icon: 'stars' },
     { to: '/paket',        label: t('Paket'),            icon: 'workspace_premium' },
     { to: '/invoice',      label: t('Invoice'),          icon: 'receipt_long' },
     { to: '/pembayaran',   label: t('Pembayaran'),       icon: 'payments' },

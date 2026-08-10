@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ExperienceController;
 use App\Http\Controllers\Api\ExpertController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\HealthCheckController;
+use App\Http\Controllers\Api\MembershipController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PamfletApiController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Api\PartnerApiController;
 use App\Http\Controllers\Api\PointController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SubmissionController;
+use App\Http\Controllers\Api\TicketController;
 use App\Http\Middleware\EnsureIsAdmin;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +42,9 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // Midtrans Webhook (no auth required, verified by Midtrans signature)
 Route::post('/midtrans/notification', [OrderController::class, 'notification']);
+
+// Membership payment callback (no auth required, verified by payment gateway)
+Route::post('/membership/payment-callback', [MembershipController::class, 'paymentCallback']);
 
 Route::get('/experts', [ExpertController::class, 'index']);
 Route::get('/experts/{slug}', [ExpertController::class, 'show']);
@@ -109,6 +114,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/submissions/mine', [SubmissionController::class, 'mine']);
     Route::get('/submissions/{id}', [SubmissionController::class, 'show']);
 
+    // Tickets (user)
+    Route::get('/tickets', [TicketController::class, 'index']);
+    Route::post('/tickets', [TicketController::class, 'store']);
+    Route::get('/tickets/{id}', [TicketController::class, 'show']);
+    Route::post('/tickets/{id}/reply', [TicketController::class, 'reply']);
+
+    // Membership (user) - with sync middleware
+    Route::middleware([\App\Http\Middleware\SyncMembershipLevel::class])->group(function () {
+        Route::get('/membership/status', [MembershipController::class, 'status']);
+        Route::get('/membership/pricing', [MembershipController::class, 'pricing']);
+        Route::post('/membership/upgrade', [MembershipController::class, 'upgrade']);
+        Route::post('/membership/renew', [MembershipController::class, 'renew']);
+        Route::get('/membership/point-history', [MembershipController::class, 'pointHistory']);
+        Route::get('/membership/membership-history', [MembershipController::class, 'membershipHistory']);
+        Route::post('/membership/transactions/{id}/cancel', [MembershipController::class, 'cancelTransaction']);
+    });
+
     Route::middleware([EnsureIsAdmin::class])->group(function () {
         // Pengajuan (admin)
         Route::get('/admin/submissions', [SubmissionController::class, 'adminIndex']);
@@ -155,5 +177,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/partners', [PartnerApiController::class, 'store']);
         Route::put('/partners/{id}', [PartnerApiController::class, 'update']);
         Route::delete('/partners/{id}', [PartnerApiController::class, 'destroy']);
+
+        // Tickets (admin)
+        Route::get('/admin/tickets', [\App\Http\Controllers\Admin\TicketController::class, 'index']);
+        Route::get('/admin/tickets/statistics', [\App\Http\Controllers\Admin\TicketController::class, 'statistics']);
+        Route::get('/admin/tickets/{id}', [\App\Http\Controllers\Admin\TicketController::class, 'show']);
+        Route::post('/admin/tickets/{id}/reply', [\App\Http\Controllers\Admin\TicketController::class, 'reply']);
+        Route::patch('/admin/tickets/{id}/status', [\App\Http\Controllers\Admin\TicketController::class, 'updateStatus']);
+
+        // Membership (admin)
+        Route::get('/admin/membership/statistics', [\App\Http\Controllers\Admin\MembershipController::class, 'statistics']);
+        Route::get('/admin/membership/users', [\App\Http\Controllers\Admin\MembershipController::class, 'users']);
+        Route::get('/admin/membership/users/{id}', [\App\Http\Controllers\Admin\MembershipController::class, 'userDetail']);
+        Route::get('/admin/membership/point-transactions', [\App\Http\Controllers\Admin\MembershipController::class, 'pointTransactions']);
+        Route::get('/admin/membership/membership-transactions', [\App\Http\Controllers\Admin\MembershipController::class, 'membershipTransactions']);
+        Route::post('/admin/membership/process-expired', [\App\Http\Controllers\Admin\MembershipController::class, 'processExpired']);
     });
 });

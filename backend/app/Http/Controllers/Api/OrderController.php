@@ -61,8 +61,8 @@ class OrderController extends Controller
                 'status' => 'menunggu_pembayaran',
             ]);
 
-            // Create Midtrans transaction if key is configured
-            if (Config::$serverKey && Config::$serverKey !== 'your-server-key-here') {
+            // Generate Midtrans Snap token
+            if (Config::$serverKey && Config::$serverKey !== 'your-midtrans-server-key') {
                 try {
                     $params = [
                         'transaction_details' => [
@@ -97,11 +97,9 @@ class OrderController extends Controller
                     ], 201);
                 } catch (\Exception $e) {
                     \Log::error('Midtrans Snap Error: ' . $e->getMessage());
-                    // Fallback to manual payment if Snap fails
                 }
             }
 
-            // Fallback: return without snap_token (manual payment flow)
             return response()->json([
                 'expert' => $expert,
                 'order' => $order,
@@ -258,7 +256,7 @@ class OrderController extends Controller
 
     public function adminIndex(Request $request)
     {
-        $query = Order::with('user:id,name,email')->latest();
+        $query = Order::with(['user:id,name,email', 'package:id,name,price'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
