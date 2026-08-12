@@ -577,7 +577,7 @@ export default function ProfilAhli() {
     );
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '© OpenStreetMap contributors © CARTO',
+      attribution: t('map.attribution', '© OpenStreetMap contributors © CARTO'),
     }).addTo(instance);
 
     L.circleMarker([profile.lokasi.lat, profile.lokasi.lng], {
@@ -935,7 +935,7 @@ export default function ProfilAhli() {
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
               <div id="profil-ahli-map" className="h-40 w-full" />
               <div className="p-5">
-                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">{t('Lokasi')}</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">{t('expert_profile.map.location', 'Lokasi')}</h3>
                 <p className="text-sm text-gray-800 mb-3 leading-snug">{t(profile.lokasi.label)}</p>
                 <a
                   href={`https://maps.google.com/?q=${encodeURIComponent(profile.lokasi.label)}`}
@@ -944,7 +944,7 @@ export default function ProfilAhli() {
                   className="text-[#0EA5E9] text-sm font-medium hover:underline flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-[16px]">directions</span>
-                  {t('Get Directions')}
+                  {t('expert_profile.map.get_directions', 'Dapatkan Petunjuk Arah')}
                 </a>
               </div>
             </div>

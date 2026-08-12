@@ -5,21 +5,21 @@ import NavbarBackground from '../components/NavbarBackground.jsx';
 import { usePageLoading } from '../context/LoadingContext.jsx';
 
 const dummyMembers = [
-  { id: 1, nama: 'Ir. Boy Rangga, ST, M.Ling', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0030' },
-  { id: 2, nama: 'Ir. M.Nasir, S.Hut, M.Si', instansi: 'PSLH UIN AR RANIRY', nomor: 'CERT. IDN. 001.5.0723.0029' },
-  { id: 3, nama: 'Dika Supyandi', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0028' },
-  { id: 4, nama: 'Surya Armi, S.Sos', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0027' },
-  { id: 5, nama: 'Riki Yulianda, S. Sos., M. Si', instansi: 'Prodi Sosiologi FISIP UTU', nomor: 'CERT. IDN. 001.5.0723.0026' },
-  { id: 6, nama: 'Dhea Amelia S.PWK', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0025' },
-  { id: 7, nama: 'Andiana Marjayanti, M.PWK', instansi: 'CV. KOTAKITA KALBAR', nomor: 'CERT. IDN. 001.5.0723.0024' },
-  { id: 8, nama: 'Dr. Zaulfikar, M.Sc.', instansi: 'Universitas Teuku Umar', nomor: 'CERT. IDN. 001.5.0723.0023' },
-  { id: 9, nama: 'Huda Eka Nurdiyatmi, S.PWK, M.PWK', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0022' },
-  { id: 10, nama: 'Risa Triwiyanti, ST., M.PWK', instansi: 'Umum', nomor: 'CERT. IDN. 001.5.0723.0021' },
-  { id: 11, nama: 'Dr. Ali Aulia Ghozali, S.Si., M.Si.', instansi: 'Institut Teknologi Yogyakarta', nomor: 'CERT. IDN. 001.5.0723.0020' },
-  { id: 12, merge: 'Dr. Ir. Eldina Fatimah, M. Sc.', instansi: 'FT Sipil, Universitas Syiah Kuala', nomor: 'CERT. IDN. 001.5.0723.0019' },
-  { id: 13, nama: 'Ir. Syaiful Bakhri, M.Kes.', instansi: 'PT. Quart Trust', nomor: 'CERT. IDN. 001.5.0723.0018' },
-  { id: 14, nama: 'Prof. Dr. Ir. Muhammad Nur Aidi MS', instansi: 'Penaprolis', nomor: 'CERT. IDN. 001.5.0523.0017' },
-  { id: 15, nama: 'Citra Fadhilah Utami', instansi: 'BPIW-Kementerian PUPR', nomor: 'CERT. IDN. 001.5.0523.0016' },
+  { id: 1, nama: 'Dr. Irman Firmansyah, S.Hut, M.Si', instansi: 'PSL - IPB University', nomor: 'TA.001.2024' },
+  { id: 2, nama: 'Prof. Dr. Ir. Ahmad Sutanto, M.Eng', instansi: 'Institut Teknologi Bandung', nomor: 'TA.002.2024' },
+  { id: 3, nama: 'Dr. Ir. Siti Rahmawati, M.T', instansi: 'Universitas Gadjah Mada', nomor: 'TA.003.2024' },
+  { id: 4, nama: 'Ir. Budi Santoso, S.T, M.Sc', instansi: 'Kementerian Lingkungan Hidup', nomor: 'TA.004.2024' },
+  { id: 5, nama: 'Dr. Dewi Lestari, S.Si, M.Si', instansi: 'Universitas Indonesia', nomor: 'TA.005.2024' },
+  { id: 6, nama: 'Ir. Muhammad Arief, M.T', instansi: 'PT. Konsultan Lingkungan Nusantara', nomor: 'TA.006.2024' },
+  { id: 7, nama: 'Dr. Ir. Fitri Handayani, M.Eng', instansi: 'Institut Teknologi Sepuluh Nopember', nomor: 'TA.007.2024' },
+  { id: 8, nama: 'Prof. Dr. Bambang Wijaya, S.T, M.Sc', instansi: 'Universitas Diponegoro', nomor: 'TA.008.2024' },
+  { id: 9, nama: 'Dr. Ir. Rina Kartika, M.Si', instansi: 'Badan Pengelolaan Lingkungan Hidup', nomor: 'TA.009.2024' },
+  { id: 10, nama: 'Ir. Agus Permana, S.T, M.T', instansi: 'Universitas Padjadjaran', nomor: 'TA.010.2024' },
+  { id: 11, nama: 'Dr. Ir. Lina Sari, M.Eng', instansi: 'Politeknik Negeri Jakarta', nomor: 'TA.011.2024' },
+  { id: 12, nama: 'Prof. Dr. Ir. Hendra Prasetyo, M.Sc', instansi: 'Universitas Hasanuddin', nomor: 'TA.012.2024' },
+  { id: 13, nama: 'Dr. Ir. Maya Indira, S.T, M.T', instansi: 'PT. EcoConsult Indonesia', nomor: 'TA.013.2024' },
+  { id: 14, nama: 'Ir. Dodi Kurniawan, M.Eng', instansi: 'Universitas Brawijaya', nomor: 'TA.014.2024' },
+  { id: 15, nama: 'Dr. Ir. Ratna Sari, M.Si', instansi: 'Lembaga Ilmu Pengetahuan Indonesia', nomor: 'TA.015.2024' },
 ];
 
 export default function Member() {
@@ -34,21 +34,30 @@ export default function Member() {
 
   useEffect(() => {
     setLoading(true);
+    // Fetch from experts API to get real-time data
     api
-      .get('/members')
+      .get('/experts')
       .then((res) => {
-        // Backend bisa saja membungkus data dalam { data: [...] } atau
-        // mengembalikan object lain, bukan array langsung. Validasi dulu
-        // sebelum di-set supaya .map()/.filter() di bawah tidak crash.
         const raw = res.data;
-        const data = Array.isArray(raw)
-          ? raw
-          : Array.isArray(raw?.data)
-          ? raw.data
-          : Array.isArray(raw?.members)
-          ? raw.members
-          : [];
-        setMembers(data.length > 0 ? data : dummyMembers);
+        let expertData = [];
+        
+        if (Array.isArray(raw)) {
+          expertData = raw;
+        } else if (Array.isArray(raw?.data)) {
+          expertData = raw.data;
+        } else if (Array.isArray(raw?.experts)) {
+          expertData = raw.experts;
+        }
+
+        // Transform expert data to member format
+        const transformedMembers = expertData.map((expert, index) => ({
+          id: expert.id || index + 1,
+          nama: expert.name || expert.nama,
+          instansi: expert.institution || expert.institusi || t('member.general', 'Umum'),
+          nomor: expert.member_number || expert.nomor_anggota || `TA.${String(index + 1).padStart(3, '0')}.${new Date().getFullYear()}`
+        }));
+
+        setMembers(transformedMembers.length > 0 ? transformedMembers : dummyMembers);
       })
       .catch(() => setMembers(dummyMembers))
       .finally(() => { setLoading(false); reportReady(); });
@@ -133,14 +142,14 @@ export default function Member() {
 
       <h1 className="font-headline-lg text-headline-lg text-on-background mb-2">{t('member.title', 'Member')}</h1>
       <p className="text-on-surface-variant mb-8">
-        {t('member.subtitle', 'Daftar tenaga ahli AMDAL yang telah tersertifikasi dan terdaftar di AMDAL.ID.')}
+        {t('member.subtitle', 'Daftar tenaga ahli profesional yang telah tersertifikasi dan terdaftar di TenagaAhli.com.')}
       </p>
 
       <div className="bg-white rounded-xl border border-[#0EA5E9]/25 shadow-sm overflow-hidden">
         {/* Toolbar: entries + search */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-[#0EA5E9]/20">
           <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-            <span>{t('member.show', 'Show')}</span>
+            <span>{t('member.show', 'Tampilkan')}</span>
             <select
               value={entriesPerPage}
               onChange={(e) => {
@@ -155,7 +164,7 @@ export default function Member() {
                 </option>
               ))}
             </select>
-            <span>{t('entri')}</span>
+            <span>{t('member.entries', 'entri')}</span>
           </div>
 
           <div className="relative w-full md:w-72">
@@ -176,97 +185,110 @@ export default function Member() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="bg-[#0EA5E9]/5">
-                {columns.map((col) => (
-                  <th
-                    key={col.key}
-                    onClick={() => handleSort(col.key)}
-                    className="px-6 py-4 font-label-md text-on-background cursor-pointer select-none whitespace-nowrap"
-                  >
-                    <span className="inline-flex items-center">
-                      {col.label}
-                      <SortIcon columnKey={col.key} />
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? null : paginatedMembers.length === 0 ? (
-                <tr>
-                  <td colSpan={columns.length} className="px-6 py-8 text-center text-on-surface-variant">
-                    {t('member.no_data', 'Tidak ada data yang cocok.')}
-                  </td>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <span className="w-10 h-10 rounded-full border-4 border-gray-200 border-t-[#0EA5E9] animate-spin block" />
+                </div>
+                <p className="text-gray-600 text-sm">{t('member.loading', 'Memuat data anggota...')}</p>
+              </div>
+            </div>
+          ) : (
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="bg-[#0EA5E9]/5">
+                  {columns.map((col) => (
+                    <th
+                      key={col.key}
+                      onClick={() => handleSort(col.key)}
+                      className="px-6 py-4 font-label-md text-on-background cursor-pointer select-none whitespace-nowrap"
+                    >
+                      <span className="inline-flex items-center">
+                        {col.label}
+                        <SortIcon columnKey={col.key} />
+                      </span>
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                paginatedMembers.map((m, idx) => (
-                  <tr
-                    key={m.id}
-                    className={`border-t border-[#0EA5E9]/10 hover:bg-[#0EA5E9]/5 transition-colors ${
-                      idx % 2 === 0 ? 'bg-white' : 'bg-[#0EA5E9]/[0.03]'
-                    }`}
-                  >
-                    <td className="px-6 py-4 text-on-background">{m.nama || m.merge}</td>
-                    <td className="px-6 py-4 text-on-surface-variant">{m.instansi}</td>
-                    <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">{m.nomor}</td>
+              </thead>
+              <tbody>
+                {paginatedMembers.length === 0 ? (
+                  <tr>
+                    <td colSpan={columns.length} className="px-6 py-8 text-center text-on-surface-variant">
+                      {t('member.no_data', 'Tidak ada data yang cocok.')}
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  paginatedMembers.map((m, idx) => (
+                    <tr
+                      key={m.id}
+                      className={`border-t border-[#0EA5E9]/10 hover:bg-[#0EA5E9]/5 transition-colors ${
+                        idx % 2 === 0 ? 'bg-white' : 'bg-[#0EA5E9]/[0.03]'
+                      }`}
+                    >
+                      <td className="px-6 py-4 text-on-background">{m.nama || m.merge}</td>
+                      <td className="px-6 py-4 text-on-surface-variant">{m.instansi}</td>
+                      <td className="px-6 py-4 text-on-surface-variant font-mono text-xs">{m.nomor}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Footer: info + pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#0EA5E9]/20 text-sm text-on-surface-variant">
-          <span>
-            {t('Menampilkan')} {showingFrom} {t('sampai')} {showingTo} {t('dari')} {totalEntries} {t('entri')}
-          </span>
+        {!loading && (
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-5 border-t border-[#0EA5E9]/20 text-sm text-on-surface-variant">
+            <span>
+              {t('member.showing', 'Menampilkan')} {showingFrom} {t('member.to', 'sampai')} {showingTo} {t('member.of', 'dari')} {totalEntries} {t('member.entries', 'entri')}
+            </span>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              {t('Sebelumnya')}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {t('member.previous', 'Sebelumnya')}
+              </button>
 
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-                .map((page, idx, arr) => {
-                  const prevPage = arr[idx - 1];
-                  const showEllipsis = prevPage && page - prevPage > 1;
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                  .map((page, idx, arr) => {
+                    const prevPage = arr[idx - 1];
+                    const showEllipsis = prevPage && page - prevPage > 1;
 
-                  return (
-                    <div key={page} className="flex items-center gap-1">
-                      {showEllipsis && <span className="px-1 text-gray-400">...</span>}
-                      <button
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? 'bg-[#0EA5E9] text-white font-bold shadow-sm'
-                            : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div key={page} className="flex items-center gap-1">
+                        {showEllipsis && <span className="px-1 text-gray-400">...</span>}
+                        <button
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === page
+                              ? 'bg-[#0EA5E9] text-white font-bold shadow-sm'
+                              : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {t('member.next', 'Selanjutnya')}
+              </button>
             </div>
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              {t('Selanjutnya')}
-            </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

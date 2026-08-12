@@ -293,23 +293,35 @@ export default function Home() {
                 className="flex items-center mb-4 p-1 rounded-full relative w-full justify-between"
                 style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }}
             >
-              {/* ✅ Pill aktif — premium glassmorphism (gradient + saturate blur + inner highlight/sheen) */}
+              {/* ✅ Pill aktif — gaya gelembung air (bubble): gradient biru bening + sheen + titik pantulan cahaya */}
               <div
                 className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out z-0 overflow-hidden"
                 style={{
                   left: sliderStyle.left,
                   width: sliderStyle.width,
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 100%)',
+                  background: 'linear-gradient(135deg, rgba(186,230,253,0.55) 0%, rgba(14,165,233,0.25) 55%, rgba(224,242,254,0.35) 100%)',
                   backdropFilter: 'blur(16px) saturate(180%)',
                   WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-                  border: '1px solid rgba(255,255,255,0.4)',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(224,242,254,0.6)',
+                  boxShadow: '0 4px 18px rgba(14,165,233,0.25), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 6px rgba(14,165,233,0.2)',
                 }}
               >
-                {/* highlight sheen di bagian atas, khas kaca */}
+                {/* highlight sheen di bagian atas, khas gelembung air */}
                 <div
                   className="absolute inset-x-0 top-0 h-1/2 rounded-t-full"
-                  style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.25), transparent)' }}
+                  style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.55), transparent)' }}
+                />
+                {/* titik pantulan cahaya kecil, khas bubble */}
+                <div
+                  className="absolute rounded-full"
+                  style={{
+                    top: '15%',
+                    left: '12%',
+                    width: '18%',
+                    height: '30%',
+                    background: 'rgba(255,255,255,0.7)',
+                    filter: 'blur(3px)',
+                  }}
                 />
               </div>
               {SEARCH_MODES.map((mode) => (

@@ -4,6 +4,7 @@ import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 import PhoneInput from '../components/PhoneInput.jsx';
 import ImageCropper from '../components/ImageCropper.jsx';
+import CoverCropper from '../components/CoverCropper.jsx';
 import CameraCapture from '../components/CameraCapture.jsx';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -159,6 +160,7 @@ function WizardNav({ onBack, onNext, showBack = true, showNext = true, nextLabel
 export default function ProfilSaya() {
   const { t } = useTranslation();
   const TABS = getTabs(t);
+  const DOC_TYPE_LABEL = getDOCTYPELABEL(t);
   const STATUS_PENGAJUAN_OPTS = getStatusPengajuan(t);
 
   const [tab, setTab] = useState('pribadi');
@@ -283,8 +285,10 @@ export default function ProfilSaya() {
   const [photoModal, setPhotoModal] = useState(false);
   const [fullPhotoView, setFullPhotoView] = useState(false);
   const [cropperOpen, setCropperOpen] = useState(false);
+  const [coverCropperOpen, setCoverCropperOpen] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState(null);
+  const [coverImageToCrop, setCoverImageToCrop] = useState(null);
   const [cvFileName, setCvFileName] = useState('');
   const [buktiFile, setBuktiFile] = useState(null);
   const [buktiFileName, setBuktiFileName] = useState('');
@@ -757,7 +761,7 @@ export default function ProfilSaya() {
     const instance = L.map(mapRef.current, { zoomControl: true }).setView([defaultLat, defaultLng], form.lat ? 13 : 7);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      attribution: t('map.attribution', '&copy; OpenStreetMap &copy; CARTO'),
     }).addTo(instance);
 
     instance.on('tileload', forceTileVisibility);
@@ -978,6 +982,33 @@ export default function ProfilSaya() {
     }
   };
 
+  const handleCoverCropComplete = (croppedBlob) => {
+    const croppedFile = new File([croppedBlob], 'cover-photo.jpg', {
+      type: 'image/jpeg',
+      lastModified: Date.now()
+    });
+
+    setCoverFile(croppedFile);
+    setCoverPreview(URL.createObjectURL(croppedBlob));
+    setCoverCropperOpen(false);
+
+    if (coverImageToCrop) {
+      URL.revokeObjectURL(coverImageToCrop);
+      setCoverImageToCrop(null);
+    }
+  };
+
+  const handleCoverCropCancel = () => {
+    setCoverCropperOpen(false);
+    if (coverImageToCrop) {
+      URL.revokeObjectURL(coverImageToCrop);
+      setCoverImageToCrop(null);
+    }
+    if (coverRef.current) {
+      coverRef.current.value = '';
+    }
+  };
+
   const handleCvChange = (e) => {
     const f = e.target.files?.[0];
     if (f) {
@@ -1023,8 +1054,10 @@ export default function ProfilSaya() {
         return;
       }
 
-      setCoverFile(f);
-      setCoverPreview(URL.createObjectURL(f));
+      // Open cover cropper instead of direct preview
+      const imageUrl = URL.createObjectURL(f);
+      setCoverImageToCrop(imageUrl);
+      setCoverCropperOpen(true);
     }
   };
 
@@ -1994,9 +2027,12 @@ export default function ProfilSaya() {
           <Card>
             <SectionTitle icon={PhotoIcon}>{t('Foto Cover / Background')}</SectionTitle>
             <div className="space-y-4">
-              {coverPreview && (
-                <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-[#2E5E3B]/20">
-                  <img src={coverPreview} alt="Foto cover" className="w-full h-full object-cover" />
+              {coverPreview ? (
+                <div className="relative w-full rounded-xl overflow-hidden border-2 border-[#0EA5E9]/20">
+                  {/* Preview with same aspect ratio as ProfilAhli (3.5:1) */}
+                  <div className="aspect-[3.5/1] w-full">
+                    <img src={coverPreview} alt="Foto cover" className="w-full h-full object-cover" />
+                  </div>
                   <button
                     onClick={deleteCover}
                     disabled={saving}
@@ -2005,16 +2041,32 @@ export default function ProfilSaya() {
                   >
                     <TrashIcon className="w-[18px] h-[18px]" strokeWidth={2} />
                   </button>
+                  {/* Preview label */}
+                  <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                    {t('cover.preview_label', 'Preview: Rasio 3.5:1 seperti di profil ahli')}
+                  </div>
+                </div>
+              ) : (
+                /* Empty state placeholder showing aspect ratio */
+                <div className="relative w-full rounded-xl border-2 border-dashed border-gray-300 bg-gray-50">
+                  <div className="aspect-[3.5/1] w-full flex items-center justify-center">
+                    <div className="text-center">
+                      <PhotoIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" strokeWidth={1.5} />
+                      <p className="text-sm text-gray-600 font-medium">{t('cover.placeholder_title', 'Belum ada foto cover')}</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('cover.placeholder_desc', 'Rasio 3.5:1 (landscape)')}</p>
+                    </div>
+                  </div>
                 </div>
               )}
 
               <div>
-                <p className="text-xs font-semibold text-[#1F2A22] mb-1">{t('Panduan Foto Cover:')}</p>
+                <p className="text-xs font-semibold text-[#1F2A22] mb-1">{t('cover.guide_title', 'Panduan Foto Cover:')}</p>
                 <ul className="text-xs text-[#5B6660] list-disc list-inside space-y-0.5">
-                  <li>{t('Format JPG atau PNG, maksimal 5MB')}</li>
-                  <li>{t('Ukuran rekomendasi: 1400x400 piksel (landscape)')}</li>
-                  <li>{t('Gunakan foto yang profesional dan relevan dengan keahlian Anda')}</li>
-                  <li>{t('Foto ini akan ditampilkan di halaman profil dan pencarian')}</li>
+                  <li>{t('cover.guide_format', 'Format JPG atau PNG, maksimal 5MB')}</li>
+                  <li>{t('cover.guide_dimensions', 'Rasio 3.5:1 (landscape) - akan otomatis dipotong sesuai rasio')}</li>
+                  <li>{t('cover.guide_quality', 'Gunakan foto yang profesional dan relevan dengan keahlian Anda')}</li>
+                  <li>{t('cover.guide_display', 'Foto ini akan ditampilkan di halaman profil ahli dengan ukuran responsif')}</li>
+                  <li>{t('cover.guide_cropper', 'Setelah memilih foto, Anda dapat menyesuaikan posisi dan zoom')}</li>
                 </ul>
               </div>
 
@@ -2022,7 +2074,7 @@ export default function ProfilSaya() {
                 <div className="flex flex-wrap gap-2 items-center">
                   <label className={BTN_GHOST + ' cursor-pointer'}>
                     <ArrowUpTrayIcon className="w-4 h-4" strokeWidth={2} />
-                    {coverPreview ? t('Ganti Foto Cover') : t('Pilih Foto Cover')}
+                    {coverPreview ? t('cover.change_button', 'Ganti Foto Cover') : t('cover.select_button', 'Pilih Foto Cover')}
                     <input
                       type="file"
                       accept="image/jpeg,image/jpg,image/png"
@@ -2345,6 +2397,17 @@ export default function ProfilSaya() {
           imageSrc={imageToCrop}
           onCropComplete={handleCropComplete}
           onCancel={handleCropCancel}
+        />
+      )}
+
+      {/* ════════════════════════════════════════════════════════ */}
+      {/* COVER CROPPER                                           */}
+      {/* ════════════════════════════════════════════════════════ */}
+      {coverCropperOpen && coverImageToCrop && (
+        <CoverCropper
+          imageSrc={coverImageToCrop}
+          onCropComplete={handleCoverCropComplete}
+          onCancel={handleCoverCropCancel}
         />
       )}
 

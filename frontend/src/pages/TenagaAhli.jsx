@@ -172,7 +172,7 @@ export default function TenagaAhli() {
     const instance = L.map('tenaga-ahli-map', { zoomControl: false }).setView([-6.9, 107.2], 7);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      attribution: t('map.attribution', '&copy; OpenStreetMap contributors &copy; CARTO'),
     }).addTo(instance);
     setMap(instance);
     return () => instance.remove();
@@ -227,7 +227,7 @@ export default function TenagaAhli() {
           <a href="https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lng}" 
              target="_blank" 
              style="color:#0EA5E9;text-decoration:none;font-size:12px;display:inline-flex;align-items:center;gap:4px;margin-top:8px">
-            <span style="font-size:14px">📍</span> ${t('Buka di Google Maps')}
+            <span style="font-size:14px">📍</span> ${t('tenaga_ahli.open_in_google_maps', 'Buka di Google Maps')}
           </a>
         </div>
       `;
@@ -315,7 +315,7 @@ export default function TenagaAhli() {
     if (!map || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
-      () => alert(t('experts.location_error', 'Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.'))
+      () => alert(t('map.location_error', 'Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.'))
     );
   };
 

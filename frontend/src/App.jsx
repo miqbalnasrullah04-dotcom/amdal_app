@@ -110,6 +110,9 @@ export default function App() {
       <Route path="/profil-publik" element={<ProtectedRoute requiredRole="user"><ProfilPublik /></ProtectedRoute>} />
       <Route path="/pengaturan" element={<ProtectedRoute requiredRole="user"><Pengaturan /></ProtectedRoute>} />
 
+      {/* ── EXPERT PROFILE (Has Navbar/Footer, No RouteLoader) ── */}
+      <Route path="/profil/:slug" element={<Layout><ProfilAhli /></Layout>} />
+
       {/* ── PUBLIC + USER ── */}
       <Route
         path="/*"
@@ -128,7 +131,6 @@ export default function App() {
                 <Route path="/tenaga-ahli" element={<TenagaAhli />} />
                 <Route path="/instruktur-pengajar" element={<InstrukturPengajar />} />
                 <Route path="/peneliti-artikel-jurnal" element={<PenelitiArtikelJurnal />} />
-                <Route path="/profil/:slug" element={<ProfilAhli />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

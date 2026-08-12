@@ -3,13 +3,6 @@ import { useTranslation } from '../context/LanguageContext.jsx';
 import tentangKamiImg from '../assets/tentangkami.jpg';
 import NavbarBackground from '../components/NavbarBackground.jsx';
 
-const TIM_AMDAL = [
-  { roleKey: 'about.roles.director', role: 'Pengarah', name: 'Prof. Dr. Ir. Widiatmaka, DAA' },
-  { roleKey: 'about.roles.coordinator', role: 'Koordinator Pakar', name: 'Dr. Irman Firmansyah, S.Hut, M.Si' },
-  { roleKey: 'about.roles.secretary', role: 'Sekretaris', name: 'Yoga Hepta Gumilar S.Pd., M.Pd' },
-  { roleKey: 'about.roles.research_head', role: 'Kepala Bidang Research', name: 'Dr. I Wayan Budiasa, S.P., M.P' },
-];
-
 export default function TentangKami() {
   const { t } = useTranslation();
 
@@ -21,7 +14,7 @@ export default function TentangKami() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter items-center mb-20">
         <img
           src={tentangKamiImg}
-          alt="Tim AMDAL.ID"
+          alt="Tim TenagaAhli.com"
           className="w-full h-[380px] object-cover rounded-xl shadow-md border border-outline-variant"
         />
 
@@ -29,32 +22,15 @@ export default function TentangKami() {
           <span className="inline-block w-14 h-1.5 rounded-full bg-[#0EA5E9] mb-4" />
           <h1 className="font-headline-lg text-headline-lg text-on-background mb-6">{t('about.title', 'Tentang Kami')}</h1>
           <p className="text-on-surface-variant leading-relaxed mb-4">
-            {t('about.desc1', 'AMDAL.ID merupakan platform pencarian ahli atau pakar untuk menyusun AMDAL maupun narasumber di Indonesia yang telah memiliki sertifikat. Platform ini bertujuan memudahkan dalam mencari ahli penyusun AMDAL sesuai dengan keahlian and kepakaran masing-masing.')}
+            {t('about.desc1', 'TenagaAhli.com merupakan platform pencarian tenaga ahli dan profesional di Indonesia yang membantu pengguna menemukan tenaga ahli berdasarkan bidang keahlian, pengalaman, kompetensi, sertifikasi, dan lokasi.')}
+          </p>
+          <p className="text-on-surface-variant leading-relaxed mb-4">
+            {t('about.desc2', 'Platform ini hadir untuk memudahkan individu, perusahaan, maupun organisasi dalam menemukan tenaga ahli yang sesuai dengan kebutuhan secara lebih cepat, mudah, dan terpercaya.')}
           </p>
           <p className="text-on-surface-variant leading-relaxed">
-            {t('about.desc2', 'AMDAL juga sebagai media memperoleh informasi mengenai peraturan, artikel, lembaga pelatihan dan penyusun AMDAL.')}
+            {t('about.desc3', 'TenagaAhli.com juga menjadi media informasi dan penghubung antara pengguna dengan para tenaga ahli dari berbagai bidang, sehingga proses pencarian dan pemilihan tenaga profesional dapat dilakukan secara lebih efektif.')}
           </p>
         </div>
-      </div>
-
-      {/* TIM AMDAL.ID — Tabel Bertema Modern */}
-      <h2 className="font-headline-md text-xl text-on-background mb-6">{t('about.team_title', 'TIM AMDAL.ID')}</h2>
-      <div className="rounded-xl overflow-hidden border border-outline-variant bg-white shadow-sm">
-        <table className="w-full text-left">
-          <tbody>
-            {TIM_AMDAL.map((member, i) => (
-              <tr
-                key={member.role}
-                className={`${i !== TIM_AMDAL.length - 1 ? 'border-b border-outline-variant' : ''} ${
-                  i % 2 === 0 ? 'bg-white' : 'bg-surface-container-low'
-                }`}
-              >
-                <td className="px-6 py-4 text-[#0EA5E9] font-semibold w-1/3">{t(member.roleKey, member.role)}</td>
-                <td className="px-6 py-4 text-on-background">{member.name}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
 
       {/* CTA — Gradasi Biru Gelap Premium */}

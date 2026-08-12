@@ -160,7 +160,7 @@ export default function PenelitiArtikelJurnal() {
     const instance = L.map('peneliti-artikel-jurnal-map', { zoomControl: false }).setView([-6.9, 107.2], 7);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      attribution: t('map.attribution', '&copy; OpenStreetMap contributors &copy; CARTO'),
     }).addTo(instance);
     setMap(instance);
     return () => instance.remove();
@@ -208,7 +208,19 @@ export default function PenelitiArtikelJurnal() {
       });
       const marker = L.marker([e.lat, e.lng], { icon })
         .addTo(map)
-        .bindPopup(`<b>${e.name}</b><br/><span style="color:#6b7570">${e.field || ''}</span>`);
+        .bindPopup(`
+          <div style="min-width:200px">
+            <b style="font-size:14px;color:#1F2A22">${e.name}</b>
+            <br/>
+            <span style="color:#6b7570;font-size:12px">${e.field || ''}</span>
+            <br/>
+            <a href="https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lng}" 
+               target="_blank" 
+               style="color:#0EA5E9;text-decoration:none;font-size:12px;display:inline-flex;align-items:center;gap:4px;margin-top:8px">
+              <span style="font-size:14px">📍</span> ${t('peneliti.open_in_google_maps', 'Buka di Google Maps')}
+            </a>
+          </div>
+        `);
       marker.on('click', () => {
         setActiveId(e.id);
         setActiveIndex(sortedExperts.findIndex((x) => x.id === e.id));
@@ -290,7 +302,7 @@ export default function PenelitiArtikelJurnal() {
     if (!map || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 13),
-      () => alert(t('experts.location_error', 'Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.'))
+      () => alert(t('map.location_error', 'Tidak bisa mengambil lokasi kamu. Pastikan izin lokasi aktif.'))
     );
   };
 

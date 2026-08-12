@@ -1,9 +1,17 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 import DashboardLayout from '../components/DashboardLayout.jsx';
 import LevelBadge from '../components/LevelBadge.jsx';
 import { useTranslation } from '../context/LanguageContext.jsx';
+
+// Helper function to construct file URLs - same as in ProfilSaya
+const getFileUrl = (filePath) => {
+  if (!filePath) return '#';
+  if (filePath.startsWith('http')) return filePath;
+  const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+  return `${baseUrl}/storage/${filePath}`;
+};
 
 export default function ProfilPublik() {
   const { t } = useTranslation();
@@ -13,19 +21,45 @@ export default function ProfilPublik() {
   const [pointsData, setPointsData] = useState(null);
 
   useEffect(() => {
-    Promise.all([
-      api.get('/my/profile'),
-      api.get('/my/points').catch(() => ({ data: null }))
-    ])
-      .then(([profileRes, pointsRes]) => {
-        setExpert(profileRes.data);
-        if (pointsRes.data) {
-          setPointsData(pointsRes.data);
-        }
-      })
-      .catch(() => setError(t('public_profile.error.load_failed', 'Gagal memuat data profil.')))
-      .finally(() => setLoading(false));
-  }, []);
+    const loadData = () => {
+      setLoading(true);
+      Promise.all([
+        api.get('/my/profile'),
+        api.get('/my/points').catch(() => ({ data: null }))
+      ])
+        .then(([profileRes, pointsRes]) => {
+          setExpert(profileRes.data);
+          if (pointsRes.data) {
+            setPointsData(pointsRes.data);
+          }
+        })
+        .catch(() => setError(t('public_profile.error.load_failed', 'Gagal memuat data profil.')))
+        .finally(() => setLoading(false));
+    };
+
+    // Initial load
+    loadData();
+
+    // Listen for profile updates from ProfilSaya
+    const handleProfileUpdate = () => {
+      console.log('[ProfilPublik] Profile updated, reloading data...');
+      loadData();
+    };
+
+    // Also refresh when user comes back to this tab (in case they uploaded in another tab)
+    const handleFocus = () => {
+      console.log('[ProfilPublik] Tab focused, refreshing profile data...');
+      loadData();
+    };
+
+    window.addEventListener('amdal-user-updated', handleProfileUpdate);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('amdal-user-updated', handleProfileUpdate);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [t]);
 
   if (loading) {
     return (
@@ -104,7 +138,11 @@ export default function ProfilPublik() {
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 rounded-full overflow-hidden border bg-[#F5F4EF] shrink-0">
                 {expert?.photo ? (
-                  <img src={expert.photo.startsWith('http') ? expert.photo : `/storage/${expert.photo}`} alt="Foto profil" className="w-full h-full object-cover" />
+                  <img 
+                    src={`${getFileUrl(expert.photo)}?t=${Date.now()}`} 
+                    alt="Foto profil" 
+                    className="w-full h-full object-cover" 
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
                     <span className="material-symbols-outlined text-[32px]">person</span>
