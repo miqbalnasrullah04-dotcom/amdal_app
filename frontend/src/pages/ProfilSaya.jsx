@@ -140,7 +140,7 @@ function Alert({ type, msg, onClose }) {
 function WizardNav({ onBack, onNext, showBack = true, showNext = true, nextLabel, backLabel, t }) {
   const defaultNextLabel = nextLabel || t('profile.wizard.next', 'Lanjut');
   const defaultBackLabel = backLabel || t('profile.wizard.back', 'Kembali');
-  
+
   return (
     <div className="flex items-center justify-between pt-2">
       {showBack ? (
@@ -315,7 +315,7 @@ export default function ProfilSaya() {
 
   /* ── wizard navigation ─────────────────────────────────────────── */
   const currentTabIdx = TABS.findIndex((tb) => tb.id === tab);
-  
+
   // Auto-save data pribadi sebelum pindah tab
   const goNext = async () => {
     if (currentTabIdx < TABS.length - 1) {
@@ -326,14 +326,14 @@ export default function ProfilSaya() {
           await api.post('/my/profile', { ...form, kriteria_list: kriteriaList });
           flash('ok', 'Data pribadi berhasil disimpan.');
           await load();
-        } catch (e) { 
+        } catch (e) {
           flash('err', e.response?.data?.message || 'Gagal menyimpan.');
           setSaving(false);
           return; // Jangan pindah tab jika gagal save
         }
         setSaving(false);
       }
-      
+
       // Auto-save jika di tab profil-bio
       if (tab === 'profil-bio') {
         setSaving(true);
@@ -345,14 +345,14 @@ export default function ProfilSaya() {
           await api.post('/my/profile', payload);
           flash('ok', 'Profil bio berhasil disimpan.');
           await load();
-        } catch (e) { 
+        } catch (e) {
           flash('err', e.response?.data?.message || 'Gagal menyimpan.');
           setSaving(false);
           return;
         }
         setSaving(false);
       }
-      
+
       // Auto-save jika di tab link akademik
       if (tab === 'akademik') {
         setSaving(true);
@@ -360,19 +360,19 @@ export default function ProfilSaya() {
           await api.post('/my/profile', akademikForm);
           flash('ok', 'Link akademik berhasil disimpan.');
           await load();
-        } catch (e) { 
+        } catch (e) {
           flash('err', e.response?.data?.message || 'Gagal menyimpan.');
           setSaving(false);
           return;
         }
         setSaving(false);
       }
-      
+
       setTab(TABS[currentTabIdx + 1].id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-  
+
   const goPrev = () => {
     if (currentTabIdx > 0) {
       setTab(TABS[currentTabIdx - 1].id);
@@ -406,10 +406,10 @@ export default function ProfilSaya() {
   const getFileUrl = (filePath) => {
     if (!filePath) return '#';
     if (filePath.startsWith('http')) return filePath;
-    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-    return `${baseUrl}/storage/${filePath}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://tenagaahli.latihan.co.id/api';
+    const cleanPath = filePath.replace(/^storage\//, '');
+    return `${apiUrl}/files/${cleanPath}`;
   };
-
   // Sinkronkan data user (khususnya foto profil) yang baru saja diambil dari
   // server ke localStorage['amdal_user'], lalu beri tahu komponen lain
   // (mis. Navbar) supaya ikut refresh tanpa perlu logout/login ulang.
@@ -1137,15 +1137,15 @@ export default function ProfilSaya() {
         {TABS.map((tabItem) => {
           const doneKey =
             tabItem.id === 'profil-bio' ? 'profilBio' :
-            tabItem.id === 'dokumen' ? 'fotoProfil' :
-            tabItem.id;
+              tabItem.id === 'dokumen' ? 'fotoProfil' :
+                tabItem.id;
           const done = !!profileCompleteness[doneKey];
           const TabIcon = tabItem.Icon;
           return (
             <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
               className={`flex items-center gap-1.5 px-4 py-2.5 rounded-t-xl text-sm font-semibold whitespace-nowrap transition-colors border-b-2 ${tab === tabItem.id
-                  ? 'border-[#2E5E3B] text-[#2E5E3B] bg-[#2E5E3B]/5'
-                  : 'border-transparent text-[#5B6660] hover:text-[#2E5E3B] hover:bg-[#2E5E3B]/5'
+                ? 'border-[#2E5E3B] text-[#2E5E3B] bg-[#2E5E3B]/5'
+                : 'border-transparent text-[#5B6660] hover:text-[#2E5E3B] hover:bg-[#2E5E3B]/5'
                 }`}
             >
               <TabIcon className="w-[18px] h-[18px]" strokeWidth={2} />
@@ -1227,8 +1227,8 @@ export default function ProfilSaya() {
                 <label
                   key={option}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${kriteriaList.includes(option)
-                      ? 'border-[#2E5E3B] bg-[#2E5E3B]/5'
-                      : 'border-outline-variant/40 hover:border-[#2E5E3B]/30'
+                    ? 'border-[#2E5E3B] bg-[#2E5E3B]/5'
+                    : 'border-outline-variant/40 hover:border-[#2E5E3B]/30'
                     }`}
                 >
                   <input
@@ -1292,8 +1292,8 @@ export default function ProfilSaya() {
           </Card>
 
           <div className="flex items-center justify-end gap-3">
-            <button 
-              className={BTN_GHOST} 
+            <button
+              className={BTN_GHOST}
               onClick={goNext}
               disabled={saving}
             >
@@ -1356,8 +1356,8 @@ export default function ProfilSaya() {
             <button className={BTN_GHOST} onClick={goPrev}>
               <ArrowLeftIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Kembali')}
             </button>
-            <button 
-              className={BTN_GHOST} 
+            <button
+              className={BTN_GHOST}
               onClick={goNext}
               disabled={saving}
             >
@@ -1498,8 +1498,8 @@ export default function ProfilSaya() {
             <button className={BTN_GHOST} onClick={goPrev}>
               <ArrowLeftIcon className="w-[18px] h-[18px]" strokeWidth={2} />{t('Kembali')}
             </button>
-            <button 
-              className={BTN_GHOST} 
+            <button
+              className={BTN_GHOST}
               onClick={goNext}
               disabled={saving}
             >
